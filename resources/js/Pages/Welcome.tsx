@@ -53,6 +53,7 @@ const App = () => {
             name: "",
             age: "",
             nationality: "",
+            idNumber: "", // Tambahkan idNumber
             hasMedicalHistory: false,
             allergies: "",
             pastMedicalHistory: "",
@@ -60,6 +61,43 @@ const App = () => {
             familyMedicalHistory: "",
         },
     ]);
+    
+    
+    const addParticipant = () => {
+        setParticipants([
+            ...participants,
+            {
+                title: "Mr",
+                name: "",
+                age: "",
+                nationality: "",
+                idNumber: "",
+                hasMedicalHistory: false,
+                allergies: "",
+                pastMedicalHistory: "",
+                currentMedications: "",
+                familyMedicalHistory: "",
+            },
+        ]);
+    };
+    
+    const removeParticipant = (index) => {
+        if (participants.length > 1) {
+            setParticipants(participants.filter((_, i) => i !== index));
+        }
+    };
+
+    const handleParticipantChange = (index, field, value) => {
+        setParticipants(prevParticipants => {
+            const newParticipants = [...prevParticipants];
+            newParticipants[index] = {
+                ...newParticipants[index],
+                [field]: value
+            };
+            return newParticipants;
+        });
+    };    
+
     const [isLoading, setIsLoading] = useState(true);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [showLoginPopup, setShowLoginPopup] = useState(false);
@@ -186,6 +224,7 @@ const App = () => {
             navHome: "Home",
             navScreening: "Screening",
             navLocation: "Location",
+            navInfo: "Info",
             navProfile: "Profile",
             bondowoso: "Bondowoso",
             banyuwangi: "Banyuwangi",
@@ -358,6 +397,7 @@ const App = () => {
             navHome: "Beranda",
             navScreening: "Pemeriksaan",
             navLocation: "Lokasi",
+            navInfo: "Info",
             navProfile: "Profil",
             bondowoso: "Bondowoso",
             banyuwangi: "Banyuwangi",
@@ -526,6 +566,7 @@ const App = () => {
             navHome: "首页",
             navScreening: "检查",
             navLocation: "位置",
+            navInfo: "Info",
             navProfile: "个人资料",
             bondowoso: "邦多沃索",
             banyuwangi: "班尤旺基",
@@ -599,28 +640,11 @@ const App = () => {
         return null;
     }
 
-    const addParticipant = () => {
-        setParticipants([
-            ...participants,
-            {
-                title: "Mr",
-                name: "",
-                age: "",
-                nationality: "",
-                hasMedicalHistory: false,
-                allergies: "",
-                pastMedicalHistory: "",
-                currentMedications: "",
-                familyMedicalHistory: "",
-            },
-        ]);
-    };
-
     const renderBottomNav = () => (
       <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg flex justify-around py-3 border-t">
           <button
-              onClick={() => setCurrentScreen("home")}
-              className={`flex flex-col items-center ${currentScreen === "home" ? "text-blue-500" : "text-gray-500"}`}
+              onClick={() => setCurrentScreen("form1")}
+              className={`flex flex-col items-center ${currentScreen === "form1" || currentScreen === "form2" || currentScreen === "form3" || currentScreen === "form4" || currentScreen === "form5" ? "text-blue-500" : "text-gray-500"}`}
           >
               <Home size={20} />
               <span className="text-xs mt-1">{t.navHome}</span>
@@ -633,11 +657,11 @@ const App = () => {
               <span className="text-xs mt-1">{t.navScreening}</span>
           </button>
           <button
-              onClick={() => setCurrentScreen("location")}
-              className={`flex flex-col items-center ${currentScreen === "location" ? "text-blue-500" : "text-gray-500"}`}
+              onClick={() => setCurrentScreen("info")}
+              className={`flex flex-col items-center ${currentScreen === "info" ? "text-blue-500" : "text-gray-500"}`}
           >
               <Map size={20} />
-              <span className="text-xs mt-1">{t.navLocation}</span>
+              <span className="text-xs mt-1">{t.navInfo}</span>
           </button>
           <button
               onClick={() => setCurrentScreen("profile")}
@@ -1237,6 +1261,260 @@ const App = () => {
                 >
                     <Plus size={24} />
                 </button>
+            </div>
+        );
+    }
+    const InfoScreen = () => {
+        return (
+            <div className="min-h-screen bg-gray-50 pb-20">
+                <div className="bg-white p-4 flex items-center shadow-sm">
+                    <h1 className="text-xl font-bold text-gray-800 flex-1 text-center">
+                        {t.navInfo}
+                    </h1>
+                </div>
+
+                {/* Main content area with cards */}
+                <div className="px-5">
+                    {/* Dynamic Weather Forecast Card - Main Section */}
+                    <h2 className="font-bold text-lg text-gray-800 mt-6 mb-3">
+                        Conditions
+                    </h2>
+                    <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-4 border border-gray-100">
+                        <div className="p-5">
+                            {/* Date selector */}
+                            <div className="flex overflow-x-auto hide-scrollbar mb-6">
+                                {['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((day, index) => {
+                                    // Generate dates dynamically starting from today
+                                    const date = new Date();
+                                    date.setDate(date.getDate() + index);
+                                    const dayNum = date.getDate();
+                                    const isToday = index === 0;
+                                    
+                                    return (
+                                        <div key={index} className="flex flex-col items-center mr-8">
+                                            <span className="text-sm text-gray-500 mb-1">{day}</span>
+                                            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg ${isToday ? 'bg-green-900 text-white' : 'text-gray-700'}`}>
+                                                {dayNum}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            
+                            {/* Current temperature and conditions */}
+                            <div className="flex items-start justify-between mb-2">
+                                <div>
+                                    <div className="text-7xl font-normal text-green-900 mb-1">13°</div>
+                                    <div className="text-xl text-gray-700 mb-1">Showers</div>
+                                    <div className="text-lg text-gray-500">H:18° L:13°</div>
+                                </div>
+                                <div className="flex flex-col items-end">
+                                    <div className="flex items-center mb-2">
+                                        <Droplets size={18} className="text-gray-500 mr-1" />
+                                        <span className="text-lg text-gray-700">25%</span>
+                                    </div>
+                                    <div className="flex items-center text-lg text-gray-500 mb-2">
+                                        <Sunrise size={18} className="mr-1" />
+                                        <span>5:25 AM</span>
+                                    </div>
+                                    <div className="flex items-center text-lg text-gray-500">
+                                        <Sunset size={18} className="mr-1" />
+                                        <span>5:16 PM</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    
+                    {/* Horizontal scrollable cards section */}
+                    <div className="flex overflow-x-auto pb-4 hide-scrollbar space-x-4 mb-6">
+                        {/* Weather along trail card */}
+                        <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 min-w-[85%] flex-shrink-0">
+                            <div className="flex justify-between items-center mb-3">
+                                <h4 className="text-lg text-gray-700">Weather along trail</h4>
+                                <select className="text-sm text-gray-700 bg-gray-100 rounded-full px-3 py-1 border-none">
+                                    <option>11:00 PM</option>
+                                    <option>12:00 AM</option>
+                                    <option>1:00 AM</option>
+                                </select>
+                            </div>
+                            
+                            <div className="relative h-24 mb-2">
+                                {/* The trail graph */}
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="h-1 bg-green-700 w-full rounded-full"></div>
+                                </div>
+                                {/* Temperature point */}
+                                <div className="absolute top-1/2 left-1/3 transform -translate-y-1/2">
+                                    <div className="w-4 h-4 bg-white rounded-full border-2 border-green-700 relative">
+                                        <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xl text-green-900 font-medium">
+                                            11°
+                                        </div>
+                                    </div>
+                                </div>
+                                {/* Path markers */}
+                                <div className="absolute bottom-0 left-0 right-0 flex justify-between text-sm text-gray-500">
+                                    <span>0 km</span>
+                                    <span>4.7 km</span>
+                                    <span>9.4 km</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Ground conditions card */}
+                        <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 min-w-[70%] flex-shrink-0">
+                            <div className="flex items-start">
+                                <div className="flex-1">
+                                    <h4 className="text-lg text-gray-700 mb-3">Ground</h4>
+                                    <div className="flex items-center">
+                                        <div className="w-16 h-16 bg-green-900 rounded-full flex items-center justify-center mr-3">
+                                            <Droplets size={28} className="text-white" />
+                                        </div>
+                                        <div>
+                                            <div className="text-green-900 text-2xl font-medium">Wet</div>
+                                            <div className="text-gray-600">11.06 mm in 72 hours</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div className="text-sm text-gray-500 mb-6 text-center">
+                        Data is based on past, current, and forecasted local weather. Accuracy is not guaranteed.
+                    </div>
+    
+                    {/* Interactive Map Card */}
+                    <h2 className="font-bold text-lg text-gray-800 mb-3">
+                        {t.track}
+                    </h2>
+                    
+                    <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6 border border-gray-100 relative">
+                        <div className="h-48 bg-blue-100 relative">
+                            <img
+                                src="https://tracedetrail.fr/traces/maps/MapTrace269148_3463.jpg"
+                                alt="Map"
+                                className="w-full h-full object-cover"
+                            />
+                            <div className="absolute bottom-3 right-3">
+                                <button className="bg-white rounded-full p-2 shadow-md">
+                                    <MapPin size={20} className="text-blue-500" />
+                                </button>
+                            </div>
+                        </div>
+                        <div className="p-4">
+                            <div className="flex justify-between items-center mb-2">
+                                <h3 className="font-medium text-gray-800">
+                                    {t.exploreRoutes}
+                                </h3>
+                                <span className="text-xs text-gray-500">
+                                    {t.interactiveMap}
+                                </span>
+                            </div>
+                            <p className="text-xs text-gray-500 mb-3">
+                                {t.routeDescription}
+                            </p>
+                            <button
+                                className="w-full flex justify-center items-center py-2.5 text-white text-sm font-medium bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
+                                onClick={() => setShowVideoPopup(true)}
+                            >
+                                <Map size={18} className="mr-2" />
+                                {t.viewFullMap}
+                            </button>
+                        </div>
+                    </div>
+    
+                    {/* Preparation Checklist - Horizontal Scrollable Cards */}
+                    <h2 className="font-bold text-lg mb-3 text-gray-800 flex items-center">
+                        {t.prepare}
+                        <span className="text-xs text-gray-500 font-normal ml-2">
+                            {t.essentialItems}
+                        </span>
+                    </h2>
+    
+                    <div className="mb-6 px-5 -mx-5">
+                        <div className="flex overflow-x-auto pb-4 px-5 hide-scrollbar snap-x">
+                            {/* Card 1 - Warm Clothing */}
+                            <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
+                                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mb-3">
+                                    <Thermometer size={22} />
+                                </div>
+                                <h3 className="font-medium text-gray-800 mb-1">
+                                    {t.warmClothing}
+                                </h3>
+                                <p className="text-xs text-gray-500">
+                                    {t.warmClothingDesc}
+                                </p>
+                            </div>
+    
+                            {/* Card 2 - Gas Mask */}
+                            <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
+                                <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-500 mb-3">
+                                    <Wind size={22} />
+                                </div>
+                                <h3 className="font-medium text-gray-800 mb-1">
+                                    {t.gasMask}
+                                </h3>
+                                <p className="text-xs text-gray-500">
+                                    {t.gasMaskDesc}
+                                </p>
+                            </div>
+    
+                            {/* Card 3 - Water & Snacks */}
+                            <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
+                                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mb-3">
+                                    <Droplets size={22} />
+                                </div>
+                                <h3 className="font-medium text-gray-800 mb-1">
+                                    {t.waterSnacks}
+                                </h3>
+                                <p className="text-xs text-gray-500">
+                                    {t.waterSnacksDesc}
+                                </p>
+                            </div>
+    
+                            {/* Card 4 - Proper Footwear */}
+                            <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
+                                <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 mb-3">
+                                    <Footprints size={22} />
+                                </div>
+                                <h3 className="font-medium text-gray-800 mb-1">
+                                    {t.properFootwear}
+                                </h3>
+                                <p className="text-xs text-gray-500">
+                                    {t.footwearDesc}
+                                </p>
+                            </div>
+    
+                            {/* Card 5 - Headlamp */}
+                            <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
+                                <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-500 mb-3">
+                                    <Flashlight size={22} />
+                                </div>
+                                <h3 className="font-medium text-gray-800 mb-1">
+                                    {t.headlamp}
+                                </h3>
+                                <p className="text-xs text-gray-500">
+                                    {t.headlampDesc}
+                                </p>
+                            </div>
+    
+                            {/* Card 6 - Rain Gear */}
+                            <div className="bg-white rounded-xl shadow-sm p-4 mr-5 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
+                                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-500 mb-3">
+                                    <Umbrella size={22} />
+                                </div>
+                                <h3 className="font-medium text-gray-800 mb-1">
+                                    {t.rainGear}
+                                </h3>
+                                <p className="text-xs text-gray-500">
+                                    {t.rainGearDesc}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {renderBottomNav()}
             </div>
         );
     }
@@ -2557,12 +2835,56 @@ const App = () => {
         );
     };
 
-    const Form2Screen = () => {
-        // Add new state for validation
-        const [validationErrors, setValidationErrors] = useState({});
+// Pendekatan baru untuk Form2Screen menggunakan controlled component sederhana
+const Form2Screen = () => {
+    // State lokal terpisah dari state global untuk menjaga fokus
+    const [localParticipants, setLocalParticipants] = useState(
+        participants.map(p => ({...p}))
+    );
+    
+    // State untuk validasi
+    const [validationErrors, setValidationErrors] = useState({});
+    
+    // Validasi ID numbers
+    const validateIdNumber = (nationality, idNumber, index) => {
+        const errors = {...validationErrors};
         
-        // Update the participants state to include idNumber field
-        const [participants, setParticipants] = useState([
+        if (!idNumber) {
+            errors[`idNumber_${index}`] = "ID number is required";
+        } else if (nationality === "Indonesia" && !/^\d{16}$/.test(idNumber)) {
+            errors[`idNumber_${index}`] = "KTP must be 16 digits";
+        } else if (nationality !== "Indonesia" && !/^[A-Z0-9]{8,9}$/.test(idNumber)) {
+            errors[`idNumber_${index}`] = "Passport must be 8-9 characters";
+        } else {
+            delete errors[`idNumber_${index}`];
+        }
+        
+        setValidationErrors(errors);
+    };
+    
+    // Handle perubahan input secara lokal saja
+    const handleInputChange = (index, field, value) => {
+        const updatedParticipants = [...localParticipants];
+        updatedParticipants[index] = {
+            ...updatedParticipants[index],
+            [field]: value
+        };
+        setLocalParticipants(updatedParticipants);
+        
+        // Validasi jika diperlukan
+        if (field === "idNumber") {
+            validateIdNumber(updatedParticipants[index].nationality, value, index);
+        }
+        
+        if (field === "nationality") {
+            validateIdNumber(value, updatedParticipants[index].idNumber, index);
+        }
+    };
+    
+    // Fungsi untuk menambah participant (hanya di state lokal)
+    const handleAddParticipant = () => {
+        setLocalParticipants([
+            ...localParticipants,
             {
                 title: "Mr",
                 name: "",
@@ -2574,309 +2896,253 @@ const App = () => {
                 pastMedicalHistory: "",
                 currentMedications: "",
                 familyMedicalHistory: "",
-            },
+            }
         ]);
+    };
     
-        // Function to validate ID numbers based on nationality
-        const validateIdNumber = (nationality, idNumber, index) => {
-            const errors = {...validationErrors};
-            
-            if (!idNumber) {
-                errors[`idNumber_${index}`] = "ID number is required";
-            } else if (nationality === "Indonesia" && !/^\d{16}$/.test(idNumber)) {
-                // KTP must be exactly 16 digits
-                errors[`idNumber_${index}`] = "KTP must be 16 digits";
-            } else if (nationality !== "Indonesia" && !/^[A-Z0-9]{8,9}$/.test(idNumber)) {
-                // Passport is typically 8-9 alphanumeric chars
-                errors[`idNumber_${index}`] = "Passport must be 8-9 characters";
-            } else {
-                delete errors[`idNumber_${index}`];
-            }
-            
-            setValidationErrors(errors);
-        };
+    // Fungsi untuk menghapus participant (hanya di state lokal)
+    const handleRemoveParticipant = (index) => {
+        if (localParticipants.length > 1) {
+            setLocalParticipants(
+                localParticipants.filter((_, i) => i !== index)
+            );
+        }
+    };
     
-        // Handle input changes for all participant fields
-        const handleInputChange = (index, field, value) => {
-            const updatedParticipants = [...participants];
-            updatedParticipants[index][field] = value;
-            
-            // Validate ID number when it changes
-            if (field === "idNumber") {
-                validateIdNumber(
-                    updatedParticipants[index].nationality, 
-                    value, 
-                    index
-                );
-            }
-            
-            // Also validate if nationality changes (which affects ID type)
-            if (field === "nationality") {
-                validateIdNumber(
-                    value, 
-                    updatedParticipants[index].idNumber, 
-                    index
-                );
-            }
-            
-            setParticipants(updatedParticipants);
-        };
+    // Check if form can proceed
+    const canProceed = () => {
+        return Object.keys(validationErrors).length === 0 && 
+            localParticipants.every(p => p.name && p.age && p.nationality && p.idNumber);
+    };
     
-        const addParticipant = () => {
-            setParticipants([
-                ...participants,
-                {
-                    title: "Mr",
-                    name: "",
-                    age: "",
-                    nationality: "",
-                    idNumber: "",
-                    hasMedicalHistory: false,
-                    allergies: "",
-                    pastMedicalHistory: "",
-                    currentMedications: "",
-                    familyMedicalHistory: "",
-                },
-            ]);
-        };
+    // Perubahan screen dengan memperbarui state global terlebih dahulu
+    const handleNext = () => {
+        // Update state global participants dengan data lokal
+        setParticipants(localParticipants);
+        
+        // Pindah ke screen berikutnya
+        setCurrentScreen("form3");
+    };
     
-        // Check if form can proceed
-        const canProceed = () => {
-            return Object.keys(validationErrors).length === 0 && 
-                participants.every(p => p.name && p.age && p.nationality && p.idNumber);
-        };
+    // Kembali ke screen sebelumnya
+    const handleBack = () => {
+        setCurrentScreen("form1");
+    };
     
-        return (
-            <div className="min-h-screen bg-gray-50 pb-20">
-                <div className="bg-white p-4 flex items-center shadow-sm">
-                    <button
-                        onClick={() => setCurrentScreen("form1")}
-                        className="mr-2"
+    return (
+        <div className="min-h-screen bg-gray-50 pb-20">
+            <div className="bg-white p-4 flex items-center shadow-sm">
+                <button
+                    onClick={handleBack}
+                    className="mr-2"
+                >
+                    <ArrowLeft size={24} className="text-gray-800" />
+                </button>
+                <h1 className="text-xl font-bold text-gray-800">
+                    {t.participantInfo}
+                </h1>
+            </div>
+    
+            <div className="p-6">
+                {localParticipants.map((participant, index) => (
+                    <div
+                        key={index}
+                        className="bg-white rounded-xl shadow-sm p-4 mb-6"
                     >
-                        <ArrowLeft size={24} className="text-gray-800" />
-                    </button>
-                    <h1 className="text-xl font-bold text-gray-800">
-                        {t.participantInfo}
-                    </h1>
-                </div>
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="font-bold text-lg text-gray-800">
+                                {t.participantInfo} {index + 1}
+                            </h2>
+                            {index > 0 && (
+                                <button
+                                    className="text-red-500"
+                                    onClick={() => handleRemoveParticipant(index)}
+                                >
+                                    <X size={20} />
+                                </button>
+                            )}
+                        </div>
     
-                <div className="p-6">
-                    {participants.map((participant, index) => (
-                        <div
-                            key={index}
-                            className="bg-white rounded-xl shadow-sm p-4 mb-6"
-                        >
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="font-bold text-lg text-gray-800">
-                                    {t.participantInfo} {index + 1}
-                                </h2>
-                                {index > 0 && (
-                                    <button
-                                        className="text-red-500"
-                                        onClick={() =>
-                                            setParticipants(
-                                                participants.filter(
-                                                    (_, i) => i !== index,
-                                                ),
-                                            )
-                                        }
+                        <div className="space-y-4">
+                            <div className="flex space-x-3">
+                                <div className="w-24">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        {t.title}
+                                    </label>
+                                    <select 
+                                        className="w-full border border-gray-300 rounded-lg p-3"
+                                        value={participant.title || "Mr"}
+                                        onChange={(e) => handleInputChange(index, "title", e.target.value)}
                                     >
-                                        <X size={20} />
-                                    </button>
-                                )}
+                                        <option>Mr</option>
+                                        <option>Mrs</option>
+                                        <option>Ms</option>
+                                    </select>
+                                </div>
+                                <div className="flex-1">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        {t.name}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={participant.name || ""}
+                                        onChange={(e) => handleInputChange(index, "name", e.target.value)}
+                                        className="w-full border border-gray-300 rounded-lg p-3"
+                                    />
+                                </div>
                             </div>
     
-                            <div className="space-y-4">
-                                <div className="flex space-x-3">
-                                    <div className="w-24">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            {t.title}
-                                        </label>
-                                        <select 
-                                            className="w-full border border-gray-300 rounded-lg p-3"
-                                            value={participant.title}
-                                            onChange={(e) => handleInputChange(index, "title", e.target.value)}
-                                        >
-                                            <option>Mr</option>
-                                            <option>Mrs</option>
-                                            <option>Ms</option>
-                                        </select>
-                                    </div>
-                                    <div className="flex-1">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            {t.name}
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={participant.name}
-                                            onChange={(e) => handleInputChange(index, "name", e.target.value)}
-                                            className="w-full border border-gray-300 rounded-lg p-3"
-                                        />
-                                    </div>
+                            <div className="flex space-x-3">
+                                <div className="w-24">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        {t.age}
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={participant.age || ""}
+                                        onChange={(e) => handleInputChange(index, "age", e.target.value)}
+                                        className="w-full border border-gray-300 rounded-lg p-3"
+                                    />
                                 </div>
-    
-                                <div className="flex space-x-3">
-                                    <div className="w-24">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            {t.age}
-                                        </label>
-                                        <input
-                                            type="number"
-                                            value={participant.age}
-                                            onChange={(e) => handleInputChange(index, "age", e.target.value)}
-                                            className="w-full border border-gray-300 rounded-lg p-3"
-                                        />
-                                    </div>
-                                    <div className="flex-1">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            {t.nationality}
-                                        </label>
-                                        <select 
-                                            className="w-full border border-gray-300 rounded-lg p-3"
-                                            value={participant.nationality}
-                                            onChange={(e) => handleInputChange(index, "nationality", e.target.value)}
-                                        >
-                                            <option value="">Select...</option>
-                                            <option value="Indonesia">Indonesia</option>
-                                            <option value="Malaysia">Malaysia</option>
-                                            <option value="Singapore">Singapore</option>
-                                            <option value="Australia">Australia</option>
-                                            <option value="United States">United States</option>
-                                            <option value="Other">Other</option>
-                                        </select>
-                                    </div>
+                                <div className="flex-1">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        {t.nationality}
+                                    </label>
+                                    <select 
+                                        className="w-full border border-gray-300 rounded-lg p-3"
+                                        value={participant.nationality || ""}
+                                        onChange={(e) => handleInputChange(index, "nationality", e.target.value)}
+                                    >
+                                        <option value="">Select...</option>
+                                        <option value="Indonesia">Indonesia</option>
+                                        <option value="Malaysia">Malaysia</option>
+                                        <option value="Singapore">Singapore</option>
+                                        <option value="Australia">Australia</option>
+                                        <option value="United States">United States</option>
+                                        <option value="Other">Other</option>
+                                    </select>
                                 </div>
+                            </div>
     
-                                {/* ID Number section - automatically set based on nationality */}
-                                <div className="space-y-2">
+                            <div className="space-y-2">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        {participant.nationality === "Indonesia" ? "KTP Number" : "Passport Number"}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={participant.idNumber || ""}
+                                        onChange={(e) => handleInputChange(index, "idNumber", e.target.value)}
+                                        className={`w-full border ${validationErrors[`idNumber_${index}`] ? "border-red-500" : "border-gray-300"} rounded-lg p-3`}
+                                        placeholder={participant.nationality === "Indonesia" ? "16 digits" : "8-9 characters"}
+                                    />
+                                    {validationErrors[`idNumber_${index}`] && (
+                                        <p className="text-red-500 text-xs mt-1">
+                                            {validationErrors[`idNumber_${index}`]}
+                                        </p>
+                                    )}
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        {participant.nationality === "Indonesia" 
+                                            ? "KTP must be 16 digits" 
+                                            : "Passport must be 8-9 alphanumeric characters"}
+                                    </p>
+                                </div>
+                            </div>
+    
+                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <span className="text-gray-700">
+                                    {t.medicalHistory}
+                                </span>
+                                <div
+                                    className={`w-12 h-6 rounded-full ${participant.hasMedicalHistory ? "bg-blue-500" : "bg-gray-300"} flex items-center p-1 transition-all duration-200 cursor-pointer`}
+                                    onClick={() => handleInputChange(index, "hasMedicalHistory", !participant.hasMedicalHistory)}
+                                >
+                                    <div
+                                        className={`w-4 h-4 rounded-full bg-white transform transition-all duration-200 ${participant.hasMedicalHistory ? "translate-x-6" : ""}`}
+                                    ></div>
+                                </div>
+                            </div>
+    
+                            {participant.hasMedicalHistory && (
+                                <div className="space-y-4 p-3 bg-blue-50 rounded-lg">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            {participant.nationality === "Indonesia" ? "KTP Number" : "Passport Number"}
+                                            {t.allergies}
                                         </label>
                                         <input
                                             type="text"
-                                            value={participant.idNumber}
-                                            onChange={(e) => handleInputChange(index, "idNumber", e.target.value)}
-                                            className={`w-full border ${validationErrors[`idNumber_${index}`] ? "border-red-500" : "border-gray-300"} rounded-lg p-3`}
-                                            placeholder={participant.nationality === "Indonesia" ? "16 digits" : "8-9 characters"}
+                                            value={participant.allergies || ""}
+                                            onChange={(e) => handleInputChange(index, "allergies", e.target.value)}
+                                            className="w-full border border-gray-300 rounded-lg p-3"
+                                            placeholder="List any allergies"
                                         />
-                                        {validationErrors[`idNumber_${index}`] && (
-                                            <p className="text-red-500 text-xs mt-1">
-                                                {validationErrors[`idNumber_${index}`]}
-                                            </p>
-                                        )}
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            {participant.nationality === "Indonesia" 
-                                                ? "KTP must be 16 digits" 
-                                                : "Passport must be 8-9 alphanumeric characters"}
-                                        </p>
+                                    </div>
+    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            {t.pastMedical}
+                                        </label>
+                                        <textarea
+                                            value={participant.pastMedicalHistory || ""}
+                                            onChange={(e) => handleInputChange(index, "pastMedicalHistory", e.target.value)}
+                                            className="w-full border border-gray-300 rounded-lg p-3"
+                                            rows={2}
+                                            placeholder="Describe any past medical conditions"
+                                        ></textarea>
+                                    </div>
+    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            {t.currentMeds}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={participant.currentMedications || ""}
+                                            onChange={(e) => handleInputChange(index, "currentMedications", e.target.value)}
+                                            className="w-full border border-gray-300 rounded-lg p-3"
+                                            placeholder="List current medications"
+                                        />
+                                    </div>
+    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            {t.familyMedical}
+                                        </label>
+                                        <textarea
+                                            value={participant.familyMedicalHistory || ""}
+                                            onChange={(e) => handleInputChange(index, "familyMedicalHistory", e.target.value)}
+                                            className="w-full border border-gray-300 rounded-lg p-3"
+                                            rows={2}
+                                            placeholder="Any relevant family medical history"
+                                        ></textarea>
                                     </div>
                                 </div>
-    
-                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                    <span className="text-gray-700">
-                                        {t.medicalHistory}
-                                    </span>
-                                    <div
-                                        className={`w-12 h-6 rounded-full ${participant.hasMedicalHistory ? "bg-blue-500" : "bg-gray-300"} flex items-center p-1 transition-all duration-200`}
-                                    >
-                                        <div
-                                            className={`w-4 h-4 rounded-full bg-white transform transition-all duration-200 ${participant.hasMedicalHistory ? "translate-x-6" : ""}`}
-                                            onClick={() => {
-                                                const newParticipants = [
-                                                    ...participants,
-                                                ];
-                                                newParticipants[
-                                                    index
-                                                ].hasMedicalHistory =
-                                                    !newParticipants[index]
-                                                        .hasMedicalHistory;
-                                                setParticipants(newParticipants);
-                                            }}
-                                        ></div>
-                                    </div>
-                                </div>
-    
-                                {participant.hasMedicalHistory && (
-                                    <div className="space-y-4 p-3 bg-blue-50 rounded-lg">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                {t.allergies}
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={participant.allergies}
-                                                onChange={(e) => handleInputChange(index, "allergies", e.target.value)}
-                                                className="w-full border border-gray-300 rounded-lg p-3"
-                                                placeholder="List any allergies"
-                                            />
-                                        </div>
-    
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                {t.pastMedical}
-                                            </label>
-                                            <textarea
-                                                value={participant.pastMedicalHistory}
-                                                onChange={(e) => handleInputChange(index, "pastMedicalHistory", e.target.value)}
-                                                className="w-full border border-gray-300 rounded-lg p-3"
-                                                rows={2}
-                                                placeholder="Describe any past medical conditions"
-                                            ></textarea>
-                                        </div>
-    
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                {t.currentMeds}
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={participant.currentMedications}
-                                                onChange={(e) => handleInputChange(index, "currentMedications", e.target.value)}
-                                                className="w-full border border-gray-300 rounded-lg p-3"
-                                                placeholder="List current medications"
-                                            />
-                                        </div>
-    
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                {t.familyMedical}
-                                            </label>
-                                            <textarea
-                                                value={participant.familyMedicalHistory}
-                                                onChange={(e) => handleInputChange(index, "familyMedicalHistory", e.target.value)}
-                                                className="w-full border border-gray-300 rounded-lg p-3"
-                                                rows={2}
-                                                placeholder="Any relevant family medical history"
-                                            ></textarea>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
+                            )}
                         </div>
-                    ))}
+                    </div>
+                ))}
     
-                    <button
-                        onClick={addParticipant}
-                        className="w-full mb-4 border-2 border-dashed border-blue-300 text-blue-500 py-3 rounded-xl font-medium flex items-center justify-center"
-                    >
-                        <Plus size={20} className="mr-2" />
-                        {t.addParticipant}
-                    </button>
+                <button
+                    onClick={handleAddParticipant}
+                    className="w-full mb-4 border-2 border-dashed border-blue-300 text-blue-500 py-3 rounded-xl font-medium flex items-center justify-center"
+                >
+                    <Plus size={20} className="mr-2" />
+                    {t.addParticipant}
+                </button>
     
-                    <button
-                        onClick={() => setCurrentScreen("form3")}
-                        className={`w-full ${canProceed() ? "bg-blue-500 text-white" : "bg-gray-300 text-gray-500"} py-3 rounded-xl font-medium mb-6`}
-                        disabled={!canProceed()}
-                    >
-                        {t.next}
-                    </button>
-                </div>
-                {renderBottomNav()}
+                <button
+                    onClick={handleNext}
+                    className={`w-full ${canProceed() ? "bg-blue-500 text-white" : "bg-gray-300 text-gray-500"} py-3 rounded-xl font-medium mb-6`}
+                    disabled={!canProceed()}
+                >
+                    {t.next}
+                </button>
             </div>
-        );
-    };
-
+            {renderBottomNav()}
+        </div>
+    );
+};
+    
     const Form3Screen = () => {
         const [termsAgreed, setTermsAgreed] = useState(false);
     
@@ -3062,7 +3328,9 @@ const App = () => {
                         <button
                             onClick={() => {
                                 if (isLoggedIn && termsAgreed) {
-                                    handleSubmit();
+                                    console.log(screeningData);
+                                    
+                                    // handleSubmit();
                                 } else if (!termsAgreed) {
                                     // Show an alert or toast notification if terms are not agreed
                                     alert(language === "en" ? "Please agree to the terms and conditions" : 
@@ -3952,7 +4220,15 @@ const App = () => {
             {currentScreen === "location" && <LocationScreen />}
             {currentScreen === "profile" && <ProfileScreen />}
             {currentScreen === "form1" && <Form1Screen />}
-            {currentScreen === "form2" && <Form2Screen />}
+            {currentScreen === "form2" &&     
+            <Form2Screen 
+                participants={participants}
+                onParticipantChange={handleParticipantChange}
+                onAddParticipant={addParticipant}
+                onRemoveParticipant={removeParticipant}
+                onNext={() => setCurrentScreen("form3")}
+                onBack={() => setCurrentScreen("form1")}
+            />}
             {currentScreen === "form3" && <Form3Screen />}
             {currentScreen === "form4" && <Form4Screen />}
             {currentScreen === "form5" && <Form5Screen />}
@@ -3961,6 +4237,7 @@ const App = () => {
             {currentScreen === "partner" && <PartnerScreen />}
             {currentScreen === "receipt" && <ReceiptScreen />}
             {currentScreen === "viewTicket" && <ViewTicketScreen />}
+            {currentScreen === "info" && <InfoScreen />}
             {showLoginPopup && <LoginPopup />}
             {showVideoPopup && <VideoPopup />}
         </div>
