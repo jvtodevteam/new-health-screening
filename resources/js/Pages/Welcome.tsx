@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef } from "react";
 import { Head } from '@inertiajs/react';
 import {
     MapPin,
@@ -33,6 +33,8 @@ import {
     Flashlight,
     Umbrella,
     Globe,
+    Sunrise,
+    Sunset
 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
@@ -64,6 +66,9 @@ const App = () => {
     const [selectedLocationFromMap, setSelectedLocationFromMap] =
         useState(null);
     const [showVideoPopup, setShowVideoPopup] = useState(false);
+    const [screeningData, setScreeningData] = useState([]);
+    const [selectedScreeningId, setSelectedScreeningId] = useState(null);
+
 
     const texts = {
         en: {
@@ -83,6 +88,8 @@ const App = () => {
             pending: "Pending",
             complete: "Complete",
             location: "Location",
+            date : "Date",
+            time: "Time",
             profile: "Profile",
             privacy: "Privacy Policy",
             terms: "Terms and Conditions",
@@ -105,7 +112,7 @@ const App = () => {
             addParticipant: "Add Participant",
 
             // New translations for static text
-            appName: "Ijen Health",
+            appName: "Ijen Health App",
             appTagline: "Health screening for your safe journey",
             continueAgreement: "By continuing, you agree to our",
             loginToContinue: "Login to continue",
@@ -253,6 +260,8 @@ const App = () => {
             pending: "Tertunda",
             complete: "Selesai",
             location: "Lokasi",
+            date : "Tanggal",
+            time: "Waktu",
             profile: "Profil",
             privacy: "Kebijakan Privasi",
             terms: "Syarat dan Ketentuan",
@@ -423,6 +432,8 @@ const App = () => {
             pending: "待处理",
             complete: "已完成",
             location: "位置",
+            date : "Date",
+            time: "Time",
             profile: "个人资料",
             privacy: "隐私政策",
             terms: "条款和条件",
@@ -643,7 +654,7 @@ const App = () => {
         React.useEffect(() => {
             const timer = setTimeout(() => {
                 setIsLoading(false);
-                setCurrentScreen("home");
+                setCurrentScreen("form1");
             }, 3000); // 3 detik loading animation
 
             return () => clearTimeout(timer);
@@ -763,7 +774,7 @@ const App = () => {
                             onClick={() => {
                                 setIsLoggedIn(true);
                                 setShowLoginPopup(false);
-                                setCurrentScreen("form4");
+                                setCurrentScreen("form5");
                             }}
                             className="w-full bg-blue-500 text-white py-3 px-6 rounded-xl flex items-center justify-center space-x-2 font-medium"
                         >
@@ -802,351 +813,433 @@ const App = () => {
             </div>
         </div>
     );
-    const HomeScreen = () => (
-        <div className="min-h-screen bg-gray-50 pb-20">
-            {/* Header with gradient and weather card */}
-            <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-6 pt-12 rounded-b-3xl shadow-lg">
-                <div className="flex justify-between items-center mb-6">
-                    <div>
-                        <p className="text-blue-100">{t.hello}</p>
-                        <h1 className="text-2xl font-bold">Arif Hassan</h1>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                        <select
-                            value={language}
-                            onChange={(e) => setLanguage(e.target.value)}
-                            className="bg-white bg-opacity-20 text-white border border-white border-opacity-20 rounded-md text-xs px-2 py-1"
-                        >
-                            <option value="en">EN</option>
-                            <option value="id">ID</option>
-                            <option value="zh">中文</option>
-                        </select>
-                        <div className="relative">
-                            <div className="w-12 h-12 bg-white rounded-full overflow-hidden border-2 border-white shadow-md">
-                                <img
-                                    src="https://cdn-icons-png.flaticon.com/128/17561/17561717.png"
-                                    alt="Profile"
-                                    className="w-full h-full object-cover"
-                                />
-                            </div>
-                            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
-                                <CheckCircle size={12} className="text-white" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {/* Interactive weather card with animation */}
-                <div className="bg-white bg-opacity-20 backdrop-blur-sm p-4 rounded-xl flex items-center mb-7 shadow-md transform hover:scale-[1.02] transition-transform">
-                    <div className="mr-3 bg-yellow-300 bg-opacity-30 p-2 rounded-full">
-                        <CloudSun size={28} className="text-yellow-300" />
-                    </div>
-                    <div className="flex-1">
-                        <h3 className="font-medium">{t.weather}</h3>
-                        <div className="flex justify-between items-center">
-                            <p className="text-sm text-blue-100">
-                                16°C - 22°C, Partly Cloudy
-                            </p>
-                            <div className="flex space-x-1">
-                                {[1, 2, 3, 4, 5].map((day) => (
-                                    <div
-                                        key={day}
-                                        className="w-1 h-6 bg-white bg-opacity-30 rounded-full"
-                                        style={{ height: `${16 + day * 3}px` }}
-                                    ></div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Main content area with cards */}
-            <div className="px-5 -mt-10">
-                {/* Health screening card with pulsing animation */}
-                <div className="bg-white rounded-2xl p-5 shadow-lg mb-6 border border-gray-100 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500 rounded-full opacity-10 -mr-10 -mt-10"></div>
-                    <div className="absolute bottom-0 left-0 w-24 h-24 bg-green-500 rounded-full opacity-10 -ml-10 -mb-10"></div>
-
-                    <div className="flex justify-between items-start mb-4">
+    const HomeScreen = () => {
+        return (
+            <div className="min-h-screen bg-gray-50 pb-20">
+                {/* Header with gradient and weather card */}
+                <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-6 pt-12 rounded-b-3xl shadow-lg">
+                    <div className="flex justify-between items-center mb-6">
                         <div>
-                            <h3 className="font-bold text-xl text-gray-800">
-                                {t.healthScreening}
-                            </h3>
-                            <p className="text-sm text-gray-600">
-                                {t.completeCheck}
-                            </p>
+                            <p className="text-blue-100">{t.hello}</p>
+                            <h1 className="text-2xl font-bold">
+                                {isLoggedIn ? "Arif Hassan" : t.appName}
+                            </h1>
                         </div>
-                        <div className="relative">
-                            <div className="w-12 h-12 rounded-full flex items-center justify-center bg-blue-100 text-blue-600">
-                                <Heart size={22} />
-                            </div>
-                            <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold animate-pulse">
-                                !
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="mb-4">
-                        <div className="w-full bg-gray-100 rounded-full h-2.5">
-                            <div className="bg-blue-600 h-2.5 rounded-full w-1/3"></div>
-                        </div>
-                        <div className="flex justify-between mt-1">
-                            <span className="text-xs text-gray-500">
-                                {t.healthStatus}
-                            </span>
-                            <span className="text-xs font-medium text-blue-600">
-                                33%
-                            </span>
-                        </div>
-                    </div>
-
-                    <button
-                        onClick={() => setCurrentScreen("form1")}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium transition-colors flex items-center justify-center"
-                    >
-                        <Activity size={18} className="mr-2" />
-                        {t.startHealthCheck}
-                    </button>
-                </div>
-
-                {/* Recent submissions carousel */}
-                <h2 className="font-bold text-lg text-gray-800 mb-3 flex items-center">
-                    {t.recentSubmissions}
-                    <span className="bg-blue-100 text-blue-600 text-xs font-medium px-2 py-0.5 rounded-full ml-2">
-                        {t.pendingCount}
-                    </span>
-                </h2>
-
-                <div className="relative">
-                    <div className="flex overflow-x-auto pb-4 -mx-2 snap-x hide-scrollbar">
-                        <div className="bg-white rounded-xl shadow-sm p-4 mb-2 border border-gray-100 min-w-[85%] mx-2 snap-center">
-                            <div className="flex justify-between items-center mb-3">
-                                <div className="flex items-center">
-                                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mr-3">
-                                        <MapPin size={18} />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-medium text-gray-800">
-                                            David Setya
-                                        </h3>
-                                        <p className="text-xs text-gray-500">
-                                            15 May 2023 • 2 participants
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs font-medium flex items-center">
-                                    <Clock size={12} className="mr-1" />
-                                    {t.pending}
-                                </div>
-                            </div>
-                            <div className="flex justify-between text-sm text-gray-500 border-t border-gray-100 pt-3 mt-2">
-                                <div>
-                                    <p className="flex items-center">
-                                        <Calendar size={14} className="mr-1" />{" "}
-                                        15 May 2023
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="flex items-center">
-                                        <Clock size={14} className="mr-1" />{" "}
-                                        05:00 AM
-                                    </p>
-                                </div>
-                            </div>
-                            <button
-                                className="w-full flex justify-center items-center py-2 text-blue-500 text-sm font-medium mt-2 hover:bg-blue-50 rounded-lg transition-colors"
-                                onClick={() => setCurrentScreen("details")}
+                        <div className="flex items-center space-x-2">
+                            <select
+                                value={language}
+                                onChange={(e) => setLanguage(e.target.value)}
+                                className="bg-white bg-opacity-20 text-white border border-white border-opacity-20 rounded-md text-xs px-2 py-1"
                             >
-                                {t.viewDetails}
-                            </button>
-                        </div>
-
-                        <div className="bg-white rounded-xl shadow-sm p-4 mb-2 border border-gray-100 min-w-[85%] mx-2 snap-center">
-                            <div className="flex justify-between items-center mb-3">
-                                <div className="flex items-center">
-                                    <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-500 mr-3">
-                                        <MapPin size={18} />
+                                <option value="en">EN</option>
+                                <option value="id">ID</option>
+                                <option value="zh">中文</option>
+                            </select>
+                            <div className="relative">
+                                <div className="w-12 h-12 bg-white rounded-full overflow-hidden border-2 border-white shadow-md">
+                                    <img
+                                        src="https://cdn-icons-png.flaticon.com/128/17561/17561717.png"
+                                        alt="Profile"
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                {isLoggedIn && (
+                                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
+                                        <CheckCircle size={12} className="text-white" />
                                     </div>
-                                    <div>
-                                        <h3 className="font-medium text-gray-800">
-                                            Inant Kharisma
-                                        </h3>
-                                        <p className="text-xs text-gray-500">
-                                            10 May 2023 • 1 participant
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium flex items-center">
-                                    <CheckCircle size={12} className="mr-1" />
-                                    {t.complete}
-                                </div>
+                                )}
                             </div>
-                            <div className="flex justify-between text-sm text-gray-500 border-t border-gray-100 pt-3 mt-2">
-                                <div>
-                                    <p className="flex items-center">
-                                        <Calendar size={14} className="mr-1" />{" "}
-                                        10 May 2023
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="flex items-center">
-                                        <Clock size={14} className="mr-1" />{" "}
-                                        04:30 AM
-                                    </p>
-                                </div>
-                            </div>
-                            <button
-                                className="w-full flex justify-center items-center py-2 text-blue-500 text-sm font-medium mt-2 hover:bg-blue-50 rounded-lg transition-colors"
-                                onClick={() => setCurrentScreen("details")}
-                            >
-                                {t.viewDetails}
-                            </button>
                         </div>
                     </div>
                 </div>
-
-                {/* Interactive Map Card */}
-                <h2 className="font-bold text-lg text-gray-800 mt-6 mb-3">
-                    {t.track}
-                </h2>
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6 border border-gray-100 relative">
-                    <div className="h-48 bg-blue-100 relative">
-                        <img
-                            src="https://tracedetrail.fr/traces/maps/MapTrace269148_3463.jpg"
-                            alt="Map"
-                            className="w-full h-full object-cover"
-                        />
-                        <div className="absolute bottom-3 right-3">
-                            <button className="bg-white rounded-full p-2 shadow-md">
-                                <MapPin size={20} className="text-blue-500" />
-                            </button>
+    
+                {/* Main content area with cards */}
+                <div className="px-5 -mt-10">
+                    {/* Health screening card with pulsing animation */}
+                    <div className="bg-white rounded-2xl p-5 shadow-lg mb-6 border border-gray-100 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500 rounded-full opacity-10 -mr-10 -mt-10"></div>
+                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-green-500 rounded-full opacity-10 -ml-10 -mb-10"></div>
+    
+                        <div className="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 className="font-bold text-xl text-gray-800">
+                                    {t.healthScreening}
+                                </h3>
+                                <p className="text-sm text-gray-600">
+                                    {t.completeCheck}
+                                </p>
+                            </div>
+                            <div className="relative">
+                                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-blue-100 text-blue-600">
+                                    <Heart size={22} />
+                                </div>
+                                <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold animate-pulse">
+                                    !
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                    <div className="p-4">
-                        <div className="flex justify-between items-center mb-2">
-                            <h3 className="font-medium text-gray-800">
-                                {t.exploreRoutes}
-                            </h3>
-                            <span className="text-xs text-gray-500">
-                                {t.interactiveMap}
-                            </span>
+    
+                        <div className="mb-4">
+                            <div className="w-full bg-gray-100 rounded-full h-2.5">
+                                <div className="bg-blue-600 h-2.5 rounded-full w-1/3"></div>
+                            </div>
+                            <div className="flex justify-between mt-1">
+                                <span className="text-xs text-gray-500">
+                                    {t.healthStatus}
+                                </span>
+                                <span className="text-xs font-medium text-blue-600">
+                                    33%
+                                </span>
+                            </div>
                         </div>
-                        <p className="text-xs text-gray-500 mb-3">
-                            {t.routeDescription}
-                        </p>
+    
                         <button
-                            className="w-full flex justify-center items-center py-2.5 text-white text-sm font-medium bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
-                            onClick={() => setShowVideoPopup(true)}
+                            onClick={() => setCurrentScreen("form1")}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium transition-colors flex items-center justify-center"
                         >
-                            <Map size={18} className="mr-2" />
-                            {t.viewFullMap}
+                            <Activity size={18} className="mr-2" />
+                            {t.startHealthCheck}
                         </button>
                     </div>
-                </div>
-
-                {/* Preparation Checklist - Horizontal Scrollable Cards */}
-                <h2 className="font-bold text-lg mb-3 text-gray-800 flex items-center">
-                    {t.prepare}
-                    <span className="text-xs text-gray-500 font-normal ml-2">
-                        {t.essentialItems}
-                    </span>
-                </h2>
-
-                <div className="mb-6 px-5 -mx-5">
-                    <div className="flex overflow-x-auto pb-4 px-5 hide-scrollbar snap-x">
-                        {/* Card 1 - Warm Clothing */}
-                        <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
-                            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mb-3">
-                                <Thermometer size={22} />
+    
+                    {/* Recent submissions carousel */}
+                    <h2 className="font-bold text-lg text-gray-800 mb-3 flex items-center">
+                        {t.recentSubmissions}
+                        {screeningData.filter(item => item.status === "pending").length > 0 && (
+                        <span className="bg-blue-100 text-blue-600 text-xs font-medium px-2 py-0.5 rounded-full ml-2">
+                            {screeningData.filter(item => item.status === "pending").length} {t.pending}
+                        </span>
+                        )}
+                    </h2>
+    
+                    <div className="relative">
+                        {screeningData.length > 0 ? (
+                        <div className="flex overflow-x-auto pb-4 -mx-2 snap-x hide-scrollbar">
+                            {screeningData.map((screening, index) => (
+                            <div key={index} className="bg-white rounded-xl shadow-sm p-4 mb-2 border border-gray-100 min-w-[85%] mx-2 snap-center">
+                                <div className="flex justify-between items-center mb-3">
+                                <div className="flex items-center">
+                                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mr-3">
+                                    <MapPin size={18} />
+                                    </div>
+                                    <div>
+                                    <h3 className="font-medium text-gray-800">
+                                        {screening.participants[0].name || "Unnamed"}
+                                    </h3>
+                                    <p className="text-xs text-gray-500">
+                                        {screening.date} • {screening.participants.length} participants
+                                    </p>
+                                    </div>
+                                </div>
+                                <div className={`px-2 py-1 rounded-full ${screening.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-green-100 text-green-700"} text-xs font-medium flex items-center`}>
+                                    {screening.status === "pending" ? (
+                                    <><Clock size={12} className="mr-1" />{t.pending}</>
+                                    ) : (
+                                    <><CheckCircle size={12} className="mr-1" />{t.complete}</>
+                                    )}
+                                </div>
+                                </div>
+                                <div className="flex justify-between text-sm text-gray-500 border-t border-gray-100 pt-3 mt-2">
+                                <div>
+                                    <p className="flex items-center">
+                                    <Calendar size={14} className="mr-1" /> {screening.date}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="flex items-center">
+                                    <Clock size={14} className="mr-1" /> {screening.time}
+                                    </p>
+                                </div>
+                                </div>
+                                <button
+                                className="w-full flex justify-center items-center py-2 text-blue-500 text-sm font-medium mt-2 hover:bg-blue-50 rounded-lg transition-colors"
+                                onClick={() => {
+                                    setSelectedScreeningId(screening.id);
+                                    setCurrentScreen("details");
+                                }}
+                                >
+                                {t.viewDetails}
+                                </button>
                             </div>
-                            <h3 className="font-medium text-gray-800 mb-1">
-                                {t.warmClothing}
-                            </h3>
-                            <p className="text-xs text-gray-500">
-                                {t.warmClothingDesc}
-                            </p>
+                            ))}
                         </div>
-
-                        {/* Card 2 - Gas Mask */}
-                        <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
-                            <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-500 mb-3">
-                                <Wind size={22} />
+                        ) : (
+                        <div className="bg-white rounded-xl shadow-sm p-6 mb-4 border border-gray-100 text-center">
+                            <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-4">
+                            <FileText size={24} className="text-blue-500" />
                             </div>
                             <h3 className="font-medium text-gray-800 mb-1">
-                                {t.gasMask}
+                            {language === "en" ? "No screenings yet" : 
+                            language === "id" ? "Belum ada pemeriksaan" : 
+                            "尚无筛查记录"}
                             </h3>
-                            <p className="text-xs text-gray-500">
-                                {t.gasMaskDesc}
+                            <p className="text-sm text-gray-500 mb-4">
+                            {language === "en" ? "Complete a health screening to see it here" : 
+                            language === "id" ? "Selesaikan pemeriksaan kesehatan untuk melihatnya di sini" : 
+                            "完成健康筛查以在此处查看"}
                             </p>
+                            <button 
+                            onClick={() => setCurrentScreen("form1")}
+                            className="text-blue-500 text-sm font-medium"
+                            >
+                            {t.startHealthCheck} →
+                            </button>
                         </div>
-
-                        {/* Card 3 - Water & Snacks */}
-                        <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
-                            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mb-3">
-                                <Droplets size={22} />
+                        )}
+                    </div>
+                    {/* Dynamic Weather Forecast Card - Main Section */}
+                    <h2 className="font-bold text-lg text-gray-800 mt-6 mb-3">
+                        Conditions
+                    </h2>
+                    <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-4 border border-gray-100">
+                        <div className="p-5">
+                            {/* Date selector */}
+                            <div className="flex overflow-x-auto hide-scrollbar mb-6">
+                                {['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((day, index) => {
+                                    // Generate dates dynamically starting from today
+                                    const date = new Date();
+                                    date.setDate(date.getDate() + index);
+                                    const dayNum = date.getDate();
+                                    const isToday = index === 0;
+                                    
+                                    return (
+                                        <div key={index} className="flex flex-col items-center mr-8">
+                                            <span className="text-sm text-gray-500 mb-1">{day}</span>
+                                            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-lg ${isToday ? 'bg-green-900 text-white' : 'text-gray-700'}`}>
+                                                {dayNum}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
-                            <h3 className="font-medium text-gray-800 mb-1">
-                                {t.waterSnacks}
-                            </h3>
-                            <p className="text-xs text-gray-500">
-                                {t.waterSnacksDesc}
-                            </p>
+                            
+                            {/* Current temperature and conditions */}
+                            <div className="flex items-start justify-between mb-2">
+                                <div>
+                                    <div className="text-7xl font-normal text-green-900 mb-1">13°</div>
+                                    <div className="text-xl text-gray-700 mb-1">Showers</div>
+                                    <div className="text-lg text-gray-500">H:18° L:13°</div>
+                                </div>
+                                <div className="flex flex-col items-end">
+                                    <div className="flex items-center mb-2">
+                                        <Droplets size={18} className="text-gray-500 mr-1" />
+                                        <span className="text-lg text-gray-700">25%</span>
+                                    </div>
+                                    <div className="flex items-center text-lg text-gray-500 mb-2">
+                                        <Sunrise size={18} className="mr-1" />
+                                        <span>5:25 AM</span>
+                                    </div>
+                                    <div className="flex items-center text-lg text-gray-500">
+                                        <Sunset size={18} className="mr-1" />
+                                        <span>5:16 PM</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-
-                        {/* Card 4 - Proper Footwear */}
-                        <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
-                            <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 mb-3">
-                                <Footprints size={22} />
+                    </div>
+    
+                    {/* Horizontal scrollable cards section */}
+                    <div className="flex overflow-x-auto pb-4 hide-scrollbar space-x-4 mb-6">
+                        {/* Weather along trail card */}
+                        <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 min-w-[85%] flex-shrink-0">
+                            <div className="flex justify-between items-center mb-3">
+                                <h4 className="text-lg text-gray-700">Weather along trail</h4>
+                                <select className="text-sm text-gray-700 bg-gray-100 rounded-full px-3 py-1 border-none">
+                                    <option>11:00 PM</option>
+                                    <option>12:00 AM</option>
+                                    <option>1:00 AM</option>
+                                </select>
                             </div>
-                            <h3 className="font-medium text-gray-800 mb-1">
-                                {t.properFootwear}
-                            </h3>
-                            <p className="text-xs text-gray-500">
-                                {t.footwearDesc}
-                            </p>
+                            
+                            <div className="relative h-24 mb-2">
+                                {/* The trail graph */}
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="h-1 bg-green-700 w-full rounded-full"></div>
+                                </div>
+                                {/* Temperature point */}
+                                <div className="absolute top-1/2 left-1/3 transform -translate-y-1/2">
+                                    <div className="w-4 h-4 bg-white rounded-full border-2 border-green-700 relative">
+                                        <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xl text-green-900 font-medium">
+                                            11°
+                                        </div>
+                                    </div>
+                                </div>
+                                {/* Path markers */}
+                                <div className="absolute bottom-0 left-0 right-0 flex justify-between text-sm text-gray-500">
+                                    <span>0 km</span>
+                                    <span>4.7 km</span>
+                                    <span>9.4 km</span>
+                                </div>
+                            </div>
                         </div>
-
-                        {/* Card 5 - Headlamp */}
-                        <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
-                            <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-500 mb-3">
-                                <Flashlight size={22} />
+                        
+                        {/* Ground conditions card */}
+                        <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 min-w-[70%] flex-shrink-0">
+                            <div className="flex items-start">
+                                <div className="flex-1">
+                                    <h4 className="text-lg text-gray-700 mb-3">Ground</h4>
+                                    <div className="flex items-center">
+                                        <div className="w-16 h-16 bg-green-900 rounded-full flex items-center justify-center mr-3">
+                                            <Droplets size={28} className="text-white" />
+                                        </div>
+                                        <div>
+                                            <div className="text-green-900 text-2xl font-medium">Wet</div>
+                                            <div className="text-gray-600">11.06 mm in 72 hours</div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <h3 className="font-medium text-gray-800 mb-1">
-                                {t.headlamp}
-                            </h3>
-                            <p className="text-xs text-gray-500">
-                                {t.headlampDesc}
-                            </p>
                         </div>
-
-                        {/* Card 6 - Rain Gear */}
-                        <div className="bg-white rounded-xl shadow-sm p-4 mr-5 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
-                            <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-500 mb-3">
-                                <Umbrella size={22} />
+                    </div>
+    
+                    <div className="text-sm text-gray-500 mb-6 text-center">
+                        Data is based on past, current, and forecasted local weather. Accuracy is not guaranteed.
+                    </div>
+    
+                    {/* Interactive Map Card */}
+                    <h2 className="font-bold text-lg text-gray-800 mb-3">
+                        {t.track}
+                    </h2>
+                    
+                    <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6 border border-gray-100 relative">
+                        <div className="h-48 bg-blue-100 relative">
+                            <img
+                                src="https://tracedetrail.fr/traces/maps/MapTrace269148_3463.jpg"
+                                alt="Map"
+                                className="w-full h-full object-cover"
+                            />
+                            <div className="absolute bottom-3 right-3">
+                                <button className="bg-white rounded-full p-2 shadow-md">
+                                    <MapPin size={20} className="text-blue-500" />
+                                </button>
                             </div>
-                            <h3 className="font-medium text-gray-800 mb-1">
-                                {t.rainGear}
-                            </h3>
-                            <p className="text-xs text-gray-500">
-                                {t.rainGearDesc}
+                        </div>
+                        <div className="p-4">
+                            <div className="flex justify-between items-center mb-2">
+                                <h3 className="font-medium text-gray-800">
+                                    {t.exploreRoutes}
+                                </h3>
+                                <span className="text-xs text-gray-500">
+                                    {t.interactiveMap}
+                                </span>
+                            </div>
+                            <p className="text-xs text-gray-500 mb-3">
+                                {t.routeDescription}
                             </p>
+                            <button
+                                className="w-full flex justify-center items-center py-2.5 text-white text-sm font-medium bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
+                                onClick={() => setShowVideoPopup(true)}
+                            >
+                                <Map size={18} className="mr-2" />
+                                {t.viewFullMap}
+                            </button>
+                        </div>
+                    </div>
+    
+                    {/* Preparation Checklist - Horizontal Scrollable Cards */}
+                    <h2 className="font-bold text-lg mb-3 text-gray-800 flex items-center">
+                        {t.prepare}
+                        <span className="text-xs text-gray-500 font-normal ml-2">
+                            {t.essentialItems}
+                        </span>
+                    </h2>
+    
+                    <div className="mb-6 px-5 -mx-5">
+                        <div className="flex overflow-x-auto pb-4 px-5 hide-scrollbar snap-x">
+                            {/* Card 1 - Warm Clothing */}
+                            <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
+                                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mb-3">
+                                    <Thermometer size={22} />
+                                </div>
+                                <h3 className="font-medium text-gray-800 mb-1">
+                                    {t.warmClothing}
+                                </h3>
+                                <p className="text-xs text-gray-500">
+                                    {t.warmClothingDesc}
+                                </p>
+                            </div>
+    
+                            {/* Card 2 - Gas Mask */}
+                            <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
+                                <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-500 mb-3">
+                                    <Wind size={22} />
+                                </div>
+                                <h3 className="font-medium text-gray-800 mb-1">
+                                    {t.gasMask}
+                                </h3>
+                                <p className="text-xs text-gray-500">
+                                    {t.gasMaskDesc}
+                                </p>
+                            </div>
+    
+                            {/* Card 3 - Water & Snacks */}
+                            <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
+                                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mb-3">
+                                    <Droplets size={22} />
+                                </div>
+                                <h3 className="font-medium text-gray-800 mb-1">
+                                    {t.waterSnacks}
+                                </h3>
+                                <p className="text-xs text-gray-500">
+                                    {t.waterSnacksDesc}
+                                </p>
+                            </div>
+    
+                            {/* Card 4 - Proper Footwear */}
+                            <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
+                                <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 mb-3">
+                                    <Footprints size={22} />
+                                </div>
+                                <h3 className="font-medium text-gray-800 mb-1">
+                                    {t.properFootwear}
+                                </h3>
+                                <p className="text-xs text-gray-500">
+                                    {t.footwearDesc}
+                                </p>
+                            </div>
+    
+                            {/* Card 5 - Headlamp */}
+                            <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
+                                <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-500 mb-3">
+                                    <Flashlight size={22} />
+                                </div>
+                                <h3 className="font-medium text-gray-800 mb-1">
+                                    {t.headlamp}
+                                </h3>
+                                <p className="text-xs text-gray-500">
+                                    {t.headlampDesc}
+                                </p>
+                            </div>
+    
+                            {/* Card 6 - Rain Gear */}
+                            <div className="bg-white rounded-xl shadow-sm p-4 mr-5 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
+                                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-500 mb-3">
+                                    <Umbrella size={22} />
+                                </div>
+                                <h3 className="font-medium text-gray-800 mb-1">
+                                    {t.rainGear}
+                                </h3>
+                                <p className="text-xs text-gray-500">
+                                    {t.rainGearDesc}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
+    
+                {/* Add a subtle flare on the bottom nav */}
+                {renderBottomNav()}
+    
+                {/* Add floating action button */}
+                <button
+                    onClick={() => setCurrentScreen("form1")}
+                    className="fixed right-6 bottom-20 w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg text-white transform hover:scale-105 transition-transform"
+                >
+                    <Plus size={24} />
+                </button>
             </div>
-
-            {/* Add a subtle flare on the bottom nav */}
-            {renderBottomNav()}
-
-            {/* Add floating action button */}
-            <button
-                onClick={() => setCurrentScreen("form1")}
-                className="fixed right-6 bottom-20 w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg text-white transform hover:scale-105 transition-transform"
-            >
-                <Plus size={24} />
-            </button>
-        </div>
-    );
+        );
+    }
     const ScreeningScreen = () => (
         <div className="min-h-screen bg-gray-50 pb-20">
             <div className="bg-white p-4 flex items-center shadow-sm">
@@ -1171,88 +1264,79 @@ const App = () => {
             </div>
 
             <div className="px-4 py-2">
-                {activeTab === "pending" ? (
-                    <>
-                        <div
-                            className="bg-white rounded-xl shadow-sm p-4 mb-4 border border-gray-100"
-                            onClick={() => setCurrentScreen("details")}
-                        >
-                            <div className="flex justify-between items-center mb-3">
-                                <div className="flex items-center">
-                                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mr-3">
-                                        <MapPin size={18} />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-medium text-gray-800">
-                                            David Setya
-                                        </h3>
-                                        <p className="text-xs text-gray-500">
-                                            15 May 2023 • 2 participants
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="px-2 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs font-medium">
-                                    {t.pending}
-                                </div>
-                            </div>
-                            <div className="flex justify-between text-sm text-gray-500 border-t border-gray-100 pt-3 mt-2">
-                                <div>
-                                    <p className="flex items-center">
-                                        <Calendar size={14} className="mr-1" />{" "}
-                                        15 May 2023
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="flex items-center">
-                                        <Clock size={14} className="mr-1" />{" "}
-                                        05:00 AM
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        <div
-                            className="bg-white rounded-xl shadow-sm p-4 mb-4 border border-gray-100"
-                            onClick={() => setCurrentScreen("details")}
-                        >
-                            <div className="flex justify-between items-center mb-3">
-                                <div className="flex items-center">
-                                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mr-3">
-                                        <MapPin size={18} />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-medium text-gray-800">
-                                            Inant Kharisma
-                                        </h3>
-                                        <p className="text-xs text-gray-500">
-                                            10 May 2023 • 1 participant
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium">
-                                    {t.complete}
-                                </div>
-                            </div>
-                            <div className="flex justify-between text-sm text-gray-500 border-t border-gray-100 pt-3 mt-2">
-                                <div>
-                                    <p className="flex items-center">
-                                        <Calendar size={14} className="mr-1" />{" "}
-                                        10 May 2023
-                                    </p>
-                                </div>
-                                <div>
-                                    <p className="flex items-center">
-                                        <Clock size={14} className="mr-1" />{" "}
-                                        04:30 AM
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </>
-                )}
+      {screeningData.filter(item => item.status === activeTab).length > 0 ? (
+        screeningData
+          .filter(item => item.status === activeTab)
+          .map((screening, index) => (
+            <div
+              key={index}
+              className="bg-white rounded-xl shadow-sm p-4 mb-4 border border-gray-100"
+              onClick={() => {
+                setSelectedScreeningId(screening.id);
+                setCurrentScreen("details");
+              }}
+            >
+              <div className="flex justify-between items-center mb-3">
+                <div className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mr-3">
+                    <MapPin size={18} />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-800">
+                      {screening.participants[0].name || "Unnamed"}
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      {screening.date} • {screening.participants.length} participants
+                    </p>
+                  </div>
+                </div>
+                <div className={`px-2 py-1 rounded-full ${activeTab === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-green-100 text-green-700"} text-xs font-medium`}>
+                  {activeTab === "pending" ? t.pending : t.complete}
+                </div>
+              </div>
+              <div className="flex justify-between text-sm text-gray-500 border-t border-gray-100 pt-3 mt-2">
+                <div>
+                  <p className="flex items-center">
+                    <Calendar size={14} className="mr-1" /> {screening.date}
+                  </p>
+                </div>
+                <div>
+                  <p className="flex items-center">
+                    <Clock size={14} className="mr-1" /> {screening.time}
+                  </p>
+                </div>
+              </div>
             </div>
+          ))
+      ) : (
+        <div className="bg-white rounded-xl shadow-sm p-6 text-center">
+          <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+            {activeTab === "pending" ? (
+              <Clock size={24} className="text-gray-400" />
+            ) : (
+              <CheckCircle size={24} className="text-gray-400" />
+            )}
+          </div>
+          <h3 className="font-medium text-gray-800 mb-1">
+            {language === "en" ? `No ${activeTab} screenings` : 
+             language === "id" ? `Tidak ada pemeriksaan ${activeTab === "pending" ? "tertunda" : "selesai"}` : 
+             `没有${activeTab === "pending" ? "待处理" : "已完成"}的筛查`}
+          </h3>
+          <p className="text-sm text-gray-500 mb-4">
+            {language === "en" ? "Schedule a health screening to see it here" : 
+             language === "id" ? "Jadwalkan pemeriksaan kesehatan untuk melihatnya di sini" : 
+             "安排健康筛查以在此处查看"}
+          </p>
+          <button 
+            onClick={() => setCurrentScreen("form1")}
+            className="text-blue-500 text-sm font-medium"
+          >
+            {t.startHealthCheck} →
+          </button>
+        </div>
+      )}
+    </div>
+
 
             <button
                 className="fixed right-6 bottom-20 w-14 h-14 rounded-full bg-blue-500 flex items-center justify-center shadow-lg text-white"
@@ -1645,7 +1729,7 @@ const App = () => {
                                     size={20}
                                     className="text-gray-500 mr-3"
                                 />
-                                <span>{t.language}</span>
+                                <span>{language}</span>
                             </div>
                             <div className="flex items-center">
                                 <span className="text-gray-500 mr-2">
@@ -2239,35 +2323,86 @@ const App = () => {
             }
             return null;
         }
+        const getHeightTopRef = useRef(null);
+        const bottomNavRef = useRef(null);
+        const [heightTop, setHeightTop] = useState(0);
+        const [heightBottomNav, setHeightBottomNav] = useState(0);
+        const [mapHeight, setMapHeight] = useState("50vh");
+    
+        // Get heights and calculate map height
+        useEffect(() => {
+            const updateHeights = () => {
+                if (getHeightTopRef.current && bottomNavRef.current) {
+                    const topHeight = getHeightTopRef.current.offsetHeight;
+                    const navHeight = bottomNavRef.current.offsetHeight;
+                    setHeightTop(topHeight);
+                    setHeightBottomNav(navHeight);
+                    
+                    // Calculate remaining height (subtract a bit extra for any padding/margins)
+                    const windowHeight = window.innerHeight;
+                    const calculatedHeight = windowHeight - topHeight - navHeight - 20;
+                    setMapHeight(`${calculatedHeight}px`);
+                }
+            };
+    
+            updateHeights();
+            // Also update on window resize
+            window.addEventListener('resize', updateHeights);
+            return () => window.removeEventListener('resize', updateHeights);
+        }, [selectedCity]); // Recalculate when city changes as this affects layout
 
         return (
             <div className="min-h-screen bg-gray-50 relative">
-                <div className="bg-white p-4 flex items-center shadow-sm">
-                    <button
-                        onClick={() => setCurrentScreen("home")}
-                        className="mr-2"
-                    >
-                        <ArrowLeft size={24} className="text-gray-800" />
-                    </button>
-                    <h1 className="text-xl font-bold text-gray-800">
-                        {t.selectLocation}
-                    </h1>
-                </div>
+                <div ref={getHeightTopRef}>
+                    <div className="bg-white p-4 flex items-center shadow-sm">
+                        <button
+                            onClick={() => setCurrentScreen("home")}
+                            className="mr-2"
+                        >
+                            <ArrowLeft size={24} className="text-gray-800" />
+                        </button>
+                        <h1 className="text-xl font-bold text-gray-800">
+                            {t.selectLocation}
+                        </h1>
+                    </div>
 
-                {/* City selection tabs */}
-                <div className="bg-white px-4 py-3 flex space-x-2 shadow-sm">
-                    <button
-                        className={`flex-1 py-2 px-4 rounded-full text-sm font-medium ${selectedCity === "Bondowoso" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800"}`}
-                        onClick={() => setSelectedCity("Bondowoso")}
-                    >
-                        {t.bondowoso}
-                    </button>
-                    <button
-                        className={`flex-1 py-2 px-4 rounded-full text-sm font-medium ${selectedCity === "Banyuwangi" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800"}`}
-                        onClick={() => setSelectedCity("Banyuwangi")}
-                    >
-                        {t.banyuwangi}
-                    </button>
+                    {/* City selection tabs */}
+                    <div className="bg-white px-4 py-3">
+                        <div>
+                            <div className="flex overflow-x-auto pb-2 mb-4 space-x-2">
+                                {[
+                                    14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+                                ].map((day) => (
+                                    <div
+                                        key={day}
+                                        className={`flex-shrink-0 w-12 h-14 rounded-lg ${day === selectedDate ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800"} flex flex-col items-center justify-center cursor-pointer`}
+                                        onClick={() => setSelectedDate(day)}
+                                    >
+                                        <span className="text-xs opacity-80">
+                                            MAY
+                                        </span>
+                                        <span className="text-lg font-bold">
+                                            {day}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>  
+                        <div className="flex space-x-2 shadow-sm">
+                            <button
+                                className={`flex-1 py-2 px-4 rounded-full text-sm font-medium ${selectedCity === "Bondowoso" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800"}`}
+                                onClick={() => setSelectedCity("Bondowoso")}
+                            >
+                                {t.bondowoso}
+                            </button>
+                            <button
+                                className={`flex-1 py-2 px-4 rounded-full text-sm font-medium ${selectedCity === "Banyuwangi" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800"}`}
+                                onClick={() => setSelectedCity("Banyuwangi")}
+                            >
+                                {t.banyuwangi}
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 {!selectedCity ? (
@@ -2280,7 +2415,7 @@ const App = () => {
                         <p className="text-gray-600">{t.selectCityPrompt}</p>
                     </div>
                 ) : (
-                    <>
+                    <div className="relative" style={{ height: mapHeight }}>
                         <div className="p-4 pt-3 relative z-10">
                             <div className="relative mb-1">
                                 <input
@@ -2321,7 +2456,7 @@ const App = () => {
                         </div>
 
                         {/* Map Container */}
-                        <div className="absolute top-[180px] left-0 right-0 bottom-0 z-0">
+                        <div className="absolute h-[100%] top-0 left-0 right-0 bottom-0 z-0">
                             <MapContainer
                                 center={getCityCenter(selectedCity)}
                                 zoom={14}
@@ -2358,16 +2493,13 @@ const App = () => {
                                 )}
                             </MapContainer>
                         </div>
-                    </>
+                    </div>
                 )}
 
                 {/* Fixed Detail Panel with Date & Time */}
                 {showDetail && selectedLocation && (
                     <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-xl p-6 shadow-lg z-10 max-h-[70%] overflow-y-auto">
                         <div className="mb-4">
-                            <h2 className="font-bold text-lg mb-1 text-gray-800">
-                                {t.selectedLocation}
-                            </h2>
                             <div className="flex items-center">
                                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mr-3">
                                     <MapPin size={16} />
@@ -2387,29 +2519,6 @@ const App = () => {
                                     <X size={16} className="text-gray-400" />
                                 </button>
                             </div>
-                        </div>
-
-                        <h3 className="font-medium text-gray-800 mb-2">
-                            {t.selectDateAndTime}
-                        </h3>
-
-                        <div className="flex overflow-x-auto pb-2 mb-4 space-x-2">
-                            {[
-                                14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
-                            ].map((day) => (
-                                <div
-                                    key={day}
-                                    className={`flex-shrink-0 w-12 h-14 rounded-lg ${day === selectedDate ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800"} flex flex-col items-center justify-center cursor-pointer`}
-                                    onClick={() => setSelectedDate(day)}
-                                >
-                                    <span className="text-xs opacity-80">
-                                        MAY
-                                    </span>
-                                    <span className="text-lg font-bold">
-                                        {day}
-                                    </span>
-                                </div>
-                            ))}
                         </div>
 
                         <div className="grid grid-cols-2 gap-2 mb-4">
@@ -2441,326 +2550,541 @@ const App = () => {
                         </button>
                     </div>
                 )}
+                <div ref={bottomNavRef}>
+                    {renderBottomNav()}
+                </div>
             </div>
         );
     };
 
-    const Form2Screen = () => (
-        <div className="min-h-screen bg-gray-50">
-            <div className="bg-white p-4 flex items-center shadow-sm">
-                <button
-                    onClick={() => setCurrentScreen("form1")}
-                    className="mr-2"
-                >
-                    <ArrowLeft size={24} className="text-gray-800" />
-                </button>
-                <h1 className="text-xl font-bold text-gray-800">
-                    {t.participantInfo}
-                </h1>
-            </div>
-
-            <div className="p-6">
-                {participants.map((participant, index) => (
-                    <div
-                        key={index}
-                        className="bg-white rounded-xl shadow-sm p-4 mb-6"
-                    >
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="font-bold text-lg text-gray-800">
-                                {t.participantInfo} {index + 1}
-                            </h2>
-                            {index > 0 && (
-                                <button
-                                    className="text-red-500"
-                                    onClick={() =>
-                                        setParticipants(
-                                            participants.filter(
-                                                (_, i) => i !== index,
-                                            ),
-                                        )
-                                    }
-                                >
-                                    <X size={20} />
-                                </button>
-                            )}
-                        </div>
-
-                        <div className="space-y-4">
-                            <div className="flex space-x-3">
-                                <div className="w-24">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        {t.title}
-                                    </label>
-                                    <select className="w-full border border-gray-300 rounded-lg p-3">
-                                        <option>Mr</option>
-                                        <option>Mrs</option>
-                                        <option>Ms</option>
-                                    </select>
-                                </div>
-                                <div className="flex-1">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        {t.name}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="w-full border border-gray-300 rounded-lg p-3"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="flex space-x-3">
-                                <div className="flex-1">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        {t.age}
-                                    </label>
-                                    <input
-                                        type="number"
-                                        className="w-full border border-gray-300 rounded-lg p-3"
-                                    />
-                                </div>
-                                <div className="flex-1">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        {t.nationality}
-                                    </label>
-                                    <select className="w-full border border-gray-300 rounded-lg p-3">
-                                        <option>Indonesia</option>
-                                        <option>Other</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                <span className="text-gray-700">
-                                    {t.medicalHistory}
-                                </span>
-                                <div
-                                    className={`w-12 h-6 rounded-full ${participant.hasMedicalHistory ? "bg-blue-500" : "bg-gray-300"} flex items-center p-1 transition-all duration-200`}
-                                >
-                                    <div
-                                        className={`w-4 h-4 rounded-full bg-white transform transition-all duration-200 ${participant.hasMedicalHistory ? "translate-x-6" : ""}`}
-                                        onClick={() => {
-                                            const newParticipants = [
-                                                ...participants,
-                                            ];
-                                            newParticipants[
-                                                index
-                                            ].hasMedicalHistory =
-                                                !newParticipants[index]
-                                                    .hasMedicalHistory;
-                                            setParticipants(newParticipants);
-                                        }}
-                                    ></div>
-                                </div>
-                            </div>
-
-                            {participant.hasMedicalHistory && (
-                                <div className="space-y-4 p-3 bg-blue-50 rounded-lg">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            {t.allergies}
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="w-full border border-gray-300 rounded-lg p-3"
-                                            placeholder="List any allergies"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            {t.pastMedical}
-                                        </label>
-                                        <textarea
-                                            className="w-full border border-gray-300 rounded-lg p-3"
-                                            rows={2}
-                                            placeholder="Describe any past medical conditions"
-                                        ></textarea>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            {t.currentMeds}
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="w-full border border-gray-300 rounded-lg p-3"
-                                            placeholder="List current medications"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            {t.familyMedical}
-                                        </label>
-                                        <textarea
-                                            className="w-full border border-gray-300 rounded-lg p-3"
-                                            rows={2}
-                                            placeholder="Any relevant family medical history"
-                                        ></textarea>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                ))}
-
-                <button
-                    onClick={addParticipant}
-                    className="w-full mb-4 border-2 border-dashed border-blue-300 text-blue-500 py-3 rounded-xl font-medium flex items-center justify-center"
-                >
-                    <Plus size={20} className="mr-2" />
-                    {t.addParticipant}
-                </button>
-
-                <button
-                    onClick={() => setCurrentScreen("form3")}
-                    className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium mb-6"
-                >
-                    {t.next}
-                </button>
-            </div>
-        </div>
-    );
-
-    const Form3Screen = () => (
-        <div className="min-h-screen bg-gray-50">
-            <div className="bg-white p-4 flex items-center shadow-sm">
-                <button
-                    onClick={() => setCurrentScreen("form2")}
-                    className="mr-2"
-                >
-                    <ArrowLeft size={24} className="text-gray-800" />
-                </button>
-                <h1 className="text-xl font-bold text-gray-800">{t.summary}</h1>
-            </div>
-
-            <div className="p-6">
-                <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-                    <h2 className="font-bold text-lg mb-4 text-gray-800">
-                        {t.screeningDetails}
-                    </h2>
-
-                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg mb-3">
-                        <span className="text-gray-700">{t.location}</span>
-                        <span className="font-medium">Baratha Hotel</span>
-                    </div>
-
-                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg mb-3">
-                        <span className="text-gray-700">{t.date}</span>
-                        <span className="font-medium">15 May 2023</span>
-                    </div>
-
-                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg mb-3">
-                        <span className="text-gray-700">{t.time}</span>
-                        <span className="font-medium">04:30 AM - 10:00 AM</span>
-                    </div>
-
-                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg mb-3">
-                        <span className="text-gray-700">{t.participants}</span>
-                        <span className="font-medium">
-                            {participants.length}
-                        </span>
-                    </div>
-
-                    <h2 className="font-bold text-lg my-4 text-gray-800">
-                        {t.payment}
-                    </h2>
-
-                    <div className="space-y-3 mb-4">
-                        <div
-                            className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer"
-                            onClick={() => setSelectedPaymentMethod("bank")}
-                        >
-                            <div className="w-6 h-6 rounded-full border-2 border-blue-500 flex items-center justify-center mr-3">
-                                {selectedPaymentMethod === "bank" && (
-                                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                                )}
-                            </div>
-                            <div className="flex-1">
-                                <h3 className="font-medium">
-                                    {t.bankTransfer}
-                                </h3>
-                                <p className="text-xs text-gray-500">
-                                    {t.manualVerification}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div
-                            className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer"
-                            onClick={() => setSelectedPaymentMethod("card")}
-                        >
-                            <div className="w-6 h-6 rounded-full border-2 border-blue-500 flex items-center justify-center mr-3">
-                                {selectedPaymentMethod === "card" && (
-                                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                                )}
-                            </div>
-                            <div className="flex-1">
-                                <h3 className="font-medium">
-                                    {t.creditDebitCard}
-                                </h3>
-                                <p className="text-xs text-gray-500">
-                                    {t.instantVerification}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div
-                            className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer"
-                            onClick={() => setSelectedPaymentMethod("ewallet")}
-                        >
-                            <div className="w-6 h-6 rounded-full border-2 border-blue-500 flex items-center justify-center mr-3">
-                                {selectedPaymentMethod === "ewallet" && (
-                                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                                )}
-                            </div>
-                            <div className="flex-1">
-                                <h3 className="font-medium">{t.eWallet}</h3>
-                                <p className="text-xs text-gray-500">
-                                    {t.instantVerification}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="border-t border-gray-200 pt-4 mb-4">
-                        <div className="flex justify-between mb-2">
-                            <span className="text-gray-700">
-                                {t.screeningFee}
-                            </span>
-                            <span>Rp 50,000 x {participants.length}</span>
-                        </div>
-                        <div className="flex justify-between mb-2">
-                            <span className="text-gray-700">
-                                {t.serviceFee}
-                            </span>
-                            <span>Rp 5,000</span>
-                        </div>
-                        <div className="flex justify-between font-bold text-lg mt-4">
-                            <span>{t.total}</span>
-                            <span>Rp {50000 * participants.length + 5000}</span>
-                        </div>
-                    </div>
-
+    const Form2Screen = () => {
+        // Add new state for validation
+        const [validationErrors, setValidationErrors] = useState({});
+        
+        // Update the participants state to include idNumber field
+        const [participants, setParticipants] = useState([
+            {
+                title: "Mr",
+                name: "",
+                age: "",
+                nationality: "",
+                idNumber: "",
+                hasMedicalHistory: false,
+                allergies: "",
+                pastMedicalHistory: "",
+                currentMedications: "",
+                familyMedicalHistory: "",
+            },
+        ]);
+    
+        // Function to validate ID numbers based on nationality
+        const validateIdNumber = (nationality, idNumber, index) => {
+            const errors = {...validationErrors};
+            
+            if (!idNumber) {
+                errors[`idNumber_${index}`] = "ID number is required";
+            } else if (nationality === "Indonesia" && !/^\d{16}$/.test(idNumber)) {
+                // KTP must be exactly 16 digits
+                errors[`idNumber_${index}`] = "KTP must be 16 digits";
+            } else if (nationality !== "Indonesia" && !/^[A-Z0-9]{8,9}$/.test(idNumber)) {
+                // Passport is typically 8-9 alphanumeric chars
+                errors[`idNumber_${index}`] = "Passport must be 8-9 characters";
+            } else {
+                delete errors[`idNumber_${index}`];
+            }
+            
+            setValidationErrors(errors);
+        };
+    
+        // Handle input changes for all participant fields
+        const handleInputChange = (index, field, value) => {
+            const updatedParticipants = [...participants];
+            updatedParticipants[index][field] = value;
+            
+            // Validate ID number when it changes
+            if (field === "idNumber") {
+                validateIdNumber(
+                    updatedParticipants[index].nationality, 
+                    value, 
+                    index
+                );
+            }
+            
+            // Also validate if nationality changes (which affects ID type)
+            if (field === "nationality") {
+                validateIdNumber(
+                    value, 
+                    updatedParticipants[index].idNumber, 
+                    index
+                );
+            }
+            
+            setParticipants(updatedParticipants);
+        };
+    
+        const addParticipant = () => {
+            setParticipants([
+                ...participants,
+                {
+                    title: "Mr",
+                    name: "",
+                    age: "",
+                    nationality: "",
+                    idNumber: "",
+                    hasMedicalHistory: false,
+                    allergies: "",
+                    pastMedicalHistory: "",
+                    currentMedications: "",
+                    familyMedicalHistory: "",
+                },
+            ]);
+        };
+    
+        // Check if form can proceed
+        const canProceed = () => {
+            return Object.keys(validationErrors).length === 0 && 
+                participants.every(p => p.name && p.age && p.nationality && p.idNumber);
+        };
+    
+        return (
+            <div className="min-h-screen bg-gray-50 pb-20">
+                <div className="bg-white p-4 flex items-center shadow-sm">
                     <button
-                        onClick={() => {
-                            if (isLoggedIn) {
-                                setCurrentScreen("form4");
-                            } else {
-                                setShowLoginPopup(true);
-                            }
-                        }}
-                        className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium"
+                        onClick={() => setCurrentScreen("form1")}
+                        className="mr-2"
                     >
-                        {t.submit}
+                        <ArrowLeft size={24} className="text-gray-800" />
+                    </button>
+                    <h1 className="text-xl font-bold text-gray-800">
+                        {t.participantInfo}
+                    </h1>
+                </div>
+    
+                <div className="p-6">
+                    {participants.map((participant, index) => (
+                        <div
+                            key={index}
+                            className="bg-white rounded-xl shadow-sm p-4 mb-6"
+                        >
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="font-bold text-lg text-gray-800">
+                                    {t.participantInfo} {index + 1}
+                                </h2>
+                                {index > 0 && (
+                                    <button
+                                        className="text-red-500"
+                                        onClick={() =>
+                                            setParticipants(
+                                                participants.filter(
+                                                    (_, i) => i !== index,
+                                                ),
+                                            )
+                                        }
+                                    >
+                                        <X size={20} />
+                                    </button>
+                                )}
+                            </div>
+    
+                            <div className="space-y-4">
+                                <div className="flex space-x-3">
+                                    <div className="w-24">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            {t.title}
+                                        </label>
+                                        <select 
+                                            className="w-full border border-gray-300 rounded-lg p-3"
+                                            value={participant.title}
+                                            onChange={(e) => handleInputChange(index, "title", e.target.value)}
+                                        >
+                                            <option>Mr</option>
+                                            <option>Mrs</option>
+                                            <option>Ms</option>
+                                        </select>
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            {t.name}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={participant.name}
+                                            onChange={(e) => handleInputChange(index, "name", e.target.value)}
+                                            className="w-full border border-gray-300 rounded-lg p-3"
+                                        />
+                                    </div>
+                                </div>
+    
+                                <div className="flex space-x-3">
+                                    <div className="w-24">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            {t.age}
+                                        </label>
+                                        <input
+                                            type="number"
+                                            value={participant.age}
+                                            onChange={(e) => handleInputChange(index, "age", e.target.value)}
+                                            className="w-full border border-gray-300 rounded-lg p-3"
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            {t.nationality}
+                                        </label>
+                                        <select 
+                                            className="w-full border border-gray-300 rounded-lg p-3"
+                                            value={participant.nationality}
+                                            onChange={(e) => handleInputChange(index, "nationality", e.target.value)}
+                                        >
+                                            <option value="">Select...</option>
+                                            <option value="Indonesia">Indonesia</option>
+                                            <option value="Malaysia">Malaysia</option>
+                                            <option value="Singapore">Singapore</option>
+                                            <option value="Australia">Australia</option>
+                                            <option value="United States">United States</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+    
+                                {/* ID Number section - automatically set based on nationality */}
+                                <div className="space-y-2">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            {participant.nationality === "Indonesia" ? "KTP Number" : "Passport Number"}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={participant.idNumber}
+                                            onChange={(e) => handleInputChange(index, "idNumber", e.target.value)}
+                                            className={`w-full border ${validationErrors[`idNumber_${index}`] ? "border-red-500" : "border-gray-300"} rounded-lg p-3`}
+                                            placeholder={participant.nationality === "Indonesia" ? "16 digits" : "8-9 characters"}
+                                        />
+                                        {validationErrors[`idNumber_${index}`] && (
+                                            <p className="text-red-500 text-xs mt-1">
+                                                {validationErrors[`idNumber_${index}`]}
+                                            </p>
+                                        )}
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            {participant.nationality === "Indonesia" 
+                                                ? "KTP must be 16 digits" 
+                                                : "Passport must be 8-9 alphanumeric characters"}
+                                        </p>
+                                    </div>
+                                </div>
+    
+                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <span className="text-gray-700">
+                                        {t.medicalHistory}
+                                    </span>
+                                    <div
+                                        className={`w-12 h-6 rounded-full ${participant.hasMedicalHistory ? "bg-blue-500" : "bg-gray-300"} flex items-center p-1 transition-all duration-200`}
+                                    >
+                                        <div
+                                            className={`w-4 h-4 rounded-full bg-white transform transition-all duration-200 ${participant.hasMedicalHistory ? "translate-x-6" : ""}`}
+                                            onClick={() => {
+                                                const newParticipants = [
+                                                    ...participants,
+                                                ];
+                                                newParticipants[
+                                                    index
+                                                ].hasMedicalHistory =
+                                                    !newParticipants[index]
+                                                        .hasMedicalHistory;
+                                                setParticipants(newParticipants);
+                                            }}
+                                        ></div>
+                                    </div>
+                                </div>
+    
+                                {participant.hasMedicalHistory && (
+                                    <div className="space-y-4 p-3 bg-blue-50 rounded-lg">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                {t.allergies}
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={participant.allergies}
+                                                onChange={(e) => handleInputChange(index, "allergies", e.target.value)}
+                                                className="w-full border border-gray-300 rounded-lg p-3"
+                                                placeholder="List any allergies"
+                                            />
+                                        </div>
+    
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                {t.pastMedical}
+                                            </label>
+                                            <textarea
+                                                value={participant.pastMedicalHistory}
+                                                onChange={(e) => handleInputChange(index, "pastMedicalHistory", e.target.value)}
+                                                className="w-full border border-gray-300 rounded-lg p-3"
+                                                rows={2}
+                                                placeholder="Describe any past medical conditions"
+                                            ></textarea>
+                                        </div>
+    
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                {t.currentMeds}
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={participant.currentMedications}
+                                                onChange={(e) => handleInputChange(index, "currentMedications", e.target.value)}
+                                                className="w-full border border-gray-300 rounded-lg p-3"
+                                                placeholder="List current medications"
+                                            />
+                                        </div>
+    
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                {t.familyMedical}
+                                            </label>
+                                            <textarea
+                                                value={participant.familyMedicalHistory}
+                                                onChange={(e) => handleInputChange(index, "familyMedicalHistory", e.target.value)}
+                                                className="w-full border border-gray-300 rounded-lg p-3"
+                                                rows={2}
+                                                placeholder="Any relevant family medical history"
+                                            ></textarea>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+    
+                    <button
+                        onClick={addParticipant}
+                        className="w-full mb-4 border-2 border-dashed border-blue-300 text-blue-500 py-3 rounded-xl font-medium flex items-center justify-center"
+                    >
+                        <Plus size={20} className="mr-2" />
+                        {t.addParticipant}
+                    </button>
+    
+                    <button
+                        onClick={() => setCurrentScreen("form3")}
+                        className={`w-full ${canProceed() ? "bg-blue-500 text-white" : "bg-gray-300 text-gray-500"} py-3 rounded-xl font-medium mb-6`}
+                        disabled={!canProceed()}
+                    >
+                        {t.next}
                     </button>
                 </div>
+                {renderBottomNav()}
             </div>
-        </div>
-    );
+        );
+    };
+
+    const Form3Screen = () => {
+        const [termsAgreed, setTermsAgreed] = useState(false);
+    
+        const handleSubmit = () => {
+            if (isLoggedIn) {
+              // Create a pending screening
+              const newScreening = {
+                id: `IJN${Date.now()}`,
+                participants: [...participants],
+                location: "Baratha Hotel", 
+                date: "15 May 2023",
+                time: "04:30 AM",
+                status: "pending",
+                total: 50000 * participants.length + 5000
+              };
+              
+              setScreeningData([...screeningData, newScreening]);
+              setSelectedScreeningId(newScreening.id);
+              console.log(participants);
+              
+              setCurrentScreen("form5");
+            } else {
+              setShowLoginPopup(true);
+            }
+        };   
+        return (
+            <div className="min-h-screen bg-gray-50 pb-20">
+                <div className="bg-white p-4 flex items-center shadow-sm">
+                    <button
+                        onClick={() => setCurrentScreen("form2")}
+                        className="mr-2"
+                    >
+                        <ArrowLeft size={24} className="text-gray-800" />
+                    </button>
+                    <h1 className="text-xl font-bold text-gray-800">{t.summary}</h1>
+                </div>
+    
+                <div className="p-6">
+                    <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
+                        <h2 className="font-bold text-lg mb-4 text-gray-800">
+                            {t.screeningDetails}
+                        </h2>
+    
+                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg mb-3">
+                            <span className="text-gray-700">{t.location}</span>
+                            <span className="font-medium">Baratha Hotel</span>
+                        </div>
+    
+                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg mb-3">
+                            <span className="text-gray-700">{t.date}</span>
+                            <span className="font-medium">15 May 2023</span>
+                        </div>
+    
+                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg mb-3">
+                            <span className="text-gray-700">{t.time}</span>
+                            <span className="font-medium">04:30 AM - 10:00 AM</span>
+                        </div>
+    
+                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg mb-3">
+                            <span className="text-gray-700">{t.participants}</span>
+                            <span className="font-medium">
+                                {participants.length}
+                            </span>
+                        </div>
+    
+                        <h2 className="font-bold text-lg my-4 text-gray-800">
+                            {t.payment}
+                        </h2>
+    
+                        <div className="space-y-3 mb-4">
+                            <div
+                                className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer"
+                                onClick={() => setSelectedPaymentMethod("bank")}
+                            >
+                                <div className="w-6 h-6 rounded-full border-2 border-blue-500 flex items-center justify-center mr-3">
+                                    {selectedPaymentMethod === "bank" && (
+                                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                                    )}
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="font-medium">
+                                        {t.bankTransfer}
+                                    </h3>
+                                    <p className="text-xs text-gray-500">
+                                        {t.manualVerification}
+                                    </p>
+                                </div>
+                            </div>
+    
+                            <div
+                                className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer"
+                                onClick={() => setSelectedPaymentMethod("card")}
+                            >
+                                <div className="w-6 h-6 rounded-full border-2 border-blue-500 flex items-center justify-center mr-3">
+                                    {selectedPaymentMethod === "card" && (
+                                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                                    )}
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="font-medium">
+                                        {t.creditDebitCard}
+                                    </h3>
+                                    <p className="text-xs text-gray-500">
+                                        {t.instantVerification}
+                                    </p>
+                                </div>
+                            </div>
+    
+                            <div
+                                className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer"
+                                onClick={() => setSelectedPaymentMethod("ewallet")}
+                            >
+                                <div className="w-6 h-6 rounded-full border-2 border-blue-500 flex items-center justify-center mr-3">
+                                    {selectedPaymentMethod === "ewallet" && (
+                                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                                    )}
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="font-medium">{t.eWallet}</h3>
+                                    <p className="text-xs text-gray-500">
+                                        {t.instantVerification}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+    
+                        <div className="border-t border-gray-200 pt-4 mb-4">
+                            <div className="flex justify-between mb-2">
+                                <span className="text-gray-700">
+                                    {t.screeningFee}
+                                </span>
+                                <span>Rp 50,000 x {participants.length}</span>
+                            </div>
+                            <div className="flex justify-between mb-2">
+                                <span className="text-gray-700">
+                                    {t.serviceFee}
+                                </span>
+                                <span>Rp 5,000</span>
+                            </div>
+                            <div className="flex justify-between font-bold text-lg mt-4">
+                                <span>{t.total}</span>
+                                <span>Rp {50000 * participants.length + 5000}</span>
+                            </div>
+                        </div>
+                        
+                        {/* Terms and Conditions Agreement Checkbox */}
+                        <div className="mb-4 mt-6">
+                            <div 
+                                className="flex items-start cursor-pointer"
+                                onClick={() => setTermsAgreed(!termsAgreed)}
+                            >
+                                <div className="flex items-center h-5">
+                                    <input
+                                        type="checkbox"
+                                        checked={termsAgreed}
+                                        onChange={() => setTermsAgreed(!termsAgreed)}
+                                        className="w-4 h-4 border border-gray-300 rounded accent-blue-500"
+                                    />
+                                </div>
+                                <div className="ml-3 text-sm">
+                                    <label className="text-gray-700">
+                                        {language === "en" ? "I agree to the " : 
+                                         language === "id" ? "Saya menyetujui " : 
+                                         "我同意 "}
+                                        <button 
+                                            className="text-blue-500 hover:underline"
+                                        >
+                                            {t.terms}
+                                        </button>
+                                        {language === "en" ? " and " : 
+                                         language === "id" ? " dan " : 
+                                         " 和 "}
+                                        <button 
+                                            className="text-blue-500 hover:underline"
+                                        >
+                                            {t.privacy}
+                                        </button>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+    
+                        <button
+                            onClick={() => {
+                                if (isLoggedIn && termsAgreed) {
+                                    handleSubmit();
+                                } else if (!termsAgreed) {
+                                    // Show an alert or toast notification if terms are not agreed
+                                    alert(language === "en" ? "Please agree to the terms and conditions" : 
+                                          language === "id" ? "Harap setujui syarat dan ketentuan" : 
+                                          "请同意条款和条件");
+                                } else {
+                                    setShowLoginPopup(true);
+                                }
+                            }}
+                            className={`w-full ${termsAgreed ? "bg-blue-500 text-white" : "bg-gray-300 text-gray-500"} py-3 rounded-xl font-medium`}
+                        >
+                            {t.submit}
+                        </button>
+                    </div>
+                </div>
+                {renderBottomNav()}
+            </div>
+        );
+    };
 
     const Form4Screen = () => (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
             <div className="bg-white p-4 flex items-center shadow-sm">
                 <h1 className="text-xl font-bold text-gray-800 flex-1 text-center">
                     {t.confirmationTitle}
@@ -2806,11 +3130,12 @@ const App = () => {
                     {t.backToHome}
                 </button>
             </div>
+            {renderBottomNav()}
         </div>
     );
 
     const Form5Screen = () => (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
             <div className="bg-white p-4 flex items-center shadow-sm">
                 <button
                     onClick={() => setCurrentScreen("form4")}
@@ -2895,198 +3220,247 @@ const App = () => {
                     </button>
                 </div>
             </div>
+            {renderBottomNav()}
         </div>
     );
 
-    const Form6Screen = () => (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
-            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-                <div className="w-24 h-24 rounded-full bg-green-100 flex items-center justify-center mb-6">
-                    <CheckCircle size={48} className="text-green-500" />
-                </div>
+    const Form6Screen = () => {
+        useEffect(() => {
+            // Create a new screening record when this screen loads
+            if (!selectedScreeningId) {
+              const newScreening = {
+                id: `IJN${Date.now()}`,
+                participants: [...participants],
+                location: "Baratha Hotel",
+                date: "15 May 2023",
+                time: "04:30 AM",
+                status: "complete",
+                total: 50000 * participants.length + 5000
+              };
+              
+              setScreeningData([...screeningData, newScreening]);
+              setSelectedScreeningId(newScreening.id);
+            }
+          }, []);
+          return (
+              <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
+                  <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+                      <div className="w-24 h-24 rounded-full bg-green-100 flex items-center justify-center mb-6">
+                          <CheckCircle size={48} className="text-green-500" />
+                      </div>
+      
+                      <h2 className="font-bold text-2xl text-gray-800 mb-2">
+                          {t.paymentSuccessful}
+                      </h2>
+                      <p className="text-gray-600 mb-8">{t.healthConfirmed}</p>
+      
+                      <div className="bg-white rounded-xl shadow-sm p-4 mb-6 w-full">
+                          <div className="flex justify-between items-center mb-2">
+                              <span className="text-gray-700">{t.location}</span>
+                              <span className="font-medium">Baratha Hotel</span>
+                          </div>
+      
+                          <div className="flex justify-between items-center mb-2">
+                              <span className="text-gray-700">{t.date}</span>
+                              <span className="font-medium">15 May 2023</span>
+                          </div>
+      
+                          <div className="flex justify-between items-center mb-2">
+                              <span className="text-gray-700">{t.time}</span>
+                              <span className="font-medium">04:30 AM</span>
+                          </div>
+      
+                          <div className="flex justify-between items-center mb-2">
+                              <span className="text-gray-700">{t.participants}</span>
+                              <span className="font-medium">
+                                  {participants.length}
+                              </span>
+                          </div>
+      
+                          <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                              <div className="flex items-start">
+                                  <AlertCircle
+                                      size={18}
+                                      className="text-green-600 mr-2 mt-0.5 flex-shrink-0"
+                                  />
+                                  <p className="text-sm text-green-800">
+                                      {t.arriveEarly}
+                                  </p>
+                              </div>
+                          </div>
+                      </div>
+      
+                      <button
+                          onClick={() => setCurrentScreen("viewTicket")}
+                          className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium mb-3"
+                          >
+                      {t.viewETicket}
+                      </button>
+      
+                      <button
+                          onClick={() => setCurrentScreen("form1")}
+                          className="text-blue-500 font-medium"
+                          >
+                          {t.backToHome}
+                      </button>
+                  </div>
+                  {renderBottomNav()}
+              </div>
+          );
+    }
 
-                <h2 className="font-bold text-2xl text-gray-800 mb-2">
-                    {t.paymentSuccessful}
-                </h2>
-                <p className="text-gray-600 mb-8">{t.healthConfirmed}</p>
-
-                <div className="bg-white rounded-xl shadow-sm p-4 mb-6 w-full">
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-gray-700">{t.location}</span>
-                        <span className="font-medium">Baratha Hotel</span>
-                    </div>
-
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-gray-700">{t.date}</span>
-                        <span className="font-medium">15 May 2023</span>
-                    </div>
-
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-gray-700">{t.time}</span>
-                        <span className="font-medium">04:30 AM</span>
-                    </div>
-
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-gray-700">{t.participants}</span>
-                        <span className="font-medium">
-                            {participants.length}
-                        </span>
-                    </div>
-
-                    <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
-                        <div className="flex items-start">
-                            <AlertCircle
-                                size={18}
-                                className="text-green-600 mr-2 mt-0.5 flex-shrink-0"
-                            />
-                            <p className="text-sm text-green-800">
-                                {t.arriveEarly}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <button
-                    onClick={() => setCurrentScreen("home")}
-                    className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium mb-3"
-                >
-                    {t.backToHome}
+    const DetailScreen = () => {
+        const screening = screeningData.find(item => item.id === selectedScreeningId);
+        
+        if (!screening) {
+          return (
+            <div className="min-h-screen bg-gray-50 flex flex-col">
+              <div className="bg-white p-4 flex items-center shadow-sm">
+                <button onClick={() => setCurrentScreen("screening")} className="mr-2">
+                  <ArrowLeft size={24} className="text-gray-800" />
                 </button>
-
-                <button
-                    onClick={() => setCurrentScreen("viewTicket")}
-                    className="text-blue-500 font-medium"
-                >
-                    {t.viewETicket}
-                </button>
-            </div>
-        </div>
-    );
-
-    const DetailScreen = () => (
-        <div className="min-h-screen bg-gray-50">
-            <div className="bg-white p-4 flex items-center shadow-sm">
-                <button
+                <h1 className="text-xl font-bold text-gray-800">{t.screeningDetails}</h1>
+              </div>
+              
+              <div className="flex-1 flex items-center justify-center p-6">
+                <div className="text-center">
+                  <AlertCircle size={48} className="text-gray-400 mx-auto mb-4" />
+                  <h3 className="font-medium text-gray-800 mb-2">
+                    {language === "en" ? "Screening not found" : 
+                     language === "id" ? "Pemeriksaan tidak ditemukan" : 
+                     "未找到筛查记录"}
+                  </h3>
+                  <button 
                     onClick={() => setCurrentScreen("screening")}
-                    className="mr-2"
-                >
-                    <ArrowLeft size={24} className="text-gray-800" />
-                </button>
-                <h1 className="text-xl font-bold text-gray-800">
-                    {t.screeningDetails}
-                </h1>
-            </div>
-
-            <div className="p-6">
-                <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-                    <div className="flex justify-between items-center mb-4">
-                        <div className="flex items-center">
-                            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mr-3">
-                                <MapPin size={20} />
-                            </div>
-                            <div>
-                                <h3 className="font-medium text-gray-800">
-                                    Baratha Hotel
-                                </h3>
-                                <p className="text-xs text-gray-500">
-                                    15 May 2023
-                                </p>
-                            </div>
-                        </div>
-                        <div className="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs font-medium">
-                            {t.pending}
-                        </div>
-                    </div>
-
-                    <div className="space-y-3 mb-4">
-                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                            <span className="text-gray-700">
-                                {t.referenceId}
-                            </span>
-                            <span className="font-medium">IJN230515001</span>
-                        </div>
-
-                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                            <span className="text-gray-700">{t.date}</span>
-                            <span className="font-medium">15 May 2023</span>
-                        </div>
-
-                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                            <span className="text-gray-700">{t.time}</span>
-                            <span className="font-medium">
-                                04:30 AM - 10:00 AM
-                            </span>
-                        </div>
-
-                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                            <span className="text-gray-700">{t.status}</span>
-                            <span className="font-medium text-yellow-600">
-                                {t.pending}
-                            </span>
-                        </div>
-                    </div>
-
-                    <h3 className="font-medium text-gray-800 mb-3">
-                        {t.participants} (2)
-                    </h3>
-
-                    <div className="bg-gray-50 rounded-lg p-3 mb-3">
-                        <div className="flex justify-between mb-1">
-                            <span className="text-gray-700">
-                                Mr. Arif Hassan
-                            </span>
-                            <span className="text-sm text-gray-500">
-                                35 years
-                            </span>
-                        </div>
-                        <p className="text-xs text-gray-500">
-                            No medical history
-                        </p>
-                    </div>
-
-                    <div className="bg-gray-50 rounded-lg p-3 mb-4">
-                        <div className="flex justify-between mb-1">
-                            <span className="text-gray-700">
-                                Mrs. Sarah Lee
-                            </span>
-                            <span className="text-sm text-gray-500">
-                                32 years
-                            </span>
-                        </div>
-                        <p className="text-xs text-gray-500">
-                            Allergic to dust
-                        </p>
-                    </div>
-
-                    <div className="border-t border-gray-200 pt-4 mb-4">
-                        <div className="flex justify-between mb-2">
-                            <span className="text-gray-700">
-                                {t.screeningFee}
-                            </span>
-                            <span>Rp 50,000 x 2</span>
-                        </div>
-                        <div className="flex justify-between mb-2">
-                            <span className="text-gray-700">
-                                {t.serviceFee}
-                            </span>
-                            <span>Rp 5,000</span>
-                        </div>
-                        <div className="flex justify-between font-bold text-lg mt-4">
-                            <span>{t.total}</span>
-                            <span>Rp 105,000</span>
-                        </div>
-                    </div>
-
-                    <button
-                        onClick={() => setCurrentScreen("form4")}
-                        className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium"
-                    >
-                        {t.continueToPayment}
-                    </button>
+                    className="text-blue-500 text-sm font-medium"
+                  >
+                    {language === "en" ? "Go back" : 
+                     language === "id" ? "Kembali" : 
+                     "返回"}
+                  </button>
                 </div>
+              </div>
             </div>
-        </div>
-    );
+          );
+        }
+        
+        return (
+          <div className="min-h-screen bg-gray-50">
+            <div className="bg-white p-4 flex items-center shadow-sm">
+              <button onClick={() => setCurrentScreen("screening")} className="mr-2">
+                <ArrowLeft size={24} className="text-gray-800" />
+              </button>
+              <h1 className="text-xl font-bold text-gray-800">{t.screeningDetails}</h1>
+            </div>
+      
+            <div className="p-6">
+              <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
+                <div className="flex justify-between items-center mb-4">
+                  <div className="flex items-center">
+                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mr-3">
+                      <MapPin size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-800">{screening.location}</h3>
+                      <p className="text-xs text-gray-500">{screening.date}</p>
+                    </div>
+                  </div>
+                  <div className={`px-3 py-1 rounded-full ${screening.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-green-100 text-green-700"} text-xs font-medium`}>
+                    {screening.status === "pending" ? t.pending : t.complete}
+                  </div>
+                </div>
+      
+                <div className="space-y-3 mb-4">
+                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <span className="text-gray-700">{t.referenceId}</span>
+                    <span className="font-medium">{screening.id}</span>
+                  </div>
+      
+                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <span className="text-gray-700">{t.date}</span>
+                    <span className="font-medium">{screening.date}</span>
+                  </div>
+      
+                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <span className="text-gray-700">{t.time}</span>
+                    <span className="font-medium">{screening.time}</span>
+                  </div>
+      
+                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <span className="text-gray-700">{t.status}</span>
+                    <span className={`font-medium ${screening.status === "pending" ? "text-yellow-600" : "text-green-600"}`}>
+                      {screening.status === "pending" ? t.pending : t.complete}
+                    </span>
+                  </div>
+                </div>
+      
+                <h3 className="font-medium text-gray-800 mb-3">
+                  {t.participants} ({screening.participants.length})
+                </h3>
+      
+                {screening.participants.map((participant, idx) => (
+                  <div key={idx} className="bg-gray-50 rounded-lg p-3 mb-3">
+                    <div className="flex justify-between mb-1">
+                      <span className="text-gray-700">
+                        {participant.title || 'Mr'}.{' '}
+                        {participant.name || 'Unnamed Participant'}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        {participant.age || 'N/A'} years
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      {participant.hasMedicalHistory ? 
+                        (participant.allergies ? `Allergies: ${participant.allergies}` : "Has medical history") : 
+                        "No medical history"}
+                    </p>
+                  </div>
+                ))}
+      
+                <div className="border-t border-gray-200 pt-4 mb-4">
+                  <div className="flex justify-between mb-2">
+                    <span className="text-gray-700">{t.screeningFee}</span>
+                    <span>Rp 50,000 x {screening.participants.length}</span>
+                  </div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-gray-700">{t.serviceFee}</span>
+                    <span>Rp 5,000</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-lg mt-4">
+                    <span>{t.total}</span>
+                    <span>Rp {50000 * screening.participants.length + 5000}</span>
+                  </div>
+                </div>
+      
+                {screening.status === "pending" && (
+                  <button
+                    onClick={() => {
+                      setSelectedScreeningId(screening.id);
+                      setCurrentScreen("form4");
+                    }}
+                    className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium"
+                  >
+                    {t.continueToPayment}
+                  </button>
+                )}
+                
+                {screening.status === "complete" && (
+                  <button
+                    onClick={() => {
+                      setSelectedScreeningId(screening.id);
+                      setCurrentScreen("viewTicket");
+                    }}
+                    className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium"
+                  >
+                    {t.viewETicket}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      };
+      
 
     const PartnerScreen = () => (
         <div className="min-h-screen bg-gray-50">
@@ -3359,179 +3733,185 @@ const App = () => {
         );
     };
 
-    const ViewTicketScreen = () => (
-        <div className="min-h-screen bg-blue-600">
-            <div className="bg-white p-4 flex items-center shadow-sm">
-                <button
-                    onClick={() => setCurrentScreen("form6")}
-                    className="mr-2"
-                >
-                    <ArrowLeft size={24} className="text-gray-800" />
-                </button>
-                <h1 className="text-xl font-bold text-gray-800">{t.eTicket}</h1>
-                <button
-                    onClick={() => window.print()}
-                    className="ml-auto text-blue-500"
-                >
-                    <Download size={20} />
-                </button>
-            </div>
-
-            <div className="p-6">
-                <div className="bg-white rounded-xl shadow-xl overflow-hidden">
-                    <div className="bg-blue-500 p-5 text-white">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h2 className="font-bold text-xl">
-                                    {t.healthPass}
-                                </h2>
-                                <p className="text-sm opacity-90">
-                                    {t.healthConfirmation}
-                                </p>
-                            </div>
-                            <Activity size={28} />
-                        </div>
+    const ViewTicketScreen = () => {
+        const screening = screeningData.find(item => item.id === selectedScreeningId);
+  
+        if (screening) {
+            return (
+                <div className="min-h-screen bg-blue-600">
+                    <div className="bg-white p-4 flex items-center shadow-sm">
+                        <button
+                            onClick={() => setCurrentScreen("form6")}
+                            className="mr-2"
+                        >
+                            <ArrowLeft size={24} className="text-gray-800" />
+                        </button>
+                        <h1 className="text-xl font-bold text-gray-800">{t.eTicket}</h1>
+                        <button
+                            onClick={() => window.print()}
+                            className="ml-auto text-blue-500"
+                        >
+                            <Download size={20} />
+                        </button>
                     </div>
-
-                    <div className="p-5">
-                        <div className="flex justify-center mb-6">
-                            <div className="p-3 bg-white rounded-lg shadow-md border border-gray-200">
-                                <img
-                                    src="https://docs.lightburnsoftware.com/legacy/img/QRCode/ExampleCode.png"
-                                    alt="QR Code"
-                                    className="w-48 h-48"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="text-center mb-6">
-                            <p className="text-sm text-gray-500">
-                                {t.referenceId}
-                            </p>
-                            <p className="text-2xl font-bold text-gray-800">
-                                IJN230515001
-                            </p>
-                        </div>
-
-                        <div className="space-y-4 mb-6">
-                            <div className="flex items-center">
-                                <MapPin
-                                    size={20}
-                                    className="text-blue-500 mr-3"
-                                />
-                                <div>
-                                    <p className="text-sm text-gray-500">
-                                        {t.location}
-                                    </p>
-                                    <p className="font-medium">Baratha Hotel</p>
+        
+                    <div className="p-6">
+                        <div className="bg-white rounded-xl shadow-xl overflow-hidden">
+                            <div className="bg-blue-500 p-5 text-white">
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <h2 className="font-bold text-xl">
+                                            {t.healthPass}
+                                        </h2>
+                                        <p className="text-sm opacity-90">
+                                            {t.healthConfirmation}
+                                        </p>
+                                    </div>
+                                    <Activity size={28} />
                                 </div>
                             </div>
-
-                            <div className="flex items-center">
-                                <Calendar
-                                    size={20}
-                                    className="text-blue-500 mr-3"
-                                />
-                                <div>
-                                    <p className="text-sm text-gray-500">
-                                        {t.date}
-                                    </p>
-                                    <p className="font-medium">15 May 2023</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center">
-                                <Clock
-                                    size={20}
-                                    className="text-blue-500 mr-3"
-                                />
-                                <div>
-                                    <p className="text-sm text-gray-500">
-                                        {t.time}
-                                    </p>
-                                    <p className="font-medium">04:30 AM</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="border-t border-dashed border-gray-200 pt-4">
-                            <h3 className="font-medium text-gray-800 mb-3">
-                                {t.participants}
-                            </h3>
-                            <div className="space-y-2">
-                                <div className="flex items-center">
-                                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-2">
-                                        <User
-                                            size={16}
-                                            className="text-gray-600"
+        
+                            <div className="p-5">
+                                <div className="flex justify-center mb-6">
+                                    <div className="p-3 bg-white rounded-lg shadow-md border border-gray-200">
+                                        <img
+                                            src="https://docs.lightburnsoftware.com/legacy/img/QRCode/ExampleCode.png"
+                                            alt="QR Code"
+                                            className="w-48 h-48"
                                         />
                                     </div>
-                                    <div>
-                                        <p className="font-medium">
-                                            Mr. Arif Hassan
-                                        </p>
-                                        <p className="text-xs text-gray-500">
-                                            35 years
-                                        </p>
-                                    </div>
                                 </div>
-
-                                <div className="flex items-center">
-                                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-2">
-                                        <User
-                                            size={16}
-                                            className="text-gray-600"
+        
+                                <div className="text-center mb-6">
+                                    <p className="text-sm text-gray-500">
+                                        {t.referenceId}
+                                    </p>
+                                    <p className="text-2xl font-bold text-gray-800">
+                                        IJN230515001
+                                    </p>
+                                </div>
+        
+                                <div className="space-y-4 mb-6">
+                                    <div className="flex items-center">
+                                        <MapPin
+                                            size={20}
+                                            className="text-blue-500 mr-3"
                                         />
+                                        <div>
+                                            <p className="text-sm text-gray-500">
+                                                {t.location}
+                                            </p>
+                                            <p className="font-medium">Baratha Hotel</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="font-medium">
-                                            Mrs. Sarah Lee
-                                        </p>
-                                        <p className="text-xs text-gray-500">
-                                            32 years
+        
+                                    <div className="flex items-center">
+                                        <Calendar
+                                            size={20}
+                                            className="text-blue-500 mr-3"
+                                        />
+                                        <div>
+                                            <p className="text-sm text-gray-500">
+                                                {t.date}
+                                            </p>
+                                            <p className="font-medium">15 May 2023</p>
+                                        </div>
+                                    </div>
+        
+                                    <div className="flex items-center">
+                                        <Clock
+                                            size={20}
+                                            className="text-blue-500 mr-3"
+                                        />
+                                        <div>
+                                            <p className="text-sm text-gray-500">
+                                                {t.time}
+                                            </p>
+                                            <p className="font-medium">04:30 AM</p>
+                                        </div>
+                                    </div>
+                                </div>
+        
+                                <div className="border-t border-dashed border-gray-200 pt-4">
+                                    <h3 className="font-medium text-gray-800 mb-3">
+                                        {t.participants}
+                                    </h3>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center">
+                                            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-2">
+                                                <User
+                                                    size={16}
+                                                    className="text-gray-600"
+                                                />
+                                            </div>
+                                            <div>
+                                                <p className="font-medium">
+                                                    Mr. Arif Hassan
+                                                </p>
+                                                <p className="text-xs text-gray-500">
+                                                    35 years
+                                                </p>
+                                            </div>
+                                        </div>
+        
+                                        <div className="flex items-center">
+                                            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-2">
+                                                <User
+                                                    size={16}
+                                                    className="text-gray-600"
+                                                />
+                                            </div>
+                                            <div>
+                                                <p className="font-medium">
+                                                    Mrs. Sarah Lee
+                                                </p>
+                                                <p className="text-xs text-gray-500">
+                                                    32 years
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+        
+                                <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-100">
+                                    <div className="flex">
+                                        <CheckCircle
+                                            size={20}
+                                            className="text-green-500 mr-2 flex-shrink-0"
+                                        />
+                                        <p className="text-sm text-green-800">
+                                            {t.showTicket}
                                         </p>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-100">
-                            <div className="flex">
-                                <CheckCircle
-                                    size={20}
-                                    className="text-green-500 mr-2 flex-shrink-0"
-                                />
-                                <p className="text-sm text-green-800">
-                                    {t.showTicket}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-gray-50 p-4 border-t border-gray-200">
-                        <div className="flex justify-between">
-                            <div>
-                                <p className="text-xs text-gray-500">
-                                    {t.issuedBy}
-                                </p>
-                                <p className="text-sm font-medium text-gray-800">
-                                    {t.issuingOrg}
-                                </p>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-xs text-gray-500">
-                                    {t.status}
-                                </p>
-                                <p className="text-sm font-medium text-green-600">
-                                    {t.confirmed}
-                                </p>
+        
+                            <div className="bg-gray-50 p-4 border-t border-gray-200">
+                                <div className="flex justify-between">
+                                    <div>
+                                        <p className="text-xs text-gray-500">
+                                            {t.issuedBy}
+                                        </p>
+                                        <p className="text-sm font-medium text-gray-800">
+                                            {t.issuingOrg}
+                                        </p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-xs text-gray-500">
+                                            {t.status}
+                                        </p>
+                                        <p className="text-sm font-medium text-green-600">
+                                            {t.confirmed}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    );
+            );
+        }      
+    }
 
     const VideoPopup = () => (
         <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
