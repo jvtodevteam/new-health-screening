@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Head } from '@inertiajs/react';
 import {
     MapPin,
     Calendar,
@@ -3562,6 +3563,8 @@ const App = () => {
 
     return (
         <div className="font-sans">
+            <Head title="Online Submission" />
+
             {currentScreen === "onboarding" && <OnboardingScreen />}
             {currentScreen === "login" && <LoginScreen />}
             {currentScreen === "home" && <HomeScreen />}

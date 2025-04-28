@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Head } from '@inertiajs/react';
 import { 
   User, Heart, Activity, Home, Calendar, Clock, Plus, 
   ChevronRight, ArrowLeft, LogOut, CheckCircle, AlertCircle, 
@@ -1362,6 +1363,7 @@ const PatientDetailScreen = () => (
   // Render the appropriate screen based on the currentScreen state
   return (
     <div className="font-sans">
+    <Head title="Medical Staff Portal" />
       {currentScreen === 'login' && <LoginScreen />}
       {currentScreen === 'home' && <HomeScreen />}
       {currentScreen === 'patientList' && <PatientListScreen />}
