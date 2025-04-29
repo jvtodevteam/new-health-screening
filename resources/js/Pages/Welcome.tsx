@@ -47,6 +47,9 @@ const App = () => {
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("bank");
     const [selectedDate, setSelectedDate] = useState(15);
     const [selectedTime, setSelectedTime] = useState("morning");
+    const [selectedLocation, setSelectedLocation] = useState(null);
+    const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
+    const [screeningTotal, setScreeningTotal] = useState(0)
     const [participants, setParticipants] = useState([
         {
             title: "Mr",
@@ -1954,7 +1957,39 @@ const App = () => {
     };
     const ProfileScreen = () => {
         const [showPartnerForm, setShowPartnerForm] = useState(false);
-
+        
+        // Default user data for when not logged in
+        const defaultUserData = {
+            name: t.appName,
+            email: "",
+            profileImage: "https://cdn-icons-png.flaticon.com/128/17561/17561717.png"
+        };
+        
+        // Sample user data for logged in user
+        // In a real app, this would come from your authentication system
+        const loggedInUserData = {
+            name: "Arif Hassan",
+            email: "arif.hassan@example.com",
+            profileImage: "https://cdn-icons-png.flaticon.com/128/17561/17561717.png"
+        };
+        
+        // Get the appropriate user data based on login status
+        const userData = isLoggedIn ? loggedInUserData : defaultUserData;
+        
+        // Handle logout
+        const handleLogout = () => {
+            // Clear user data
+            setIsLoggedIn(false);
+            
+            // Reset any user-specific data if needed
+            // For example, you might want to clear screening data
+            setScreeningData([]);
+            setSelectedScreeningId(null);
+            
+            // Navigate to login screen
+            setCurrentScreen("login");
+        };
+    
         return (
             <div className="min-h-screen bg-gray-50 pb-20">
                 <div className="bg-white p-4 flex items-center shadow-sm">
@@ -1962,23 +1997,29 @@ const App = () => {
                         {t.profile}
                     </h1>
                 </div>
-
+    
                 <div className="p-6 flex flex-col items-center">
-                    <div className="w-24 h-24 rounded-full bg-blue-100 overflow-hidden mb-3">
+                    <div className="w-24 h-24 rounded-full bg-blue-100 overflow-hidden mb-3 relative">
                         <img
-                            src="https://cdn-icons-png.flaticon.com/128/17561/17561717.png"
+                            src={userData.profileImage}
                             alt="Profile"
                             className="w-full h-full object-cover"
                         />
+                        {isLoggedIn && (
+                            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
+                                <CheckCircle size={12} className="text-white" />
+                            </div>
+                        )}
                     </div>
                     <h2 className="font-bold text-xl text-gray-800">
-                        Arif Hassan
+                        {userData.name}
                     </h2>
                     <p className="text-gray-500 mb-6">
-                        arif.hassan@example.com
+                        {userData.email}
                     </p>
-
+    
                     <div className="w-full space-y-4">
+                        
                         <button
                             className="w-full bg-blue-500 hover:bg-blue-600 text-white py-4 px-6 rounded-xl font-medium flex items-center justify-between mb-6 shadow-md"
                             onClick={() => setShowPartnerForm(true)}
@@ -2001,13 +2042,14 @@ const App = () => {
                             </div>
                             <ChevronRight size={20} className="text-white" />
                         </button>
+                        
                         <button className="w-full flex justify-between items-center p-4 bg-white rounded-xl shadow-sm mb-4">
                             <div className="flex items-center">
                                 <Globe
                                     size={20}
                                     className="text-gray-500 mr-3"
                                 />
-                                <span>{language}</span>
+                                <span>{t.language}</span>
                             </div>
                             <div className="flex items-center">
                                 <span className="text-gray-500 mr-2">
@@ -2023,6 +2065,7 @@ const App = () => {
                                 />
                             </div>
                         </button>
+                        
                         <button className="w-full flex justify-between items-center p-4 bg-white rounded-xl shadow-sm">
                             <div className="flex items-center">
                                 <FileText
@@ -2033,7 +2076,7 @@ const App = () => {
                             </div>
                             <ChevronRight size={20} className="text-gray-400" />
                         </button>
-
+    
                         <button className="w-full flex justify-between items-center p-4 bg-white rounded-xl shadow-sm">
                             <div className="flex items-center">
                                 <FileText
@@ -2044,30 +2087,32 @@ const App = () => {
                             </div>
                             <ChevronRight size={20} className="text-gray-400" />
                         </button>
-
-                        <button
-                            className="w-full flex justify-between items-center p-4 bg-white rounded-xl shadow-sm text-red-500"
-                            onClick={() => setCurrentScreen("login")}
-                        >
-                            <div className="flex items-center">
-                                <LogOut size={20} className="mr-3" />
-                                <span>{t.logout}</span>
-                            </div>
-                        </button>
+    
+                        {isLoggedIn && (
+                            <button
+                                className="w-full flex justify-between items-center p-4 bg-white rounded-xl shadow-sm text-red-500"
+                                onClick={handleLogout}
+                            >
+                                <div className="flex items-center">
+                                    <LogOut size={20} className="mr-3" />
+                                    <span>{t.logout}</span>
+                                </div>
+                                <ChevronRight size={20} className="text-red-300" />
+                            </button>
+                        )}
                     </div>
                 </div>
-
+    
                 {showPartnerForm && (
                     <PartnerApplicationForm
                         onClose={() => setShowPartnerForm(false)}
                     />
                 )}
-
+    
                 {renderBottomNav()}
             </div>
         );
     };
-
     const PartnerApplicationForm = ({ onClose }) => {
         const [formData, setFormData] = useState({
             businessName: "",
@@ -2456,384 +2501,400 @@ const App = () => {
         );
     };
     const Form1Screen = () => {
-        const [selectedLocation, setSelectedLocation] = useState(
-            selectedLocationFromMap,
-        );
-        const [selectedDate, setSelectedDate] = useState(15);
-        const [selectedTime, setSelectedTime] = useState(null);
-        const [searchQuery, setSearchQuery] = useState("");
-        const [showDetail, setShowDetail] = useState(
-            selectedLocationFromMap !== null,
-        );
-        const [selectedCity, setSelectedCity] = useState(null);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [showDetail, setShowDetail] = useState(
+        selectedLocationFromMap !== null,
+    );
+    const [selectedCity, setSelectedCity] = useState(null);
 
-        const timeSlots = [
-            {
-                id: 1,
-                start: "04:30",
-                end: "05:30",
-                label: "Morning",
-                available: true,
-            },
-            {
-                id: 2,
-                start: "05:30",
-                end: "06:30",
-                label: "Sunrise",
-                available: true,
-            },
-            {
-                id: 3,
-                start: "15:00",
-                end: "16:00",
-                label: "Afternoon",
-                available: true,
-            },
-            {
-                id: 4,
-                start: "20:00",
-                end: "21:00",
-                label: "Night (Blue Fire)",
-                available: true,
-            },
-        ];
+    const timeSlots = [
+        {
+            id: 1,
+            start: "04:30",
+            end: "05:30",
+            label: "Morning",
+            available: true,
+        },
+        {
+            id: 2,
+            start: "05:30",
+            end: "06:30",
+            label: "Sunrise",
+            available: true,
+        },
+        {
+            id: 3,
+            start: "15:00",
+            end: "16:00",
+            label: "Afternoon",
+            available: true,
+        },
+        {
+            id: 4,
+            start: "20:00",
+            end: "21:00",
+            label: "Night (Blue Fire)",
+            available: true,
+        },
+    ];
 
-        // Updated locations with city field added to each location
-        const locations = [
-            {
-                id: 1,
-                name: "Baratha Hotel",
-                coords: [-7.91303, 113.807867],
-                description: "Most popular entry point",
-                city: "Bondowoso",
-            },
-            {
-                id: 2,
-                name: "Riverside Homestay",
-                coords: [-7.932059, 113.824877],
-                description: "Eastern entry point",
-                city: "Bondowoso",
-            },
-            {
-                id: 3,
-                name: "Grand Padis Hotel",
-                coords: [-7.915963, 113.819655],
-                description: "Northern entry point",
-                city: "Bondowoso",
-            },
-            {
-                id: 4,
-                name: "Luminor Hotel",
-                coords: [-8.210083, 114.369759],
-                description: "City center hotel",
-                city: "Banyuwangi",
-            },
-            {
-                id: 5,
-                name: "Santika Hotel",
-                coords: [-8.219246, 114.364867],
-                description: "Near shopping district",
-                city: "Banyuwangi",
-            },
-        ];
-        function SetMapCenter({ city }) {
-            const map = useMap();
-
-            useEffect(() => {
-                if (city) {
-                    const center = getCityCenter(city);
-                    map.setView(center, 14);
-                }
-            }, [city, map]);
-
-            return null;
-        }
-
-        // Get center coordinates for map based on selected city
-        const getCityCenter = (city) => {
-            if (city === "Bondowoso") return [-7.91303, 113.820867];
-            if (city === "Banyuwangi") return [-8.215083, 114.367759];
-            return [-7.91303, 113.820867]; // Default to Bondowoso
-        };
+    // Updated locations with city field added to each location
+    const locations = [
+        {
+            id: 1,
+            name: "Baratha Hotel",
+            coords: [-7.91303, 113.807867],
+            description: "Most popular entry point",
+            city: "Bondowoso",
+        },
+        {
+            id: 2,
+            name: "Riverside Homestay",
+            coords: [-7.932059, 113.824877],
+            description: "Eastern entry point",
+            city: "Bondowoso",
+        },
+        {
+            id: 3,
+            name: "Grand Padis Hotel",
+            coords: [-7.915963, 113.819655],
+            description: "Northern entry point",
+            city: "Bondowoso",
+        },
+        {
+            id: 4,
+            name: "Luminor Hotel",
+            coords: [-8.210083, 114.369759],
+            description: "City center hotel",
+            city: "Banyuwangi",
+        },
+        {
+            id: 5,
+            name: "Santika Hotel",
+            coords: [-8.219246, 114.364867],
+            description: "Near shopping district",
+            city: "Banyuwangi",
+        },
+    ];
+    
+    // Local state for map interaction
+    const [localSelectedLocation, setLocalSelectedLocation] = useState(
+        selectedLocationFromMap || selectedLocation
+    );
+    const [localSelectedTimeSlot, setLocalSelectedTimeSlot] = useState(null);
+    
+    function SetMapCenter({ city }) {
+        const map = useMap();
 
         useEffect(() => {
-            if (selectedLocationFromMap) {
-                // Find the location and set its city
-                const fullLocationDetails = locations.find(
-                    (loc) => loc.id === selectedLocationFromMap.id,
-                );
-                if (fullLocationDetails) {
-                    setSelectedCity(fullLocationDetails.city);
-                    setSelectedLocation(fullLocationDetails);
-                    setShowDetail(true);
-                }
+            if (city) {
+                const center = getCityCenter(city);
+                map.setView(center, 14);
             }
-        }, []);
+        }, [city, map]);
 
-        // Get active locations for the selected city
-        const activeLocations = selectedCity
-            ? locations.filter((location) => location.city === selectedCity)
-            : [];
+        return null;
+    }
 
-        // Filter locations based on search query
-        const filteredLocations = activeLocations.filter((location) =>
-            location.name.toLowerCase().includes(searchQuery.toLowerCase()),
-        );
+    // Get center coordinates for map based on selected city
+    const getCityCenter = (city) => {
+        if (city === "Bondowoso") return [-7.91303, 113.820867];
+        if (city === "Banyuwangi") return [-8.215083, 114.367759];
+        return [-7.91303, 113.820867]; // Default to Bondowoso
+    };
 
-        const handleMarkerClick = (location) => {
-            setSelectedLocation(location);
+    useEffect(() => {
+        if (selectedLocationFromMap) {
+            // Find the location and set its city
+            const fullLocationDetails = locations.find(
+                (loc) => loc.id === selectedLocationFromMap.id,
+            );
+            if (fullLocationDetails) {
+                setSelectedCity(fullLocationDetails.city);
+                setLocalSelectedLocation(fullLocationDetails);
+                setShowDetail(true);
+            }
+        } else if (selectedLocation) {
+            setLocalSelectedLocation(selectedLocation);
             setShowDetail(true);
-            setSearchQuery(""); // Reset search after selecting location
-        };
-
-        const handleProceed = () => {
-            if (selectedLocation && selectedDate && selectedTime) {
-                setCurrentScreen("form2");
+            if (selectedLocation.city) {
+                setSelectedCity(selectedLocation.city);
             }
-        };
-
-        // Component for zooming to location
-        function FlyToMarker({ coords }) {
-            const map = useMap();
-            if (coords) {
-                // Zoom to location with offset so marker is visible above detail panel
-                map.flyTo([coords[0] - 0.008, coords[1]], 14);
-            }
-            return null;
         }
-        const getHeightTopRef = useRef(null);
-        const bottomNavRef = useRef(null);
-        const [heightTop, setHeightTop] = useState(0);
-        const [heightBottomNav, setHeightBottomNav] = useState(0);
-        const [mapHeight, setMapHeight] = useState("50vh");
-    
-        // Get heights and calculate map height
-        useEffect(() => {
-            const updateHeights = () => {
-                if (getHeightTopRef.current && bottomNavRef.current) {
-                    const topHeight = getHeightTopRef.current.offsetHeight;
-                    const navHeight = bottomNavRef.current.offsetHeight;
-                    setHeightTop(topHeight);
-                    setHeightBottomNav(navHeight);
-                    
-                    // Calculate remaining height (subtract a bit extra for any padding/margins)
-                    const windowHeight = window.innerHeight;
-                    const calculatedHeight = windowHeight - topHeight - navHeight - 20;
-                    setMapHeight(`${calculatedHeight}px`);
-                }
-            };
-    
-            updateHeights();
-            // Also update on window resize
-            window.addEventListener('resize', updateHeights);
-            return () => window.removeEventListener('resize', updateHeights);
-        }, [selectedCity]); // Recalculate when city changes as this affects layout
+    }, []);
 
-        return (
-            <div className="min-h-screen bg-gray-50 relative">
-                <div ref={getHeightTopRef}>
-                    <div className="bg-white p-4 flex items-center shadow-sm">
-                        <button
-                            onClick={() => setCurrentScreen("home")}
-                            className="mr-2"
-                        >
-                            <ArrowLeft size={24} className="text-gray-800" />
-                        </button>
-                        <h1 className="text-xl font-bold text-gray-800">
-                            {t.selectLocation}
-                        </h1>
-                    </div>
+    // Get active locations for the selected city
+    const activeLocations = selectedCity
+        ? locations.filter((location) => location.city === selectedCity)
+        : [];
 
-                    {/* City selection tabs */}
-                    <div className="bg-white px-4 py-3">
-                        <div>
-                            <div className="flex overflow-x-auto pb-2 mb-4 space-x-2">
-                                {[
-                                    14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
-                                ].map((day) => (
-                                    <div
-                                        key={day}
-                                        className={`flex-shrink-0 w-12 h-14 rounded-lg ${day === selectedDate ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800"} flex flex-col items-center justify-center cursor-pointer`}
-                                        onClick={() => setSelectedDate(day)}
-                                    >
-                                        <span className="text-xs opacity-80">
-                                            MAY
-                                        </span>
-                                        <span className="text-lg font-bold">
-                                            {day}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>  
-                        <div className="flex space-x-2 shadow-sm">
-                            <button
-                                className={`flex-1 py-2 px-4 rounded-full text-sm font-medium ${selectedCity === "Bondowoso" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800"}`}
-                                onClick={() => setSelectedCity("Bondowoso")}
-                            >
-                                {t.bondowoso}
-                            </button>
-                            <button
-                                className={`flex-1 py-2 px-4 rounded-full text-sm font-medium ${selectedCity === "Banyuwangi" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800"}`}
-                                onClick={() => setSelectedCity("Banyuwangi")}
-                            >
-                                {t.banyuwangi}
-                            </button>
-                        </div>
-                    </div>
+    // Filter locations based on search query
+    const filteredLocations = activeLocations.filter((location) =>
+        location.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+
+    const handleMarkerClick = (location) => {
+        setLocalSelectedLocation(location);
+        setShowDetail(true);
+        setSearchQuery(""); // Reset search after selecting location
+    };
+
+    const handleTimeSelection = (timeSlot) => {
+        setLocalSelectedTimeSlot(timeSlot);
+    };
+
+    const handleProceed = () => {
+        if (localSelectedLocation && selectedDate && localSelectedTimeSlot) {
+            // Update the global state with selected location and time slot
+            setSelectedLocation(localSelectedLocation);
+            setSelectedTimeSlot(localSelectedTimeSlot);
+            setCurrentScreen("form2");
+        }
+    };
+
+    // Component for zooming to location
+    function FlyToMarker({ coords }) {
+        const map = useMap();
+        if (coords) {
+            // Zoom to location with offset so marker is visible above detail panel
+            map.flyTo([coords[0] - 0.008, coords[1]], 14);
+        }
+        return null;
+    }
+    
+    const getHeightTopRef = useRef(null);
+    const bottomNavRef = useRef(null);
+    const [heightTop, setHeightTop] = useState(0);
+    const [heightBottomNav, setHeightBottomNav] = useState(0);
+    const [mapHeight, setMapHeight] = useState("50vh");
+
+    // Get heights and calculate map height
+    useEffect(() => {
+        const updateHeights = () => {
+            if (getHeightTopRef.current && bottomNavRef.current) {
+                const topHeight = getHeightTopRef.current.offsetHeight;
+                const navHeight = bottomNavRef.current.offsetHeight;
+                setHeightTop(topHeight);
+                setHeightBottomNav(navHeight);
+                
+                // Calculate remaining height (subtract a bit extra for any padding/margins)
+                const windowHeight = window.innerHeight;
+                const calculatedHeight = windowHeight - topHeight - navHeight - 20;
+                setMapHeight(`${calculatedHeight}px`);
+            }
+        };
+
+        updateHeights();
+        // Also update on window resize
+        window.addEventListener('resize', updateHeights);
+        return () => window.removeEventListener('resize', updateHeights);
+    }, [selectedCity]); // Recalculate when city changes as this affects layout
+
+    return (
+        <div className="min-h-screen bg-gray-50 relative">
+            <div ref={getHeightTopRef}>
+                <div className="bg-white p-4 flex items-center shadow-sm">
+                    <button
+                        onClick={() => setCurrentScreen("home")}
+                        className="mr-2"
+                    >
+                        <ArrowLeft size={24} className="text-gray-800" />
+                    </button>
+                    <h1 className="text-xl font-bold text-gray-800">
+                        {t.selectLocation}
+                    </h1>
                 </div>
 
-                {!selectedCity ? (
-                    // Instructions when no city is selected
-                    <div className="p-6 flex flex-col items-center justify-center h-64 text-center">
-                        <MapPin size={40} className="text-blue-400 mb-4" />
-                        <h3 className="text-lg font-medium text-gray-800 mb-2">
-                            {t.selectCity}
-                        </h3>
-                        <p className="text-gray-600">{t.selectCityPrompt}</p>
-                    </div>
-                ) : (
-                    <div className="relative" style={{ height: mapHeight }}>
-                        <div className="p-4 pt-3 relative z-10">
-                            <div className="relative mb-1">
-                                <input
-                                    type="text"
-                                    placeholder={t.searchLocations}
-                                    className="w-full bg-white rounded-lg py-3 px-4 pl-10 shadow-sm border border-gray-200"
-                                    value={searchQuery}
-                                    onChange={(e) =>
-                                        setSearchQuery(e.target.value)
-                                    }
-                                />
-                                <Search
-                                    size={18}
-                                    className="absolute left-3 top-3.5 text-gray-400"
-                                />
-                            </div>
-
-                            {/* Search Results Dropdown */}
-                            {searchQuery && filteredLocations.length > 0 && (
-                                <div className="absolute left-4 right-4 bg-white rounded-lg shadow-lg mt-1 z-20 border border-gray-200 overflow-hidden">
-                                    {filteredLocations.map((location) => (
-                                        <div
-                                            key={location.id}
-                                            className="p-3 border-b border-gray-100 flex items-center cursor-pointer hover:bg-gray-50"
-                                            onClick={() =>
-                                                handleMarkerClick(location)
-                                            }
-                                        >
-                                            <MapPin
-                                                size={16}
-                                                className="text-blue-500 mr-2"
-                                            />
-                                            <span>{location.name}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Map Container */}
-                        <div className="absolute h-[100%] top-0 left-0 right-0 bottom-0 z-0">
-                            <MapContainer
-                                center={getCityCenter(selectedCity)}
-                                zoom={14}
-                                style={{ height: "100%", width: "100%" }}
-                                zoomControl={false}
-                            >
-                                <TileLayer
-                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                    className="grayscale brightness-105 contrast-105"
-                                />
-
-                                {/* Add this line to update center when city changes */}
-                                <SetMapCenter city={selectedCity} />
-
-                                {activeLocations.map((location) => (
-                                    <Marker
-                                        key={location.id}
-                                        position={location.coords}
-                                        icon={defaultIcon}
-                                        eventHandlers={{
-                                            click: () =>
-                                                handleMarkerClick(location),
-                                        }}
-                                    >
-                                        <Popup>{location.name}</Popup>
-                                    </Marker>
-                                ))}
-
-                                {selectedLocation && (
-                                    <FlyToMarker
-                                        coords={selectedLocation.coords}
-                                    />
-                                )}
-                            </MapContainer>
-                        </div>
-                    </div>
-                )}
-
-                {/* Fixed Detail Panel with Date & Time */}
-                {showDetail && selectedLocation && (
-                    <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-xl p-6 shadow-lg z-10 max-h-[70%] overflow-y-auto">
-                        <div className="mb-4">
-                            <div className="flex items-center">
-                                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mr-3">
-                                    <MapPin size={16} />
-                                </div>
-                                <div className="flex-grow">
-                                    <h3 className="font-medium text-gray-800">
-                                        {selectedLocation.name}
-                                    </h3>
-                                    <p className="text-xs text-gray-500">
-                                        {selectedLocation.description}
-                                    </p>
-                                </div>
-                                <button
-                                    onClick={() => setShowDetail(false)}
-                                    className="ml-auto"
-                                >
-                                    <X size={16} className="text-gray-400" />
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-2 mb-4">
-                            {timeSlots.map((slot) => (
+                {/* City selection tabs */}
+                <div className="bg-white px-4 py-3">
+                    <div>
+                        <div className="flex overflow-x-auto pb-2 mb-4 space-x-2">
+                            {[
+                                14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+                            ].map((day) => (
                                 <div
-                                    key={slot.id}
-                                    className={`p-3 rounded-lg ${selectedTime === slot.id ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800"} flex flex-col items-center cursor-pointer ${!slot.available ? "opacity-50" : ""}`}
-                                    onClick={() =>
-                                        slot.available &&
-                                        setSelectedTime(slot.id)
-                                    }
+                                    key={day}
+                                    className={`flex-shrink-0 w-12 h-14 rounded-lg ${day === selectedDate ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800"} flex flex-col items-center justify-center cursor-pointer`}
+                                    onClick={() => setSelectedDate(day)}
                                 >
                                     <span className="text-xs opacity-80">
-                                        {slot.label}
+                                        MAY
                                     </span>
-                                    <span className="text-sm font-medium">
-                                        {slot.start} - {slot.end}
+                                    <span className="text-lg font-bold">
+                                        {day}
                                     </span>
                                 </div>
                             ))}
                         </div>
-
+                    </div>  
+                    <div className="flex space-x-2 shadow-sm">
                         <button
-                            onClick={handleProceed}
-                            className={`w-full py-3 rounded-xl font-medium ${selectedDate && selectedTime ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-500"}`}
-                            disabled={!selectedDate || !selectedTime}
+                            className={`flex-1 py-2 px-4 rounded-full text-sm font-medium ${selectedCity === "Bondowoso" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800"}`}
+                            onClick={() => setSelectedCity("Bondowoso")}
                         >
-                            {t.next}
+                            {t.bondowoso}
+                        </button>
+                        <button
+                            className={`flex-1 py-2 px-4 rounded-full text-sm font-medium ${selectedCity === "Banyuwangi" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800"}`}
+                            onClick={() => setSelectedCity("Banyuwangi")}
+                        >
+                            {t.banyuwangi}
                         </button>
                     </div>
-                )}
-                <div ref={bottomNavRef}>
-                    {renderBottomNav()}
                 </div>
             </div>
-        );
-    };
+
+            {!selectedCity ? (
+                // Instructions when no city is selected
+                <div className="p-6 flex flex-col items-center justify-center h-64 text-center">
+                    <MapPin size={40} className="text-blue-400 mb-4" />
+                    <h3 className="text-lg font-medium text-gray-800 mb-2">
+                        {t.selectCity}
+                    </h3>
+                    <p className="text-gray-600">{t.selectCityPrompt}</p>
+                </div>
+            ) : (
+                <div className="relative" style={{ height: mapHeight }}>
+                    <div className="p-4 pt-3 relative z-10">
+                        <div className="relative mb-1">
+                            <input
+                                type="text"
+                                placeholder={t.searchLocations}
+                                className="w-full bg-white rounded-lg py-3 px-4 pl-10 shadow-sm border border-gray-200"
+                                value={searchQuery}
+                                onChange={(e) =>
+                                    setSearchQuery(e.target.value)
+                                }
+                            />
+                            <Search
+                                size={18}
+                                className="absolute left-3 top-3.5 text-gray-400"
+                            />
+                        </div>
+
+                        {/* Search Results Dropdown */}
+                        {searchQuery && filteredLocations.length > 0 && (
+                            <div className="absolute left-4 right-4 bg-white rounded-lg shadow-lg mt-1 z-20 border border-gray-200 overflow-hidden">
+                                {filteredLocations.map((location) => (
+                                    <div
+                                        key={location.id}
+                                        className="p-3 border-b border-gray-100 flex items-center cursor-pointer hover:bg-gray-50"
+                                        onClick={() =>
+                                            handleMarkerClick(location)
+                                        }
+                                    >
+                                        <MapPin
+                                            size={16}
+                                            className="text-blue-500 mr-2"
+                                        />
+                                        <span>{location.name}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Map Container */}
+                    <div className="absolute h-[100%] top-0 left-0 right-0 bottom-0 z-0">
+                        <MapContainer
+                            center={getCityCenter(selectedCity)}
+                            zoom={14}
+                            style={{ height: "100%", width: "100%" }}
+                            zoomControl={false}
+                        >
+                            <TileLayer
+                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                className="grayscale brightness-105 contrast-105"
+                            />
+
+                            {/* Add this line to update center when city changes */}
+                            <SetMapCenter city={selectedCity} />
+
+                            {activeLocations.map((location) => (
+                                <Marker
+                                    key={location.id}
+                                    position={location.coords}
+                                    icon={defaultIcon}
+                                    eventHandlers={{
+                                        click: () =>
+                                            handleMarkerClick(location),
+                                    }}
+                                >
+                                    <Popup>{location.name}</Popup>
+                                </Marker>
+                            ))}
+
+                            {localSelectedLocation && (
+                                <FlyToMarker
+                                    coords={localSelectedLocation.coords}
+                                />
+                            )}
+                        </MapContainer>
+                    </div>
+                </div>
+            )}
+
+            {/* Fixed Detail Panel with Date & Time */}
+            {showDetail && localSelectedLocation && (
+                <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-xl p-6 shadow-lg z-10 max-h-[70%] overflow-y-auto">
+                    <div className="mb-4">
+                        <div className="flex items-center">
+                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mr-3">
+                                <MapPin size={16} />
+                            </div>
+                            <div className="flex-grow">
+                                <h3 className="font-medium text-gray-800">
+                                    {localSelectedLocation.name}
+                                </h3>
+                                <p className="text-xs text-gray-500">
+                                    {localSelectedLocation.description}
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setShowDetail(false)}
+                                className="ml-auto"
+                            >
+                                <X size={16} className="text-gray-400" />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                        {timeSlots.map((slot) => (
+                            <div
+                                key={slot.id}
+                                className={`p-3 rounded-lg ${localSelectedTimeSlot && localSelectedTimeSlot.id === slot.id ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-800"} flex flex-col items-center cursor-pointer ${!slot.available ? "opacity-50" : ""}`}
+                                onClick={() =>
+                                    slot.available &&
+                                    handleTimeSelection(slot)
+                                }
+                            >
+                                <span className="text-xs opacity-80">
+                                    {slot.label}
+                                </span>
+                                <span className="text-sm font-medium">
+                                    {slot.start} - {slot.end}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <button
+                        onClick={handleProceed}
+                        className={`w-full py-3 rounded-xl font-medium ${selectedDate && localSelectedTimeSlot ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-500"}`}
+                        disabled={!selectedDate || !localSelectedTimeSlot}
+                    >
+                        {t.next}
+                    </button>
+                </div>
+            )}
+            <div ref={bottomNavRef}>
+                {renderBottomNav()}
+            </div>
+        </div>
+    );
+};
 
 // Pendekatan baru untuk Form2Screen menggunakan controlled component sederhana
 const Form2Screen = () => {
@@ -3143,213 +3204,216 @@ const Form2Screen = () => {
     );
 };
     
-    const Form3Screen = () => {
-        const [termsAgreed, setTermsAgreed] = useState(false);
-    
-        const handleSubmit = () => {
-            if (isLoggedIn) {
-              // Create a pending screening
-              const newScreening = {
+const Form3Screen = () => {
+    const [termsAgreed, setTermsAgreed] = useState(false);
+
+    const handleSubmit = () => {
+        if (isLoggedIn && termsAgreed) {
+            // Calculate total based on participants and service fee
+            const total = 50000 * participants.length + 5000;
+            
+            // Create a pending screening with all details
+            const newScreening = {
                 id: `IJN${Date.now()}`,
                 participants: [...participants],
-                location: "Baratha Hotel", 
-                date: "15 May 2023",
-                time: "04:30 AM",
+                location: selectedLocation ? selectedLocation.name : "Baratha Hotel", 
+                date: `${selectedDate} May 2023`,
+                time: selectedTimeSlot ? 
+                    `${selectedTimeSlot.start} - ${selectedTimeSlot.end}` : 
+                    "04:30 AM",
+                paymentMethod: selectedPaymentMethod,
                 status: "pending",
-                total: 50000 * participants.length + 5000
-              };
-              
-              setScreeningData([...screeningData, newScreening]);
-              setSelectedScreeningId(newScreening.id);
-              console.log(participants);
-              
-              setCurrentScreen("form5");
-            } else {
-              setShowLoginPopup(true);
-            }
-        };   
-        return (
-            <div className="min-h-screen bg-gray-50 pb-20">
-                <div className="bg-white p-4 flex items-center shadow-sm">
-                    <button
-                        onClick={() => setCurrentScreen("form2")}
-                        className="mr-2"
-                    >
-                        <ArrowLeft size={24} className="text-gray-800" />
-                    </button>
-                    <h1 className="text-xl font-bold text-gray-800">{t.summary}</h1>
-                </div>
+                total: total
+            };
+            
+            setScreeningData([...screeningData, newScreening]);
+            setSelectedScreeningId(newScreening.id);
+            
+            setCurrentScreen("form5");
+        } else if (!termsAgreed) {
+            // Show an alert or toast notification if terms are not agreed
+            alert(language === "en" ? "Please agree to the terms and conditions" : 
+                    language === "id" ? "Harap setujui syarat dan ketentuan" : 
+                    "请同意条款和条件");
+        } else {
+            setShowLoginPopup(true);
+        }
+    };  
     
-                <div className="p-6">
-                    <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-                        <h2 className="font-bold text-lg mb-4 text-gray-800">
-                            {t.screeningDetails}
-                        </h2>
-    
-                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg mb-3">
-                            <span className="text-gray-700">{t.location}</span>
-                            <span className="font-medium">Baratha Hotel</span>
-                        </div>
-    
-                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg mb-3">
-                            <span className="text-gray-700">{t.date}</span>
-                            <span className="font-medium">15 May 2023</span>
-                        </div>
-    
-                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg mb-3">
-                            <span className="text-gray-700">{t.time}</span>
-                            <span className="font-medium">04:30 AM - 10:00 AM</span>
-                        </div>
-    
-                        <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg mb-3">
-                            <span className="text-gray-700">{t.participants}</span>
-                            <span className="font-medium">
-                                {participants.length}
-                            </span>
-                        </div>
-    
-                        <h2 className="font-bold text-lg my-4 text-gray-800">
-                            {t.payment}
-                        </h2>
-    
-                        <div className="space-y-3 mb-4">
-                            <div
-                                className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer"
-                                onClick={() => setSelectedPaymentMethod("bank")}
-                            >
-                                <div className="w-6 h-6 rounded-full border-2 border-blue-500 flex items-center justify-center mr-3">
-                                    {selectedPaymentMethod === "bank" && (
-                                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                                    )}
-                                </div>
-                                <div className="flex-1">
-                                    <h3 className="font-medium">
-                                        {t.bankTransfer}
-                                    </h3>
-                                    <p className="text-xs text-gray-500">
-                                        {t.manualVerification}
-                                    </p>
-                                </div>
-                            </div>
-    
-                            <div
-                                className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer"
-                                onClick={() => setSelectedPaymentMethod("card")}
-                            >
-                                <div className="w-6 h-6 rounded-full border-2 border-blue-500 flex items-center justify-center mr-3">
-                                    {selectedPaymentMethod === "card" && (
-                                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                                    )}
-                                </div>
-                                <div className="flex-1">
-                                    <h3 className="font-medium">
-                                        {t.creditDebitCard}
-                                    </h3>
-                                    <p className="text-xs text-gray-500">
-                                        {t.instantVerification}
-                                    </p>
-                                </div>
-                            </div>
-    
-                            <div
-                                className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer"
-                                onClick={() => setSelectedPaymentMethod("ewallet")}
-                            >
-                                <div className="w-6 h-6 rounded-full border-2 border-blue-500 flex items-center justify-center mr-3">
-                                    {selectedPaymentMethod === "ewallet" && (
-                                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                                    )}
-                                </div>
-                                <div className="flex-1">
-                                    <h3 className="font-medium">{t.eWallet}</h3>
-                                    <p className="text-xs text-gray-500">
-                                        {t.instantVerification}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-    
-                        <div className="border-t border-gray-200 pt-4 mb-4">
-                            <div className="flex justify-between mb-2">
-                                <span className="text-gray-700">
-                                    {t.screeningFee}
-                                </span>
-                                <span>Rp 50,000 x {participants.length}</span>
-                            </div>
-                            <div className="flex justify-between mb-2">
-                                <span className="text-gray-700">
-                                    {t.serviceFee}
-                                </span>
-                                <span>Rp 5,000</span>
-                            </div>
-                            <div className="flex justify-between font-bold text-lg mt-4">
-                                <span>{t.total}</span>
-                                <span>Rp {50000 * participants.length + 5000}</span>
-                            </div>
-                        </div>
-                        
-                        {/* Terms and Conditions Agreement Checkbox */}
-                        <div className="mb-4 mt-6">
-                            <div 
-                                className="flex items-start cursor-pointer"
-                                onClick={() => setTermsAgreed(!termsAgreed)}
-                            >
-                                <div className="flex items-center h-5">
-                                    <input
-                                        type="checkbox"
-                                        checked={termsAgreed}
-                                        onChange={() => setTermsAgreed(!termsAgreed)}
-                                        className="w-4 h-4 border border-gray-300 rounded accent-blue-500"
-                                    />
-                                </div>
-                                <div className="ml-3 text-sm">
-                                    <label className="text-gray-700">
-                                        {language === "en" ? "I agree to the " : 
-                                         language === "id" ? "Saya menyetujui " : 
-                                         "我同意 "}
-                                        <button 
-                                            className="text-blue-500 hover:underline"
-                                        >
-                                            {t.terms}
-                                        </button>
-                                        {language === "en" ? " and " : 
-                                         language === "id" ? " dan " : 
-                                         " 和 "}
-                                        <button 
-                                            className="text-blue-500 hover:underline"
-                                        >
-                                            {t.privacy}
-                                        </button>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-    
-                        <button
-                            onClick={() => {
-                                if (isLoggedIn && termsAgreed) {
-                                    console.log(screeningData);
-                                    
-                                    // handleSubmit();
-                                } else if (!termsAgreed) {
-                                    // Show an alert or toast notification if terms are not agreed
-                                    alert(language === "en" ? "Please agree to the terms and conditions" : 
-                                          language === "id" ? "Harap setujui syarat dan ketentuan" : 
-                                          "请同意条款和条件");
-                                } else {
-                                    setShowLoginPopup(true);
-                                }
-                            }}
-                            className={`w-full ${termsAgreed ? "bg-blue-500 text-white" : "bg-gray-300 text-gray-500"} py-3 rounded-xl font-medium`}
-                        >
-                            {t.submit}
-                        </button>
-                    </div>
-                </div>
-                {renderBottomNav()}
+    return (
+        <div className="min-h-screen bg-gray-50 pb-20">
+            <div className="bg-white p-4 flex items-center shadow-sm">
+                <button
+                    onClick={() => setCurrentScreen("form2")}
+                    className="mr-2"
+                >
+                    <ArrowLeft size={24} className="text-gray-800" />
+                </button>
+                <h1 className="text-xl font-bold text-gray-800">{t.summary}</h1>
             </div>
-        );
-    };
+
+            <div className="p-6">
+                <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
+                    <h2 className="font-bold text-lg mb-4 text-gray-800">
+                        {t.screeningDetails}
+                    </h2>
+
+                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg mb-3">
+                        <span className="text-gray-700">{t.location}</span>
+                        <span className="font-medium">{selectedLocation ? selectedLocation.name : "Baratha Hotel"}</span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg mb-3">
+                        <span className="text-gray-700">{t.date}</span>
+                        <span className="font-medium">{selectedDate} May 2023</span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg mb-3">
+                        <span className="text-gray-700">{t.time}</span>
+                        <span className="font-medium">
+                            {selectedTimeSlot ? 
+                                `${selectedTimeSlot.start} - ${selectedTimeSlot.end}` : 
+                                "04:30 AM - 10:00 AM"}
+                        </span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg mb-3">
+                        <span className="text-gray-700">{t.participants}</span>
+                        <span className="font-medium">
+                            {participants.length}
+                        </span>
+                    </div>
+
+                    <h2 className="font-bold text-lg my-4 text-gray-800">
+                        {t.payment}
+                    </h2>
+
+                    <div className="space-y-3 mb-4">
+                        <div
+                            className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer"
+                            onClick={() => setSelectedPaymentMethod("bank")}
+                        >
+                            <div className="w-6 h-6 rounded-full border-2 border-blue-500 flex items-center justify-center mr-3">
+                                {selectedPaymentMethod === "bank" && (
+                                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                                )}
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="font-medium">
+                                    {t.bankTransfer}
+                                </h3>
+                                <p className="text-xs text-gray-500">
+                                    {t.manualVerification}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div
+                            className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer"
+                            onClick={() => setSelectedPaymentMethod("card")}
+                        >
+                            <div className="w-6 h-6 rounded-full border-2 border-blue-500 flex items-center justify-center mr-3">
+                                {selectedPaymentMethod === "card" && (
+                                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                                )}
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="font-medium">
+                                    {t.creditDebitCard}
+                                </h3>
+                                <p className="text-xs text-gray-500">
+                                    {t.instantVerification}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div
+                            className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer"
+                            onClick={() => setSelectedPaymentMethod("ewallet")}
+                        >
+                            <div className="w-6 h-6 rounded-full border-2 border-blue-500 flex items-center justify-center mr-3">
+                                {selectedPaymentMethod === "ewallet" && (
+                                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                                )}
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="font-medium">{t.eWallet}</h3>
+                                <p className="text-xs text-gray-500">
+                                    {t.instantVerification}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="border-t border-gray-200 pt-4 mb-4">
+                        <div className="flex justify-between mb-2">
+                            <span className="text-gray-700">
+                                {t.screeningFee}
+                            </span>
+                            <span>Rp 50,000 x {participants.length}</span>
+                        </div>
+                        <div className="flex justify-between mb-2">
+                            <span className="text-gray-700">
+                                {t.serviceFee}
+                            </span>
+                            <span>Rp 5,000</span>
+                        </div>
+                        <div className="flex justify-between font-bold text-lg mt-4">
+                            <span>{t.total}</span>
+                            <span>Rp {50000 * participants.length + 5000}</span>
+                        </div>
+                    </div>
+                    
+                    {/* Terms and Conditions Agreement Checkbox */}
+                    <div className="mb-4 mt-6">
+                        <div 
+                            className="flex items-start cursor-pointer"
+                            onClick={() => setTermsAgreed(!termsAgreed)}
+                        >
+                            <div className="flex items-center h-5">
+                                <input
+                                    type="checkbox"
+                                    checked={termsAgreed}
+                                    onChange={() => setTermsAgreed(!termsAgreed)}
+                                    className="w-4 h-4 border border-gray-300 rounded accent-blue-500"
+                                />
+                            </div>
+                            <div className="ml-3 text-sm">
+                                <label className="text-gray-700">
+                                    {language === "en" ? "I agree to the " : 
+                                     language === "id" ? "Saya menyetujui " : 
+                                     "我同意 "}
+                                    <button 
+                                        className="text-blue-500 hover:underline"
+                                    >
+                                        {t.terms}
+                                    </button>
+                                    {language === "en" ? " and " : 
+                                     language === "id" ? " dan " : 
+                                     " 和 "}
+                                    <button 
+                                        className="text-blue-500 hover:underline"
+                                    >
+                                        {t.privacy}
+                                    </button>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={handleSubmit}
+                        className={`w-full ${termsAgreed ? "bg-blue-500 text-white" : "bg-gray-300 text-gray-500"} py-3 rounded-xl font-medium`}
+                        disabled={!termsAgreed}
+                    >
+                        {t.submit}
+                    </button>
+                </div>
+            </div>
+            {renderBottomNav()}
+        </div>
+    );
+};
 
     const Form4Screen = () => (
         <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
@@ -3492,243 +3556,270 @@ const Form2Screen = () => {
         </div>
     );
 
-    const Form6Screen = () => {
-        useEffect(() => {
-            // Create a new screening record when this screen loads
-            if (!selectedScreeningId) {
-              const newScreening = {
+const Form6Screen = () => {
+    useEffect(() => {
+        // Create a new screening record when this screen loads
+        if (!selectedScreeningId) {
+            const newScreening = {
                 id: `IJN${Date.now()}`,
                 participants: [...participants],
-                location: "Baratha Hotel",
-                date: "15 May 2023",
-                time: "04:30 AM",
+                location: selectedLocation ? selectedLocation.name : "Baratha Hotel",
+                date: `${selectedDate} May 2023`,
+                time: selectedTimeSlot ? 
+                    `${selectedTimeSlot.start} - ${selectedTimeSlot.end}` : 
+                    "04:30 AM",
+                paymentMethod: selectedPaymentMethod,
                 status: "complete",
                 total: 50000 * participants.length + 5000
-              };
-              
-              setScreeningData([...screeningData, newScreening]);
-              setSelectedScreeningId(newScreening.id);
-            }
-          }, []);
-          return (
-              <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
-                  <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-                      <div className="w-24 h-24 rounded-full bg-green-100 flex items-center justify-center mb-6">
-                          <CheckCircle size={48} className="text-green-500" />
-                      </div>
-      
-                      <h2 className="font-bold text-2xl text-gray-800 mb-2">
-                          {t.paymentSuccessful}
-                      </h2>
-                      <p className="text-gray-600 mb-8">{t.healthConfirmed}</p>
-      
-                      <div className="bg-white rounded-xl shadow-sm p-4 mb-6 w-full">
-                          <div className="flex justify-between items-center mb-2">
-                              <span className="text-gray-700">{t.location}</span>
-                              <span className="font-medium">Baratha Hotel</span>
-                          </div>
-      
-                          <div className="flex justify-between items-center mb-2">
-                              <span className="text-gray-700">{t.date}</span>
-                              <span className="font-medium">15 May 2023</span>
-                          </div>
-      
-                          <div className="flex justify-between items-center mb-2">
-                              <span className="text-gray-700">{t.time}</span>
-                              <span className="font-medium">04:30 AM</span>
-                          </div>
-      
-                          <div className="flex justify-between items-center mb-2">
-                              <span className="text-gray-700">{t.participants}</span>
-                              <span className="font-medium">
-                                  {participants.length}
-                              </span>
-                          </div>
-      
-                          <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
-                              <div className="flex items-start">
-                                  <AlertCircle
-                                      size={18}
-                                      className="text-green-600 mr-2 mt-0.5 flex-shrink-0"
-                                  />
-                                  <p className="text-sm text-green-800">
-                                      {t.arriveEarly}
-                                  </p>
-                              </div>
-                          </div>
-                      </div>
-      
-                      <button
-                          onClick={() => setCurrentScreen("viewTicket")}
-                          className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium mb-3"
-                          >
-                      {t.viewETicket}
-                      </button>
-      
-                      <button
-                          onClick={() => setCurrentScreen("form1")}
-                          className="text-blue-500 font-medium"
-                          >
-                          {t.backToHome}
-                      </button>
-                  </div>
-                  {renderBottomNav()}
-              </div>
-          );
-    }
-
-    const DetailScreen = () => {
-        const screening = screeningData.find(item => item.id === selectedScreeningId);
-        
-        if (!screening) {
-          return (
-            <div className="min-h-screen bg-gray-50 flex flex-col">
-              <div className="bg-white p-4 flex items-center shadow-sm">
-                <button onClick={() => setCurrentScreen("screening")} className="mr-2">
-                  <ArrowLeft size={24} className="text-gray-800" />
-                </button>
-                <h1 className="text-xl font-bold text-gray-800">{t.screeningDetails}</h1>
-              </div>
-              
-              <div className="flex-1 flex items-center justify-center p-6">
-                <div className="text-center">
-                  <AlertCircle size={48} className="text-gray-400 mx-auto mb-4" />
-                  <h3 className="font-medium text-gray-800 mb-2">
-                    {language === "en" ? "Screening not found" : 
-                     language === "id" ? "Pemeriksaan tidak ditemukan" : 
-                     "未找到筛查记录"}
-                  </h3>
-                  <button 
-                    onClick={() => setCurrentScreen("screening")}
-                    className="text-blue-500 text-sm font-medium"
-                  >
-                    {language === "en" ? "Go back" : 
-                     language === "id" ? "Kembali" : 
-                     "返回"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          );
+            };
+            
+            setScreeningData([...screeningData, newScreening]);
+            setSelectedScreeningId(newScreening.id);
+        } else {
+            // Update the status of existing screening to complete
+            const updatedScreeningData = screeningData.map(screening => 
+                screening.id === selectedScreeningId 
+                    ? {...screening, status: "complete"} 
+                    : screening
+            );
+            setScreeningData(updatedScreeningData);
         }
-        
-        return (
-          <div className="min-h-screen bg-gray-50">
-            <div className="bg-white p-4 flex items-center shadow-sm">
-              <button onClick={() => setCurrentScreen("screening")} className="mr-2">
-                <ArrowLeft size={24} className="text-gray-800" />
-              </button>
-              <h1 className="text-xl font-bold text-gray-800">{t.screeningDetails}</h1>
-            </div>
-      
-            <div className="p-6">
-              <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
-                <div className="flex justify-between items-center mb-4">
-                  <div className="flex items-center">
-                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mr-3">
-                      <MapPin size={20} />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-gray-800">{screening.location}</h3>
-                      <p className="text-xs text-gray-500">{screening.date}</p>
-                    </div>
-                  </div>
-                  <div className={`px-3 py-1 rounded-full ${screening.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-green-100 text-green-700"} text-xs font-medium`}>
-                    {screening.status === "pending" ? t.pending : t.complete}
-                  </div>
+    }, []);
+    
+    return (
+        <div className="min-h-screen bg-gray-50 flex flex-col pb-20">
+            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+                <div className="w-24 h-24 rounded-full bg-green-100 flex items-center justify-center mb-6">
+                    <CheckCircle size={48} className="text-green-500" />
                 </div>
-      
-                <div className="space-y-3 mb-4">
-                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span className="text-gray-700">{t.referenceId}</span>
-                    <span className="font-medium">{screening.id}</span>
-                  </div>
-      
-                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span className="text-gray-700">{t.date}</span>
-                    <span className="font-medium">{screening.date}</span>
-                  </div>
-      
-                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span className="text-gray-700">{t.time}</span>
-                    <span className="font-medium">{screening.time}</span>
-                  </div>
-      
-                  <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                    <span className="text-gray-700">{t.status}</span>
-                    <span className={`font-medium ${screening.status === "pending" ? "text-yellow-600" : "text-green-600"}`}>
-                      {screening.status === "pending" ? t.pending : t.complete}
-                    </span>
-                  </div>
-                </div>
-      
-                <h3 className="font-medium text-gray-800 mb-3">
-                  {t.participants} ({screening.participants.length})
-                </h3>
-      
-                {screening.participants.map((participant, idx) => (
-                  <div key={idx} className="bg-gray-50 rounded-lg p-3 mb-3">
-                    <div className="flex justify-between mb-1">
-                      <span className="text-gray-700">
-                        {participant.title || 'Mr'}.{' '}
-                        {participant.name || 'Unnamed Participant'}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        {participant.age || 'N/A'} years
-                      </span>
+
+                <h2 className="font-bold text-2xl text-gray-800 mb-2">
+                    {t.paymentSuccessful}
+                </h2>
+                <p className="text-gray-600 mb-8">{t.healthConfirmed}</p>
+
+                <div className="bg-white rounded-xl shadow-sm p-4 mb-6 w-full">
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-700">{t.location}</span>
+                        <span className="font-medium">
+                            {selectedLocation ? selectedLocation.name : "Baratha Hotel"}
+                        </span>
                     </div>
-                    <p className="text-xs text-gray-500">
-                      {participant.hasMedicalHistory ? 
-                        (participant.allergies ? `Allergies: ${participant.allergies}` : "Has medical history") : 
-                        "No medical history"}
-                    </p>
-                  </div>
-                ))}
-      
-                <div className="border-t border-gray-200 pt-4 mb-4">
-                  <div className="flex justify-between mb-2">
-                    <span className="text-gray-700">{t.screeningFee}</span>
-                    <span>Rp 50,000 x {screening.participants.length}</span>
-                  </div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-gray-700">{t.serviceFee}</span>
-                    <span>Rp 5,000</span>
-                  </div>
-                  <div className="flex justify-between font-bold text-lg mt-4">
-                    <span>{t.total}</span>
-                    <span>Rp {50000 * screening.participants.length + 5000}</span>
-                  </div>
+
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-700">{t.date}</span>
+                        <span className="font-medium">{selectedDate} May 2023</span>
+                    </div>
+
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-700">{t.time}</span>
+                        <span className="font-medium">
+                            {selectedTimeSlot ? selectedTimeSlot.start : "04:30 AM"}
+                        </span>
+                    </div>
+
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-700">{t.participants}</span>
+                        <span className="font-medium">
+                            {participants.length}
+                        </span>
+                    </div>
+
+                    <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                        <div className="flex items-start">
+                            <AlertCircle
+                                size={18}
+                                className="text-green-600 mr-2 mt-0.5 flex-shrink-0"
+                            />
+                            <p className="text-sm text-green-800">
+                                {t.arriveEarly}
+                            </p>
+                        </div>
+                    </div>
                 </div>
-      
-                {screening.status === "pending" && (
-                  <button
-                    onClick={() => {
-                      setSelectedScreeningId(screening.id);
-                      setCurrentScreen("form4");
-                    }}
-                    className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium"
-                  >
-                    {t.continueToPayment}
-                  </button>
-                )}
-                
-                {screening.status === "complete" && (
-                  <button
-                    onClick={() => {
-                      setSelectedScreeningId(screening.id);
-                      setCurrentScreen("viewTicket");
-                    }}
-                    className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium"
-                  >
+
+                <button
+                    onClick={() => setCurrentScreen("viewTicket")}
+                    className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium mb-3"
+                >
                     {t.viewETicket}
-                  </button>
-                )}
-              </div>
+                </button>
+
+                <button
+                    onClick={() => setCurrentScreen("home")}
+                    className="text-blue-500 font-medium"
+                >
+                    {t.backToHome}
+                </button>
+            </div>
+            {renderBottomNav()}
+        </div>
+    );
+};
+
+
+const DetailScreen = () => {
+    const screening = screeningData.find(item => item.id === selectedScreeningId);
+    
+    if (!screening) {
+      return (
+        <div className="min-h-screen bg-gray-50 flex flex-col">
+          <div className="bg-white p-4 flex items-center shadow-sm">
+            <button onClick={() => setCurrentScreen("screening")} className="mr-2">
+              <ArrowLeft size={24} className="text-gray-800" />
+            </button>
+            <h1 className="text-xl font-bold text-gray-800">{t.screeningDetails}</h1>
+          </div>
+          
+          <div className="flex-1 flex items-center justify-center p-6">
+            <div className="text-center">
+              <AlertCircle size={48} className="text-gray-400 mx-auto mb-4" />
+              <h3 className="font-medium text-gray-800 mb-2">
+                {language === "en" ? "Screening not found" : 
+                 language === "id" ? "Pemeriksaan tidak ditemukan" : 
+                 "未找到筛查记录"}
+              </h3>
+              <button 
+                onClick={() => setCurrentScreen("screening")}
+                className="text-blue-500 text-sm font-medium"
+              >
+                {language === "en" ? "Go back" : 
+                 language === "id" ? "Kembali" : 
+                 "返回"}
+              </button>
             </div>
           </div>
-        );
-      };
-      
+        </div>
+      );
+    }
+    
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="bg-white p-4 flex items-center shadow-sm">
+          <button onClick={() => setCurrentScreen("screening")} className="mr-2">
+            <ArrowLeft size={24} className="text-gray-800" />
+          </button>
+          <h1 className="text-xl font-bold text-gray-800">{t.screeningDetails}</h1>
+        </div>
+  
+        <div className="p-6">
+          <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center">
+                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 mr-3">
+                  <MapPin size={20} />
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-800">{screening.location}</h3>
+                  <p className="text-xs text-gray-500">{screening.date}</p>
+                </div>
+              </div>
+              <div className={`px-3 py-1 rounded-full ${screening.status === "pending" ? "bg-yellow-100 text-yellow-700" : "bg-green-100 text-green-700"} text-xs font-medium`}>
+                {screening.status === "pending" ? t.pending : t.complete}
+              </div>
+            </div>
+  
+            <div className="space-y-3 mb-4">
+              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span className="text-gray-700">{t.referenceId}</span>
+                <span className="font-medium">{screening.id}</span>
+              </div>
+  
+              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span className="text-gray-700">{t.date}</span>
+                <span className="font-medium">{screening.date}</span>
+              </div>
+  
+              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span className="text-gray-700">{t.time}</span>
+                <span className="font-medium">{screening.time}</span>
+              </div>
+  
+              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span className="text-gray-700">{t.status}</span>
+                <span className={`font-medium ${screening.status === "pending" ? "text-yellow-600" : "text-green-600"}`}>
+                  {screening.status === "pending" ? t.pending : t.complete}
+                </span>
+              </div>
+              
+              {screening.paymentMethod && (
+                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                  <span className="text-gray-700">{t.payment}</span>
+                  <span className="font-medium">
+                    {screening.paymentMethod === "bank" ? t.bankTransfer : 
+                     screening.paymentMethod === "card" ? t.creditDebitCard : 
+                     t.eWallet}
+                  </span>
+                </div>
+              )}
+            </div>
+  
+            <h3 className="font-medium text-gray-800 mb-3">
+              {t.participants} ({screening.participants.length})
+            </h3>
+  
+            {screening.participants.map((participant, idx) => (
+              <div key={idx} className="bg-gray-50 rounded-lg p-3 mb-3">
+                <div className="flex justify-between mb-1">
+                  <span className="text-gray-700">
+                    {participant.title || 'Mr'}.{' '}
+                    {participant.name || 'Unnamed Participant'}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    {participant.age || 'N/A'} years
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500">
+                  {participant.hasMedicalHistory ? 
+                    (participant.allergies ? `Allergies: ${participant.allergies}` : "Has medical history") : 
+                    "No medical history"}
+                </p>
+              </div>
+            ))}
+  
+            <div className="border-t border-gray-200 pt-4 mb-4">
+              <div className="flex justify-between mb-2">
+                <span className="text-gray-700">{t.screeningFee}</span>
+                <span>Rp 50,000 x {screening.participants.length}</span>
+              </div>
+              <div className="flex justify-between mb-2">
+                <span className="text-gray-700">{t.serviceFee}</span>
+                <span>Rp 5,000</span>
+              </div>
+              <div className="flex justify-between font-bold text-lg mt-4">
+                <span>{t.total}</span>
+                <span>Rp {screening.total || (50000 * screening.participants.length + 5000)}</span>
+              </div>
+            </div>
+  
+            {screening.status === "pending" && (
+              <button
+                onClick={() => {
+                  setSelectedScreeningId(screening.id);
+                  setCurrentScreen("form4");
+                }}
+                className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium"
+              >
+                {t.continueToPayment}
+              </button>
+            )}
+            
+            {screening.status === "complete" && (
+              <button
+                onClick={() => {
+                  setSelectedScreeningId(screening.id);
+                  setCurrentScreen("viewTicket");
+                }}
+                className="w-full bg-blue-500 text-white py-3 rounded-xl font-medium"
+              >
+                {t.viewETicket}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+};
 
     const PartnerScreen = () => (
         <div className="min-h-screen bg-gray-50">
@@ -4001,111 +4092,112 @@ const Form2Screen = () => {
         );
     };
 
-    const ViewTicketScreen = () => {
-        const screening = screeningData.find(item => item.id === selectedScreeningId);
+const ViewTicketScreen = () => {
+    const screening = screeningData.find(item => item.id === selectedScreeningId);
   
-        if (screening) {
-            return (
-                <div className="min-h-screen bg-blue-600">
-                    <div className="bg-white p-4 flex items-center shadow-sm">
-                        <button
-                            onClick={() => setCurrentScreen("form6")}
-                            className="mr-2"
-                        >
-                            <ArrowLeft size={24} className="text-gray-800" />
-                        </button>
-                        <h1 className="text-xl font-bold text-gray-800">{t.eTicket}</h1>
-                        <button
-                            onClick={() => window.print()}
-                            className="ml-auto text-blue-500"
-                        >
-                            <Download size={20} />
-                        </button>
-                    </div>
-        
-                    <div className="p-6">
-                        <div className="bg-white rounded-xl shadow-xl overflow-hidden">
-                            <div className="bg-blue-500 p-5 text-white">
-                                <div className="flex justify-between items-center">
-                                    <div>
-                                        <h2 className="font-bold text-xl">
-                                            {t.healthPass}
-                                        </h2>
-                                        <p className="text-sm opacity-90">
-                                            {t.healthConfirmation}
-                                        </p>
-                                    </div>
-                                    <Activity size={28} />
+    if (screening) {
+        return (
+            <div className="min-h-screen bg-blue-600">
+                <div className="bg-white p-4 flex items-center shadow-sm">
+                    <button
+                        onClick={() => setCurrentScreen("form6")}
+                        className="mr-2"
+                    >
+                        <ArrowLeft size={24} className="text-gray-800" />
+                    </button>
+                    <h1 className="text-xl font-bold text-gray-800">{t.eTicket}</h1>
+                    <button
+                        onClick={() => window.print()}
+                        className="ml-auto text-blue-500"
+                    >
+                        <Download size={20} />
+                    </button>
+                </div>
+    
+                <div className="p-6">
+                    <div className="bg-white rounded-xl shadow-xl overflow-hidden">
+                        <div className="bg-blue-500 p-5 text-white">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h2 className="font-bold text-xl">
+                                        {t.healthPass}
+                                    </h2>
+                                    <p className="text-sm opacity-90">
+                                        {t.healthConfirmation}
+                                    </p>
+                                </div>
+                                <Activity size={28} />
+                            </div>
+                        </div>
+    
+                        <div className="p-5">
+                            <div className="flex justify-center mb-6">
+                                <div className="p-3 bg-white rounded-lg shadow-md border border-gray-200">
+                                    <img
+                                        src="https://docs.lightburnsoftware.com/legacy/img/QRCode/ExampleCode.png"
+                                        alt="QR Code"
+                                        className="w-48 h-48"
+                                    />
                                 </div>
                             </div>
-        
-                            <div className="p-5">
-                                <div className="flex justify-center mb-6">
-                                    <div className="p-3 bg-white rounded-lg shadow-md border border-gray-200">
-                                        <img
-                                            src="https://docs.lightburnsoftware.com/legacy/img/QRCode/ExampleCode.png"
-                                            alt="QR Code"
-                                            className="w-48 h-48"
-                                        />
+    
+                            <div className="text-center mb-6">
+                                <p className="text-sm text-gray-500">
+                                    {t.referenceId}
+                                </p>
+                                <p className="text-2xl font-bold text-gray-800">
+                                    {screening.id}
+                                </p>
+                            </div>
+    
+                            <div className="space-y-4 mb-6">
+                                <div className="flex items-center">
+                                    <MapPin
+                                        size={20}
+                                        className="text-blue-500 mr-3"
+                                    />
+                                    <div>
+                                        <p className="text-sm text-gray-500">
+                                            {t.location}
+                                        </p>
+                                        <p className="font-medium">{screening.location}</p>
                                     </div>
                                 </div>
-        
-                                <div className="text-center mb-6">
-                                    <p className="text-sm text-gray-500">
-                                        {t.referenceId}
-                                    </p>
-                                    <p className="text-2xl font-bold text-gray-800">
-                                        IJN230515001
-                                    </p>
-                                </div>
-        
-                                <div className="space-y-4 mb-6">
-                                    <div className="flex items-center">
-                                        <MapPin
-                                            size={20}
-                                            className="text-blue-500 mr-3"
-                                        />
-                                        <div>
-                                            <p className="text-sm text-gray-500">
-                                                {t.location}
-                                            </p>
-                                            <p className="font-medium">Baratha Hotel</p>
-                                        </div>
-                                    </div>
-        
-                                    <div className="flex items-center">
-                                        <Calendar
-                                            size={20}
-                                            className="text-blue-500 mr-3"
-                                        />
-                                        <div>
-                                            <p className="text-sm text-gray-500">
-                                                {t.date}
-                                            </p>
-                                            <p className="font-medium">15 May 2023</p>
-                                        </div>
-                                    </div>
-        
-                                    <div className="flex items-center">
-                                        <Clock
-                                            size={20}
-                                            className="text-blue-500 mr-3"
-                                        />
-                                        <div>
-                                            <p className="text-sm text-gray-500">
-                                                {t.time}
-                                            </p>
-                                            <p className="font-medium">04:30 AM</p>
-                                        </div>
+    
+                                <div className="flex items-center">
+                                    <Calendar
+                                        size={20}
+                                        className="text-blue-500 mr-3"
+                                    />
+                                    <div>
+                                        <p className="text-sm text-gray-500">
+                                            {t.date}
+                                        </p>
+                                        <p className="font-medium">{screening.date}</p>
                                     </div>
                                 </div>
-        
-                                <div className="border-t border-dashed border-gray-200 pt-4">
-                                    <h3 className="font-medium text-gray-800 mb-3">
-                                        {t.participants}
-                                    </h3>
-                                    <div className="space-y-2">
-                                        <div className="flex items-center">
+    
+                                <div className="flex items-center">
+                                    <Clock
+                                        size={20}
+                                        className="text-blue-500 mr-3"
+                                    />
+                                    <div>
+                                        <p className="text-sm text-gray-500">
+                                            {t.time}
+                                        </p>
+                                        <p className="font-medium">{screening.time}</p>
+                                    </div>
+                                </div>
+                            </div>
+    
+                            <div className="border-t border-dashed border-gray-200 pt-4">
+                                <h3 className="font-medium text-gray-800 mb-3">
+                                    {t.participants}
+                                </h3>
+                                <div className="space-y-2">
+                                    {screening.participants.map((participant, index) => (
+                                        <div key={index} className="flex items-center">
                                             <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-2">
                                                 <User
                                                     size={16}
@@ -4114,72 +4206,83 @@ const Form2Screen = () => {
                                             </div>
                                             <div>
                                                 <p className="font-medium">
-                                                    Mr. Arif Hassan
+                                                    {participant.title || 'Mr'}. {participant.name || 'Unnamed'}
                                                 </p>
                                                 <p className="text-xs text-gray-500">
-                                                    35 years
+                                                    {participant.age || '30'} years
                                                 </p>
                                             </div>
                                         </div>
-        
-                                        <div className="flex items-center">
-                                            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-2">
-                                                <User
-                                                    size={16}
-                                                    className="text-gray-600"
-                                                />
-                                            </div>
-                                            <div>
-                                                <p className="font-medium">
-                                                    Mrs. Sarah Lee
-                                                </p>
-                                                <p className="text-xs text-gray-500">
-                                                    32 years
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-        
-                                <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-100">
-                                    <div className="flex">
-                                        <CheckCircle
-                                            size={20}
-                                            className="text-green-500 mr-2 flex-shrink-0"
-                                        />
-                                        <p className="text-sm text-green-800">
-                                            {t.showTicket}
-                                        </p>
-                                    </div>
+                                    ))}
                                 </div>
                             </div>
-        
-                            <div className="bg-gray-50 p-4 border-t border-gray-200">
-                                <div className="flex justify-between">
-                                    <div>
-                                        <p className="text-xs text-gray-500">
-                                            {t.issuedBy}
-                                        </p>
-                                        <p className="text-sm font-medium text-gray-800">
-                                            {t.issuingOrg}
-                                        </p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-xs text-gray-500">
-                                            {t.status}
-                                        </p>
-                                        <p className="text-sm font-medium text-green-600">
-                                            {t.confirmed}
-                                        </p>
-                                    </div>
+    
+                            <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-100">
+                                <div className="flex">
+                                    <CheckCircle
+                                        size={20}
+                                        className="text-green-500 mr-2 flex-shrink-0"
+                                    />
+                                    <p className="text-sm text-green-800">
+                                        {t.showTicket}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+    
+                        <div className="bg-gray-50 p-4 border-t border-gray-200">
+                            <div className="flex justify-between">
+                                <div>
+                                    <p className="text-xs text-gray-500">
+                                        {t.issuedBy}
+                                    </p>
+                                    <p className="text-sm font-medium text-gray-800">
+                                        {t.issuingOrg}
+                                    </p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-xs text-gray-500">
+                                        {t.status}
+                                    </p>
+                                    <p className="text-sm font-medium text-green-600">
+                                        {t.confirmed}
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            );
-        }      
+            </div>
+        );
     }
+    
+    // Fallback if screening not found
+    return (
+        <div className="min-h-screen bg-gray-50">
+            <div className="bg-white p-4 flex items-center shadow-sm">
+                <button onClick={() => setCurrentScreen("home")} className="mr-2">
+                    <ArrowLeft size={24} className="text-gray-800" />
+                </button>
+                <h1 className="text-xl font-bold text-gray-800">{t.eTicket}</h1>
+            </div>
+            
+            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+                <AlertCircle size={48} className="text-gray-400 mb-4" />
+                <h3 className="font-medium text-gray-800 mb-2">
+                    {language === "en" ? "Ticket not found" : 
+                    language === "id" ? "Tiket tidak ditemukan" : 
+                    "未找到票据"}
+                </h3>
+                <button 
+                    onClick={() => setCurrentScreen("home")}
+                    className="text-blue-500 mt-4"
+                >
+                    {t.backToHome}
+                </button>
+            </div>
+        </div>
+    );
+};
 
     const VideoPopup = () => (
         <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
