@@ -5,9 +5,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta property="og:type" content="article" />
         <meta property="og:title" content="Ijen Health" />
-        <meta property="og:description" content="Health screening for your safe journey" />
+        <meta property="og:description" content="Verifikasi Kesehatan Digital" />
         <meta property="og:url" content="https://health.mountijen.com/" />
-        <meta property="og:image" content="https://health.mountijen.com/assets/img/logo-blue.png" />
+        <meta property="og:image" content="https://health.mountijen.com/assets/img/banner.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="627" />
         <link rel="icon" type="image/png" href="https://health.mountijen.com/assets/img/logo-blue.png" id="favicon"/>

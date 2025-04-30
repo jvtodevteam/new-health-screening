@@ -47,7 +47,7 @@ import "leaflet/dist/leaflet.css";
 import lang from "@/lang.json";
 
 const App = () => {
-    const [language, setLanguage] = useState("en");
+    const [language, setLanguage] = useState("id");
     const [activeTab, setActiveTab] = useState("pending");
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
     const [selectedTime, setSelectedTime] = useState("morning");
