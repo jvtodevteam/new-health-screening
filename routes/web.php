@@ -36,6 +36,7 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('/generate-payment', [ScreeningController::class,'generatePayment']);
+Route::get('/payment-success/{id}', [ScreeningController::class,'paymentSuccess']);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
