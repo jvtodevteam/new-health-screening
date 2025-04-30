@@ -35,6 +35,11 @@ import {
     Globe,
     Sunrise,
     Sunset,
+    Play,
+    CreditCard,
+    Smartphone,
+    FileImage,
+    Maximize2
 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
@@ -199,9 +204,6 @@ const App = () => {
         // Clean any quotes from the ID before storing
         const cleanedId = newId ? newId.replace(/^["']|["']$/g, '') : newId;
         
-        // For debugging
-        console.log("Setting screeningId - Original:", newId, "Cleaned:", cleanedId);
-        
         // Update the state
         setSelectedScreeningId(cleanedId);
         
@@ -255,9 +257,12 @@ const App = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [showLoginPopup, setShowLoginPopup] = useState(false);
+    const [showInfographicPopup, setShowInfographicPopup] = useState(false);
+    const [showingRegistrationVideo, setShowingRegistrationVideo] = useState(false);
     const [selectedLocationFromMap, setSelectedLocationFromMap] =
         useState(null);
     const [showVideoPopup, setShowVideoPopup] = useState(false);
+    const [showInfographicImagePopup, setShowInfographicImagePopup] = useState(false);
     const [paymentUrl, setPaymentUrl] = useState(null);
 
     const t = lang[language];
@@ -343,7 +348,7 @@ const App = () => {
         // Set loading state to true at the beginning of the process
         setIsProcessingPayment(true);
 
-        const SCREENING_FEE = 35000; // 35.000 rupiah per pax
+        const SCREENING_FEE = 1000; // 35.000 rupiah per pax
         const SERVICE_FEE = 0; // 5.000 rupiah service fee
 
         // Calculate total based on participants and service fee
@@ -482,15 +487,6 @@ const App = () => {
         // Timer state for countdown display
         const [countdown, setCountdown] = useState(2);
         
-        // Debug logging
-        useEffect(() => {
-            console.log("Success Screen State:", {
-                hasRedirected,
-                pendingPaymentUrl,
-                screeningId
-            });
-        }, [hasRedirected, pendingPaymentUrl, screeningId]);
-        
         // Countdown effect
         useEffect(() => {
             const countdownInterval = setInterval(() => {
@@ -605,11 +601,9 @@ const App = () => {
     const OnboardingScreen = () => {
 
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-b from-green-500 to-green-600">
+            <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-black">
                 <div className="mb-8 text-center">
-                    <div className="bg-white rounded-full p-5 inline-block mb-4">
-                        <Activity size={40} className="text-green-500" />
-                    </div>
+                    <img src="/assets/img/logo-blue.png" className="mx-auto w-64" alt="" srcset="" />
                     <h1 className="text-3xl font-bold text-white">
                         {t.appName}
                     </h1>
@@ -681,6 +675,29 @@ const App = () => {
                                 )}
                             </button>
 
+                            {/* Tambahkan tombol Apple */}
+                            <button
+                                onClick={() => {
+                                    afterLogin();
+                                }}
+                                className="w-full bg-black text-white py-3 px-6 rounded-xl flex items-center justify-center space-x-2 font-medium"
+                                disabled={isProcessingPayment}
+                            >
+                                {isProcessingPayment ? (
+                                    <span className="flex items-center justify-center">
+                                        <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+                                        {t.processing}
+                                    </span>
+                                ) : (
+                                    <>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" width="18" height="18" fill="white" className="mr-2">
+                                            <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
+                                        </svg>
+                                        <span>{t.loginWithApple}</span>
+                                    </>
+                                )}
+                            </button>
+
                             <button
                                 onClick={() => {
                                     afterLogin();
@@ -722,6 +739,529 @@ const App = () => {
             </div>
         );
     };
+    const InfographicPopup = () => (
+        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] overflow-auto">
+                <div className="p-4 flex justify-between items-center border-b border-gray-200">
+                    <h3 className="font-bold text-lg">
+                        {t.registrationGuide}
+                    </h3>
+                    <button
+                        onClick={() => setShowInfographicPopup(false)}
+                        className="p-2 rounded-full hover:bg-gray-100"
+                    >
+                        <X size={24} className="text-gray-600" />
+                    </button>
+                </div>
+                <div className="p-6">
+                    <div className="max-w-3xl mx-auto">
+                        {/* Header */}
+                        <div className="text-center mb-8">
+                            <h2 className="text-2xl font-bold text-gray-800 mb-2">{t.howToRegister}</h2>
+                            <p className="text-gray-600">
+                                {language === "en" 
+                                    ? "Follow these simple steps to complete your health screening registration" 
+                                    : language === "id" 
+                                        ? "Ikuti langkah-langkah sederhana ini untuk menyelesaikan pendaftaran pemeriksaan kesehatan Anda"
+                                        : "按照以下简单步骤完成健康检查注册"}
+                            </p>
+                        </div>
+                        
+                        {/* Steps in infographic style */}
+                        <div className="space-y-10">
+                            {/* Step 1 */}
+                            <div className="flex">
+                                <div className="flex-shrink-0">
+                                    <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center text-white font-bold text-2xl">1</div>
+                                    <div className="w-1 h-20 bg-green-500 mx-auto mt-2 rounded-full"></div>
+                                </div>
+                                <div className="ml-6 flex-1">
+                                    <h3 className="text-xl font-bold text-gray-800 mb-2">{t.step1Title}</h3>
+                                    <p className="text-gray-600 mb-3">{t.step1Desc}</p>
+                                    <div className="bg-gray-100 rounded-lg p-4">
+                                        <ul className="list-disc pl-5 text-gray-700 space-y-2">
+                                            <li>{language === "en" ? "Personal information" : language === "id" ? "Informasi pribadi" : "个人信息"}</li>
+                                            <li>{language === "en" ? "Contact details" : language === "id" ? "Detail kontak" : "联系方式"}</li>
+                                            <li>{language === "en" ? "Medical history" : language === "id" ? "Riwayat medis" : "医疗历史"}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Step 2 */}
+                            <div className="flex">
+                                <div className="flex-shrink-0">
+                                    <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center text-white font-bold text-2xl">2</div>
+                                    <div className="w-1 h-20 bg-green-500 mx-auto mt-2 rounded-full"></div>
+                                </div>
+                                <div className="ml-6 flex-1">
+                                    <h3 className="text-xl font-bold text-gray-800 mb-2">{t.step2Title}</h3>
+                                    <p className="text-gray-600 mb-3">{t.step2Desc}</p>
+                                    <div className="bg-gray-100 rounded-lg p-4">
+                                        <div className="flex flex-wrap justify-between">
+                                            <div className="px-3 py-2 bg-white rounded-lg shadow-sm mb-2 mr-2">
+                                                <MapPin size={16} className="text-green-500 inline mr-1" />
+                                                <span className="text-sm">{language === "en" ? "Location" : language === "id" ? "Lokasi" : "地点"}</span>
+                                            </div>
+                                            <div className="px-3 py-2 bg-white rounded-lg shadow-sm mb-2 mr-2">
+                                                <Calendar size={16} className="text-green-500 inline mr-1" />
+                                                <span className="text-sm">{language === "en" ? "Date" : language === "id" ? "Tanggal" : "日期"}</span>
+                                            </div>
+                                            <div className="px-3 py-2 bg-white rounded-lg shadow-sm mb-2">
+                                                <Clock size={16} className="text-green-500 inline mr-1" />
+                                                <span className="text-sm">{language === "en" ? "Time" : language === "id" ? "Waktu" : "时间"}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Step 3 */}
+                            <div className="flex">
+                                <div className="flex-shrink-0">
+                                    <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center text-white font-bold text-2xl">3</div>
+                                    <div className="w-1 h-20 bg-green-500 mx-auto mt-2 rounded-full"></div>
+                                </div>
+                                <div className="ml-6 flex-1">
+                                    <h3 className="text-xl font-bold text-gray-800 mb-2">{t.step3Title}</h3>
+                                    <p className="text-gray-600 mb-3">{t.step3Desc}</p>
+                                    <div className="bg-gray-100 rounded-lg p-4 flex justify-around flex-wrap">
+                                        <div className="px-3 py-2 bg-white rounded-lg shadow-sm mb-2 mx-1">
+                                            <DollarSign size={16} className="text-green-500 inline mr-1" />
+                                            <span className="text-sm">{language === "en" ? "Bank Transfer" : language === "id" ? "Transfer Bank" : "银行转账"}</span>
+                                        </div>
+                                        <div className="px-3 py-2 bg-white rounded-lg shadow-sm mb-2 mx-1">
+                                            <CreditCard size={16} className="text-green-500 inline mr-1" />
+                                            <span className="text-sm">{language === "en" ? "Credit Card" : language === "id" ? "Kartu Kredit" : "信用卡"}</span>
+                                        </div>
+                                        <div className="px-3 py-2 bg-white rounded-lg shadow-sm mb-2 mx-1">
+                                            <Smartphone size={16} className="text-green-500 inline mr-1" />
+                                            <span className="text-sm">E-Wallet</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Step 4 */}
+                            <div className="flex">
+                                <div className="flex-shrink-0">
+                                    <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center text-white font-bold text-2xl">4</div>
+                                </div>
+                                <div className="ml-6 flex-1">
+                                    <h3 className="text-xl font-bold text-gray-800 mb-2">{t.step4Title}</h3>
+                                    <p className="text-gray-600 mb-3">{t.step4Desc}</p>
+                                    <div className="bg-green-100 rounded-lg p-4 border border-green-200">
+                                        <div className="flex">
+                                            <CheckCircle size={20} className="text-green-500 mr-2 flex-shrink-0 mt-1" />
+                                            <p className="text-green-800">
+                                                {language === "en" 
+                                                    ? "Your e-ticket will be available for download and can be shown at the screening location for quick check-in." 
+                                                    : language === "id" 
+                                                        ? "E-tiket Anda akan tersedia untuk diunduh dan dapat ditunjukkan di lokasi pemeriksaan untuk check-in cepat."
+                                                        : "您的电子票可供下载，并可在检查地点出示以快速办理登记手续。"}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Call to action button */}
+                        <div className="text-center mt-10">
+                            <button
+                                onClick={() => {
+                                    setShowInfographicPopup(false);
+                                    setCurrentScreen("form1");
+                                }}
+                                className="inline-flex items-center px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-medium rounded-lg transition-colors"
+                            >
+                                {language === "en" ? "Start Registration" : language === "id" ? "Mulai Pendaftaran" : "开始注册"}
+                                <ChevronRight size={20} className="ml-2" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+    const partialInfo = () => (
+        <>
+        {/* Dynamic Weather Forecast Card - Main Section */}
+        <h2 className="font-bold text-lg text-gray-800 mt-6 mb-3">
+            {t.weatherConditions}
+        </h2>
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-4 border border-gray-100">
+            <div className="p-5">
+                {/* Date selector */}
+                <div className="flex overflow-x-auto hide-scrollbar mb-6">
+                    {[
+                        "Sat",
+                        "Sun",
+                        "Mon",
+                        "Tue",
+                        "Wed",
+                        "Thu",
+                        "Fri",
+                    ].map((day, index) => {
+                        // Generate dates dynamically starting from today
+                        const date = new Date();
+                        date.setDate(date.getDate() + index);
+                        const dayNum = date.getDate();
+                        const isToday = index === 0;
+
+                        return (
+                            <div
+                                key={index}
+                                className="flex flex-col items-center mr-8"
+                            >
+                                <span className="text-sm text-gray-500 mb-1">
+                                    {day}
+                                </span>
+                                <div
+                                    className={`w-12 h-12 rounded-full flex items-center justify-center text-lg ${
+                                        isToday
+                                            ? "bg-green-900 text-white"
+                                            : "text-gray-700"
+                                    }`}
+                                >
+                                    {dayNum}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* Current temperature and conditions */}
+                <div className="flex items-start justify-between mb-2">
+                    <div>
+                        <div className="text-7xl font-normal text-green-900 mb-1">
+                            13°
+                        </div>
+                        <div className="text-xl text-gray-700 mb-1">
+                            {t.showers}
+                        </div>
+                        <div className="text-lg text-gray-500">
+                            {t.highLowTemp}
+                        </div>
+                    </div>
+                    <div className="flex flex-col items-end">
+                        <div className="flex items-center mb-2">
+                            <Droplets
+                                size={18}
+                                className="text-gray-500 mr-1"
+                            />
+                            <span className="text-lg text-gray-700">
+                                {t.precipitationPercent}
+                            </span>
+                        </div>
+                        <div className="flex items-center text-lg text-gray-500 mb-2">
+                            <Sunrise size={18} className="mr-1" />
+                            <span>{t.sunriseTime}</span>
+                        </div>
+                        <div className="flex items-center text-lg text-gray-500">
+                            <Sunset size={18} className="mr-1" />
+                            <span>{t.sunsetTime}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {/* Horizontal scrollable cards section */}
+        <div className="flex overflow-x-auto pb-4 hide-scrollbar space-x-4 mb-6">
+            {/* Weather along trail card */}
+            <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 min-w-[85%] flex-shrink-0">
+                <div className="flex justify-between items-center mb-3">
+                    <h4 className="text-lg text-gray-700">
+                        {t.weatherAlongTrail}
+                    </h4>
+                    <select className="text-sm text-gray-700 bg-gray-100 rounded-full px-3 py-1 border-none">
+                        <option>11:00 PM</option>
+                        <option>12:00 AM</option>
+                        <option>1:00 AM</option>
+                    </select>
+                </div>
+
+                <div className="relative h-24 mb-2">
+                    {/* The trail graph */}
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="h-1 bg-green-700 w-full rounded-full"></div>
+                    </div>
+                    {/* Temperature point */}
+                    <div className="absolute top-1/2 left-1/3 transform -translate-y-1/2">
+                        <div className="w-4 h-4 bg-white rounded-full border-2 border-green-700 relative">
+                            <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xl text-green-900 font-medium">
+                                11°
+                            </div>
+                        </div>
+                    </div>
+                    {/* Path markers */}
+                    <div className="absolute bottom-0 left-0 right-0 flex justify-between text-sm text-gray-500">
+                        <span>0 km</span>
+                        <span>4.7 km</span>
+                        <span>9.4 km</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Ground conditions card */}
+            <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 min-w-[70%] flex-shrink-0">
+                <div className="flex items-start">
+                    <div className="flex-1">
+                        <h4 className="text-lg text-gray-700 mb-3">
+                            Ground
+                        </h4>
+                        <div className="flex items-center">
+                            <div className="w-16 h-16 bg-green-900 rounded-full flex items-center justify-center mr-3">
+                                <Droplets
+                                    size={28}
+                                    className="text-white"
+                                />
+                            </div>
+                            <div>
+                                <div className="text-green-900 text-2xl font-medium">
+                                    {t.wetCondition}
+                                </div>
+                                <div className="text-gray-600">
+                                    {t.weatherDataDescription}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div className="text-sm text-gray-500 mb-10 text-center">
+            {t.weatherDataDisclaimer}
+        </div>
+
+        {/* Title for Horizontal Scrollable Information Cards */}
+        <h2 className="font-bold text-lg text-gray-800 mb-3 flex items-center">
+            {language === "en" 
+                ? "Visitor Information" 
+                : language === "id" 
+                    ? "Informasi Pengunjung" 
+                    : "游客信息"}
+        </h2>
+
+        <div className="flex overflow-x-auto hide-scrollbar space-x-4 mb-6">
+            <div className="min-w-[85%]">
+                <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6 border border-gray-100 relative">
+                    <div className="h-48 bg-green-100 relative">
+                        <img
+                            src="https://tracedetrail.fr/traces/maps/MapTrace269148_3463.jpg"
+                            alt="Map"
+                            className="w-full h-full object-cover"
+                        />
+                        <div className="absolute bottom-3 right-3">
+                            <button className="bg-white rounded-full p-2 shadow-md">
+                                <MapPin
+                                    size={20}
+                                    className="text-green-500"
+                                />
+                            </button>
+                        </div>
+                    </div>
+                    <div className="p-4">
+                        <div className="flex justify-between items-center mb-2">
+                            <h3 className="font-medium text-gray-800">
+                                {t.exploreRoutes}
+                            </h3>
+                        </div>
+                        <p className="text-xs text-gray-500 mb-3">
+                            {t.routeDescription}
+                        </p>
+                        <button
+                            className="w-full flex justify-center items-center py-2.5 text-white text-sm font-medium bg-green-500 hover:bg-green-600 rounded-lg transition-colors"
+                            onClick={() => {
+                                setShowingRegistrationVideo(false);
+                                setShowVideoPopup(true);
+                            }}
+                        >
+                            <Map size={18} className="mr-2" />
+                            {t.viewFullMap}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div className="min-w-[85%]">                            
+                {/* Video Animation Guide */}
+                <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-4 border border-gray-100">
+                    <div className="relative h-48">
+                        <img 
+                            src="https://img.freepik.com/free-vector/online-app-tourism-traveler-with-mobile-phone-map-building_74855-10966.jpg" 
+                            alt="Registration Guide"
+                            className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+                            <button 
+                                onClick={() => {
+                                    setShowingRegistrationVideo(true);
+                                    setShowVideoPopup(true)
+                                }} 
+                                className="bg-white bg-opacity-90 text-green-600 rounded-full p-4 shadow-lg hover:bg-opacity-100 transition"
+                            >
+                                <Play size={30} />
+                            </button>
+                        </div>
+                    </div>
+                    <div className="p-4">
+                        <h3 className="font-medium text-gray-800 mb-2">{t.howToRegister}</h3>
+                        <p className="text-xs text-gray-600 mb-3">
+                            {language === "en" 
+                                ? "Learn how to complete your health screening registration with our simple guide." 
+                                : language === "id" 
+                                    ? "Pelajari cara menyelesaikan pendaftaran pemeriksaan kesehatan Anda dengan panduan sederhana kami."
+                                    : "通过我们简单的指南，了解如何完成健康检查注册。"}
+                        </p>
+                        <button 
+                            onClick={() => {
+                                setShowingRegistrationVideo(true);
+                                setShowVideoPopup(true);
+                            }}
+                            className="w-full flex justify-center items-center py-2.5 text-white text-sm font-medium bg-green-500 hover:bg-green-600 rounded-lg transition-colors"
+                        >
+                            <Play size={16} className="mr-2" />
+                            {t.watchVideo}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div className="min-w-[85%]">
+                {/* Infographic Card */}
+                <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-4 border border-gray-100">
+                    <div className="relative h-48">
+                        <img 
+                            src="/assets/img/infografik1.png" 
+                            alt="Kawah Ijen Infographic"
+                            className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-3 right-3">
+                            <div className="bg-white bg-opacity-90 text-green-600 rounded-full p-2 shadow-md">
+                                <FileImage size={20} />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="p-4">
+                        <h3 className="font-medium text-gray-800 mb-2">
+                            {language === "en" 
+                                ? "Registration Process" 
+                                : language === "id" 
+                                    ? "Proses Pendaftaran" 
+                                    : "注册流程"}
+                        </h3>
+                        <p className="text-xs text-gray-600 mb-3">
+                            {language === "en" 
+                                ? "Complete guide from registration to entering Kawah Ijen gate." 
+                                : language === "id" 
+                                    ? "Panduan lengkap dari pendaftaran hingga memasuki gerbang Kawah Ijen."
+                                    : "从注册到进入伊真火山口大门的完整指南。"}
+                        </p>
+                        <button 
+                            onClick={() => setShowInfographicImagePopup(true)}
+                            className="w-full flex justify-center items-center py-2.5 text-white text-sm font-medium bg-green-500 hover:bg-green-600 rounded-lg transition-colors"
+                        >
+                            <Maximize2 size={16} className="mr-2" />
+                            {language === "en" 
+                                ? "View Registration Process" 
+                                : language === "id" 
+                                    ? "Lihat Proses Pendaftaran" 
+                                    : "查看注册流程"}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {/* Preparation Checklist - Horizontal Scrollable Cards */}
+        <h2 className="font-bold text-lg mb-3 text-gray-800 flex items-center">
+            {t.prepare}
+        </h2>
+
+        <div className="mb-6 px-5 -mx-5">
+            <div className="flex overflow-x-auto pb-4 px-5 hide-scrollbar snap-x">
+                {/* Card 1 - Warm Clothing */}
+                <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
+                    <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-500 mb-3">
+                        <Thermometer size={22} />
+                    </div>
+                    <h3 className="font-medium text-gray-800 mb-1">
+                        {t.warmClothing}
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                        {t.warmClothingDesc}
+                    </p>
+                </div>
+
+                {/* Card 2 - Gas Mask */}
+                <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
+                    <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-500 mb-3">
+                        <Wind size={22} />
+                    </div>
+                    <h3 className="font-medium text-gray-800 mb-1">
+                        {t.gasMask}
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                        {t.gasMaskDesc}
+                    </p>
+                </div>
+
+                {/* Card 3 - Water & Snacks */}
+                <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
+                    <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-500 mb-3">
+                        <Droplets size={22} />
+                    </div>
+                    <h3 className="font-medium text-gray-800 mb-1">
+                        {t.waterSnacks}
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                        {t.waterSnacksDesc}
+                    </p>
+                </div>
+
+                {/* Card 4 - Proper Footwear */}
+                <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
+                    <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 mb-3">
+                        <Footprints size={22} />
+                    </div>
+                    <h3 className="font-medium text-gray-800 mb-1">
+                        {t.properFootwear}
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                        {t.footwearDesc}
+                    </p>
+                </div>
+
+                {/* Card 5 - Headlamp */}
+                <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
+                    <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-500 mb-3">
+                        <Flashlight size={22} />
+                    </div>
+                    <h3 className="font-medium text-gray-800 mb-1">
+                        {t.headlamp}
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                        {t.headlampDesc}
+                    </p>
+                </div>
+
+                {/* Card 6 - Rain Gear */}
+                <div className="bg-white rounded-xl shadow-sm p-4 mr-5 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
+                    <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-500 mb-3">
+                        <Umbrella size={22} />
+                    </div>
+                    <h3 className="font-medium text-gray-800 mb-1">
+                        {t.rainGear}
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                        {t.rainGearDesc}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </>
+    )
     const HomeScreen = () => {
         return (
             <div className="min-h-screen bg-gray-50 pb-20">
@@ -732,45 +1272,57 @@ const App = () => {
                             <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-3">
                                 <Home size={20} className="text-white" />
                             </div>
-                            <span className="text-green-500 font-medium">Kawah Ijen</span>
+                            <span className="text-green-500 font-medium">{t.kawahIjenTitle}</span>
                         </div>
-                        <div className="bg-gray-100 rounded-full p-2">
-                            <User size={20} className="text-gray-500" />
+                        <div className="flex items-center gap-3">
+                            {/* Language selector */}
+                            <select 
+                                className="bg-gray-100 rounded-md py-1 text-sm text-gray-700 border-none"
+                                value={language}
+                                onChange={(e) => setLanguage(e.target.value)}
+                            >
+                                <option value="en">EN</option>
+                                <option value="id">ID</option>
+                                <option value="zh">ZH</option>
+                            </select>
+                            <div className="bg-gray-100 rounded-full p-2">
+                                <User size={20} className="text-gray-500" />
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div className="px-5 py-6">
                     <h1 className="text-3xl font-bold text-gray-800 mb-6">
-                        Kawah Ijen Health Verification
+                        {t.kawahIjenVerification}
                     </h1>
-
+    
                     {/* Health screening card */}
                     <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                         <h2 className="font-bold text-xl text-gray-800 mb-2">
-                            Book Your Health Check
+                            {t.bookHealthCheck}
                         </h2>
                         <p className="text-gray-600 mb-6">
-                            Complete a mandatory health check before hiking at Kawah Ijen. The examination takes only 10-15 minutes.
+                            {t.healthCheckDescription}
                         </p>
-
+    
                         <button
                             onClick={() => setCurrentScreen("form1")}
                             className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center"
                         >
-                            Book Health Check
+                            {t.bookHealthCheckBtn}
                         </button>
                     </div>
                 </div>                
                 {/* Main content area with cards */}
                 <div className="px-5">
-
+    
                     {/* Recent submissions carousel */}
                     <h2 className="font-bold text-lg text-gray-800 mb-3 flex items-center">
                         {t.recentSubmissions}
                         {screeningData.filter(
                             (item) => item.status === "pending"
                         ).length > 0 && (
-                            <span className="bg-green-100 text-green-600 text-xs font-medium px-2 py-0.5 rounded-full ml-2">
+                            <span className="bg-yellow-100 text-yellow-600 text-xs font-medium px-2 py-0.5 rounded-full ml-2">
                                 {
                                     screeningData.filter(
                                         (item) => item.status === "pending"
@@ -780,7 +1332,7 @@ const App = () => {
                             </span>
                         )}
                     </h2>
-
+    
                     <div className="relative">
                         {screeningData.length > 0 ? (
                             <div className="flex overflow-x-auto pb-4 -mx-2 snap-x hide-scrollbar">
@@ -904,294 +1456,12 @@ const App = () => {
                             </div>
                         )}
                     </div>
-                    {/* Dynamic Weather Forecast Card - Main Section */}
-                    <h2 className="font-bold text-lg text-gray-800 mt-6 mb-3">
-                        Conditions
-                    </h2>
-                    <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-4 border border-gray-100">
-                        <div className="p-5">
-                            {/* Date selector */}
-                            <div className="flex overflow-x-auto hide-scrollbar mb-6">
-                                {[
-                                    "Sat",
-                                    "Sun",
-                                    "Mon",
-                                    "Tue",
-                                    "Wed",
-                                    "Thu",
-                                    "Fri",
-                                ].map((day, index) => {
-                                    // Generate dates dynamically starting from today
-                                    const date = new Date();
-                                    date.setDate(date.getDate() + index);
-                                    const dayNum = date.getDate();
-                                    const isToday = index === 0;
-
-                                    return (
-                                        <div
-                                            key={index}
-                                            className="flex flex-col items-center mr-8"
-                                        >
-                                            <span className="text-sm text-gray-500 mb-1">
-                                                {day}
-                                            </span>
-                                            <div
-                                                className={`w-12 h-12 rounded-full flex items-center justify-center text-lg ${
-                                                    isToday
-                                                        ? "bg-green-900 text-white"
-                                                        : "text-gray-700"
-                                                }`}
-                                            >
-                                                {dayNum}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-
-                            {/* Current temperature and conditions */}
-                            <div className="flex items-start justify-between mb-2">
-                                <div>
-                                    <div className="text-7xl font-normal text-green-900 mb-1">
-                                        13°
-                                    </div>
-                                    <div className="text-xl text-gray-700 mb-1">
-                                        Showers
-                                    </div>
-                                    <div className="text-lg text-gray-500">
-                                        H:18° L:13°
-                                    </div>
-                                </div>
-                                <div className="flex flex-col items-end">
-                                    <div className="flex items-center mb-2">
-                                        <Droplets
-                                            size={18}
-                                            className="text-gray-500 mr-1"
-                                        />
-                                        <span className="text-lg text-gray-700">
-                                            25%
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center text-lg text-gray-500 mb-2">
-                                        <Sunrise size={18} className="mr-1" />
-                                        <span>5:25 AM</span>
-                                    </div>
-                                    <div className="flex items-center text-lg text-gray-500">
-                                        <Sunset size={18} className="mr-1" />
-                                        <span>5:16 PM</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Horizontal scrollable cards section */}
-                    <div className="flex overflow-x-auto pb-4 hide-scrollbar space-x-4 mb-6">
-                        {/* Weather along trail card */}
-                        <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 min-w-[85%] flex-shrink-0">
-                            <div className="flex justify-between items-center mb-3">
-                                <h4 className="text-lg text-gray-700">
-                                    Weather along trail
-                                </h4>
-                                <select className="text-sm text-gray-700 bg-gray-100 rounded-full px-3 py-1 border-none">
-                                    <option>11:00 PM</option>
-                                    <option>12:00 AM</option>
-                                    <option>1:00 AM</option>
-                                </select>
-                            </div>
-
-                            <div className="relative h-24 mb-2">
-                                {/* The trail graph */}
-                                <div className="absolute inset-0 flex items-center">
-                                    <div className="h-1 bg-green-700 w-full rounded-full"></div>
-                                </div>
-                                {/* Temperature point */}
-                                <div className="absolute top-1/2 left-1/3 transform -translate-y-1/2">
-                                    <div className="w-4 h-4 bg-white rounded-full border-2 border-green-700 relative">
-                                        <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xl text-green-900 font-medium">
-                                            11°
-                                        </div>
-                                    </div>
-                                </div>
-                                {/* Path markers */}
-                                <div className="absolute bottom-0 left-0 right-0 flex justify-between text-sm text-gray-500">
-                                    <span>0 km</span>
-                                    <span>4.7 km</span>
-                                    <span>9.4 km</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Ground conditions card */}
-                        <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 min-w-[70%] flex-shrink-0">
-                            <div className="flex items-start">
-                                <div className="flex-1">
-                                    <h4 className="text-lg text-gray-700 mb-3">
-                                        Ground
-                                    </h4>
-                                    <div className="flex items-center">
-                                        <div className="w-16 h-16 bg-green-900 rounded-full flex items-center justify-center mr-3">
-                                            <Droplets
-                                                size={28}
-                                                className="text-white"
-                                            />
-                                        </div>
-                                        <div>
-                                            <div className="text-green-900 text-2xl font-medium">
-                                                Wet
-                                            </div>
-                                            <div className="text-gray-600">
-                                                11.06 mm in 72 hours
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="text-sm text-gray-500 mb-6 text-center">
-                        Data is based on past, current, and forecasted local
-                        weather. Accuracy is not guaranteed.
-                    </div>
-
-                    {/* Interactive Map Card */}
-                    <h2 className="font-bold text-lg text-gray-800 mb-3">
-                        {t.track}
-                    </h2>
-
-                    <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6 border border-gray-100 relative">
-                        <div className="h-48 bg-green-100 relative">
-                            <img
-                                src="https://tracedetrail.fr/traces/maps/MapTrace269148_3463.jpg"
-                                alt="Map"
-                                className="w-full h-full object-cover"
-                            />
-                            <div className="absolute bottom-3 right-3">
-                                <button className="bg-white rounded-full p-2 shadow-md">
-                                    <MapPin
-                                        size={20}
-                                        className="text-green-500"
-                                    />
-                                </button>
-                            </div>
-                        </div>
-                        <div className="p-4">
-                            <div className="flex justify-between items-center mb-2">
-                                <h3 className="font-medium text-gray-800">
-                                    {t.exploreRoutes}
-                                </h3>
-                                <span className="text-xs text-gray-500">
-                                    {t.interactiveMap}
-                                </span>
-                            </div>
-                            <p className="text-xs text-gray-500 mb-3">
-                                {t.routeDescription}
-                            </p>
-                            <button
-                                className="w-full flex justify-center items-center py-2.5 text-white text-sm font-medium bg-green-500 hover:bg-green-600 rounded-lg transition-colors"
-                                onClick={() => setShowVideoPopup(true)}
-                            >
-                                <Map size={18} className="mr-2" />
-                                {t.viewFullMap}
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Preparation Checklist - Horizontal Scrollable Cards */}
-                    <h2 className="font-bold text-lg mb-3 text-gray-800 flex items-center">
-                        {t.prepare}
-                        <span className="text-xs text-gray-500 font-normal ml-2">
-                            {t.essentialItems}
-                        </span>
-                    </h2>
-
-                    <div className="mb-6 px-5 -mx-5">
-                        <div className="flex overflow-x-auto pb-4 px-5 hide-scrollbar snap-x">
-                            {/* Card 1 - Warm Clothing */}
-                            <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
-                                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-500 mb-3">
-                                    <Thermometer size={22} />
-                                </div>
-                                <h3 className="font-medium text-gray-800 mb-1">
-                                    {t.warmClothing}
-                                </h3>
-                                <p className="text-xs text-gray-500">
-                                    {t.warmClothingDesc}
-                                </p>
-                            </div>
-
-                            {/* Card 2 - Gas Mask */}
-                            <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
-                                <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-500 mb-3">
-                                    <Wind size={22} />
-                                </div>
-                                <h3 className="font-medium text-gray-800 mb-1">
-                                    {t.gasMask}
-                                </h3>
-                                <p className="text-xs text-gray-500">
-                                    {t.gasMaskDesc}
-                                </p>
-                            </div>
-
-                            {/* Card 3 - Water & Snacks */}
-                            <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
-                                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-500 mb-3">
-                                    <Droplets size={22} />
-                                </div>
-                                <h3 className="font-medium text-gray-800 mb-1">
-                                    {t.waterSnacks}
-                                </h3>
-                                <p className="text-xs text-gray-500">
-                                    {t.waterSnacksDesc}
-                                </p>
-                            </div>
-
-                            {/* Card 4 - Proper Footwear */}
-                            <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
-                                <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 mb-3">
-                                    <Footprints size={22} />
-                                </div>
-                                <h3 className="font-medium text-gray-800 mb-1">
-                                    {t.properFootwear}
-                                </h3>
-                                <p className="text-xs text-gray-500">
-                                    {t.footwearDesc}
-                                </p>
-                            </div>
-
-                            {/* Card 5 - Headlamp */}
-                            <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
-                                <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-500 mb-3">
-                                    <Flashlight size={22} />
-                                </div>
-                                <h3 className="font-medium text-gray-800 mb-1">
-                                    {t.headlamp}
-                                </h3>
-                                <p className="text-xs text-gray-500">
-                                    {t.headlampDesc}
-                                </p>
-                            </div>
-
-                            {/* Card 6 - Rain Gear */}
-                            <div className="bg-white rounded-xl shadow-sm p-4 mr-5 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
-                                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-500 mb-3">
-                                    <Umbrella size={22} />
-                                </div>
-                                <h3 className="font-medium text-gray-800 mb-1">
-                                    {t.rainGear}
-                                </h3>
-                                <p className="text-xs text-gray-500">
-                                    {t.rainGearDesc}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                    {partialInfo()}
                 </div>
-
+    
                 {/* Add a subtle flare on the bottom nav */}
                 {renderBottomNav()}
-
+    
                 {/* Add floating action button */}
                 <button
                     onClick={() => setCurrentScreen("form1")}
@@ -1211,333 +1481,69 @@ const App = () => {
                     </h1>
                 </div>
 
-                {/* Main content area with cards */}
                 <div className="px-5">
-                    {/* Dynamic Weather Forecast Card - Main Section */}
-                    <h2 className="font-bold text-lg text-gray-800 mt-6 mb-3">
-                        Conditions
-                    </h2>
-                    <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-4 border border-gray-100">
-                        <div className="p-5">
-                            {/* Date selector */}
-                            <div className="flex overflow-x-auto hide-scrollbar mb-6">
-                                {[
-                                    "Sat",
-                                    "Sun",
-                                    "Mon",
-                                    "Tue",
-                                    "Wed",
-                                    "Thu",
-                                    "Fri",
-                                ].map((day, index) => {
-                                    // Generate dates dynamically starting from today
-                                    const date = new Date();
-                                    date.setDate(date.getDate() + index);
-                                    const dayNum = date.getDate();
-                                    const isToday = index === 0;
-
-                                    return (
-                                        <div
-                                            key={index}
-                                            className="flex flex-col items-center mr-8"
-                                        >
-                                            <span className="text-sm text-gray-500 mb-1">
-                                                {day}
-                                            </span>
-                                            <div
-                                                className={`w-12 h-12 rounded-full flex items-center justify-center text-lg ${
-                                                    isToday
-                                                        ? "bg-green-900 text-white"
-                                                        : "text-gray-700"
-                                                }`}
-                                            >
-                                                {dayNum}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-
-                            {/* Current temperature and conditions */}
-                            <div className="flex items-start justify-between mb-2">
-                                <div>
-                                    <div className="text-7xl font-normal text-green-900 mb-1">
-                                        13°
-                                    </div>
-                                    <div className="text-xl text-gray-700 mb-1">
-                                        Showers
-                                    </div>
-                                    <div className="text-lg text-gray-500">
-                                        H:18° L:13°
-                                    </div>
-                                </div>
-                                <div className="flex flex-col items-end">
-                                    <div className="flex items-center mb-2">
-                                        <Droplets
-                                            size={18}
-                                            className="text-gray-500 mr-1"
-                                        />
-                                        <span className="text-lg text-gray-700">
-                                            25%
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center text-lg text-gray-500 mb-2">
-                                        <Sunrise size={18} className="mr-1" />
-                                        <span>5:25 AM</span>
-                                    </div>
-                                    <div className="flex items-center text-lg text-gray-500">
-                                        <Sunset size={18} className="mr-1" />
-                                        <span>5:16 PM</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Horizontal scrollable cards section */}
-                    <div className="flex overflow-x-auto pb-4 hide-scrollbar space-x-4 mb-6">
-                        {/* Weather along trail card */}
-                        <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 min-w-[85%] flex-shrink-0">
-                            <div className="flex justify-between items-center mb-3">
-                                <h4 className="text-lg text-gray-700">
-                                    Weather along trail
-                                </h4>
-                                <select className="text-sm text-gray-700 bg-gray-100 rounded-full px-3 py-1 border-none">
-                                    <option>11:00 PM</option>
-                                    <option>12:00 AM</option>
-                                    <option>1:00 AM</option>
-                                </select>
-                            </div>
-
-                            <div className="relative h-24 mb-2">
-                                {/* The trail graph */}
-                                <div className="absolute inset-0 flex items-center">
-                                    <div className="h-1 bg-green-700 w-full rounded-full"></div>
-                                </div>
-                                {/* Temperature point */}
-                                <div className="absolute top-1/2 left-1/3 transform -translate-y-1/2">
-                                    <div className="w-4 h-4 bg-white rounded-full border-2 border-green-700 relative">
-                                        <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-xl text-green-900 font-medium">
-                                            11°
-                                        </div>
-                                    </div>
-                                </div>
-                                {/* Path markers */}
-                                <div className="absolute bottom-0 left-0 right-0 flex justify-between text-sm text-gray-500">
-                                    <span>0 km</span>
-                                    <span>4.7 km</span>
-                                    <span>9.4 km</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Ground conditions card */}
-                        <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 min-w-[70%] flex-shrink-0">
-                            <div className="flex items-start">
-                                <div className="flex-1">
-                                    <h4 className="text-lg text-gray-700 mb-3">
-                                        Ground
-                                    </h4>
-                                    <div className="flex items-center">
-                                        <div className="w-16 h-16 bg-green-900 rounded-full flex items-center justify-center mr-3">
-                                            <Droplets
-                                                size={28}
-                                                className="text-white"
-                                            />
-                                        </div>
-                                        <div>
-                                            <div className="text-green-900 text-2xl font-medium">
-                                                Wet
-                                            </div>
-                                            <div className="text-gray-600">
-                                                11.06 mm in 72 hours
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="text-sm text-gray-500 mb-6 text-center">
-                        Data is based on past, current, and forecasted local
-                        weather. Accuracy is not guaranteed.
-                    </div>
-
-                    {/* Interactive Map Card */}
-                    <h2 className="font-bold text-lg text-gray-800 mb-3">
-                        {t.track}
-                    </h2>
-
-                    <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6 border border-gray-100 relative">
-                        <div className="h-48 bg-green-100 relative">
-                            <img
-                                src="https://tracedetrail.fr/traces/maps/MapTrace269148_3463.jpg"
-                                alt="Map"
-                                className="w-full h-full object-cover"
-                            />
-                            <div className="absolute bottom-3 right-3">
-                                <button className="bg-white rounded-full p-2 shadow-md">
-                                    <MapPin
-                                        size={20}
-                                        className="text-green-500"
-                                    />
-                                </button>
-                            </div>
-                        </div>
-                        <div className="p-4">
-                            <div className="flex justify-between items-center mb-2">
-                                <h3 className="font-medium text-gray-800">
-                                    {t.exploreRoutes}
-                                </h3>
-                                <span className="text-xs text-gray-500">
-                                    {t.interactiveMap}
-                                </span>
-                            </div>
-                            <p className="text-xs text-gray-500 mb-3">
-                                {t.routeDescription}
-                            </p>
-                            <button
-                                className="w-full flex justify-center items-center py-2.5 text-white text-sm font-medium bg-green-500 hover:bg-green-600 rounded-lg transition-colors"
-                                onClick={() => setShowVideoPopup(true)}
-                            >
-                                <Map size={18} className="mr-2" />
-                                {t.viewFullMap}
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Preparation Checklist - Horizontal Scrollable Cards */}
-                    <h2 className="font-bold text-lg mb-3 text-gray-800 flex items-center">
-                        {t.prepare}
-                        <span className="text-xs text-gray-500 font-normal ml-2">
-                            {t.essentialItems}
-                        </span>
-                    </h2>
-
-                    <div className="mb-6 px-5 -mx-5">
-                        <div className="flex overflow-x-auto pb-4 px-5 hide-scrollbar snap-x">
-                            {/* Card 1 - Warm Clothing */}
-                            <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
-                                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-500 mb-3">
-                                    <Thermometer size={22} />
-                                </div>
-                                <h3 className="font-medium text-gray-800 mb-1">
-                                    {t.warmClothing}
-                                </h3>
-                                <p className="text-xs text-gray-500">
-                                    {t.warmClothingDesc}
-                                </p>
-                            </div>
-
-                            {/* Card 2 - Gas Mask */}
-                            <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
-                                <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-500 mb-3">
-                                    <Wind size={22} />
-                                </div>
-                                <h3 className="font-medium text-gray-800 mb-1">
-                                    {t.gasMask}
-                                </h3>
-                                <p className="text-xs text-gray-500">
-                                    {t.gasMaskDesc}
-                                </p>
-                            </div>
-
-                            {/* Card 3 - Water & Snacks */}
-                            <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
-                                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-500 mb-3">
-                                    <Droplets size={22} />
-                                </div>
-                                <h3 className="font-medium text-gray-800 mb-1">
-                                    {t.waterSnacks}
-                                </h3>
-                                <p className="text-xs text-gray-500">
-                                    {t.waterSnacksDesc}
-                                </p>
-                            </div>
-
-                            {/* Card 4 - Proper Footwear */}
-                            <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
-                                <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 mb-3">
-                                    <Footprints size={22} />
-                                </div>
-                                <h3 className="font-medium text-gray-800 mb-1">
-                                    {t.properFootwear}
-                                </h3>
-                                <p className="text-xs text-gray-500">
-                                    {t.footwearDesc}
-                                </p>
-                            </div>
-
-                            {/* Card 5 - Headlamp */}
-                            <div className="bg-white rounded-xl shadow-sm p-4 mr-3 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
-                                <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-500 mb-3">
-                                    <Flashlight size={22} />
-                                </div>
-                                <h3 className="font-medium text-gray-800 mb-1">
-                                    {t.headlamp}
-                                </h3>
-                                <p className="text-xs text-gray-500">
-                                    {t.headlampDesc}
-                                </p>
-                            </div>
-
-                            {/* Card 6 - Rain Gear */}
-                            <div className="bg-white rounded-xl shadow-sm p-4 mr-5 w-[220px] border border-gray-100 flex-shrink-0 snap-start">
-                                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-500 mb-3">
-                                    <Umbrella size={22} />
-                                </div>
-                                <h3 className="font-medium text-gray-800 mb-1">
-                                    {t.rainGear}
-                                </h3>
-                                <p className="text-xs text-gray-500">
-                                    {t.rainGearDesc}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                    {partialInfo()}
                 </div>
                 {renderBottomNav()}
             </div>
         );
     };
-    const ScreeningScreen = () => (
-        <div className="min-h-screen bg-gray-50 pb-20">
-            <div className="bg-white p-4 flex items-center shadow-sm">
-                <h1 className="text-xl font-bold text-gray-800 flex-1 text-center">
-                    {t.healthScreening}
-                </h1>
-            </div>
-
-            <div className="p-4 flex space-x-2 mb-2">
-                <button
-                    className={`flex-1 py-2 px-4 rounded-full ${
-                        activeTab === "pending"
-                            ? "bg-green-500 text-white"
-                            : "bg-gray-200 text-gray-800"
-                    } font-medium`}
-                    onClick={() => setActiveTab("pending")}
-                >
-                    {t.pending}
-                </button>
-                <button
-                    className={`flex-1 py-2 px-4 rounded-full ${
-                        activeTab === "complete"
-                            ? "bg-green-500 text-white"
-                            : "bg-gray-200 text-gray-800"
-                    } font-medium`}
-                    onClick={() => setActiveTab("complete")}
-                >
-                    {t.complete}
-                </button>
-            </div>
-
-            <div className="px-4 py-2">
-                {screeningData.filter((item) => item.status === activeTab)
-                    .length > 0 ? (
-                    screeningData
-                        .filter((item) => item.status === activeTab)
-                        .map((screening, index) => (
+    const ScreeningScreen = () => {
+        // Modifikasi untuk menampilkan data terbaru terlebih dahulu
+        const getSortedScreeningData = (status) => {
+            return screeningData
+                .filter(item => item.status === status)
+                .sort((a, b) => {
+                    // Urutkan berdasarkan ID secara descending (ID terbaru di atas)
+                    // Asumsi bahwa ID mengandung timestamp, seperti IJN1745976859708
+                    return b.id.localeCompare(a.id);
+                });
+        };
+    
+        return (
+            <div className="min-h-screen bg-gray-50 pb-20">
+                <div className="bg-white p-4 flex items-center justify-between shadow-sm">
+                    <h1 className="text-xl font-bold text-gray-800 flex-1 text-center">
+                        {t.healthScreening}
+                    </h1>
+                </div>
+    
+                <div className="p-4 flex space-x-2 mb-2">
+                    <button
+                        className={`flex-1 py-2 px-4 rounded-full ${
+                            activeTab === "pending"
+                                ? "bg-green-500 text-white"
+                                : "bg-gray-200 text-gray-800"
+                        } font-medium`}
+                        onClick={() => setActiveTab("pending")}
+                    >
+                        {t.pending}
+                        {screeningData.filter(item => item.status === "pending").length > 0 && (
+                            <span className="ml-2 bg-white text-green-500 text-xs rounded-full px-2 py-0.5">
+                                {screeningData.filter(item => item.status === "pending").length}
+                            </span>
+                        )}
+                    </button>
+                    <button
+                        className={`flex-1 py-2 px-4 rounded-full ${
+                            activeTab === "complete"
+                                ? "bg-green-500 text-white"
+                                : "bg-gray-200 text-gray-800"
+                        } font-medium`}
+                        onClick={() => setActiveTab("complete")}
+                    >
+                        {t.complete}
+                        {screeningData.filter(item => item.status === "complete").length > 0 && (
+                            <span className="ml-2 bg-white text-green-500 text-xs rounded-full px-2 py-0.5">
+                                {screeningData.filter(item => item.status === "complete").length}
+                            </span>
+                        )}
+                    </button>
+                </div>
+    
+                <div className="px-4 py-2">
+                    {getSortedScreeningData(activeTab).length > 0 ? (
+                        getSortedScreeningData(activeTab).map((screening, index) => (
                             <div
                                 key={index}
                                 className="bg-white rounded-xl shadow-sm p-4 mb-4 border border-gray-100"
@@ -1559,7 +1565,7 @@ const App = () => {
                                             <p className="text-xs text-gray-500">
                                                 {screening.date} •{" "}
                                                 {screening.participants.length}{" "}
-                                                participants
+                                                {screening.participants.length > 1 ? t.participants : t.participants.slice(0, -1)}
                                             </p>
                                         </div>
                                     </div>
@@ -1568,11 +1574,19 @@ const App = () => {
                                             activeTab === "pending"
                                                 ? "bg-yellow-100 text-yellow-700"
                                                 : "bg-green-100 text-green-700"
-                                        } text-xs font-medium`}
+                                        } text-xs font-medium flex items-center`}
                                     >
-                                        {activeTab === "pending"
-                                            ? t.pending
-                                            : t.complete}
+                                        {activeTab === "pending" ? (
+                                            <>
+                                                <Clock size={12} className="mr-1" />
+                                                {t.pending}
+                                            </>
+                                        ) : (
+                                            <>
+                                                <CheckCircle size={12} className="mr-1" />
+                                                {t.complete}
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="flex justify-between text-sm text-gray-500 border-t border-gray-100 pt-3 mt-2">
@@ -1592,62 +1606,73 @@ const App = () => {
                                         </p>
                                     </div>
                                 </div>
+                                <button
+                                    className="w-full flex justify-center items-center py-2 mt-2 text-green-500 text-sm font-medium hover:bg-green-50 rounded-lg transition-colors"
+                                    onClick={(e) => {
+                                        e.stopPropagation(); // Mencegah bubble ke div parent
+                                        setSelectedScreeningId(screening.id);
+                                        setCurrentScreen("details");
+                                    }}
+                                >
+                                    {t.viewDetails}
+                                </button>
                             </div>
                         ))
-                ) : (
-                    <div className="bg-white rounded-xl shadow-sm p-6 text-center">
-                        <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                            {activeTab === "pending" ? (
-                                <Clock size={24} className="text-gray-400" />
-                            ) : (
-                                <CheckCircle
-                                    size={24}
-                                    className="text-gray-400"
-                                />
-                            )}
+                    ) : (
+                        <div className="bg-white rounded-xl shadow-sm p-6 text-center">
+                            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                                {activeTab === "pending" ? (
+                                    <Clock size={24} className="text-gray-400" />
+                                ) : (
+                                    <CheckCircle
+                                        size={24}
+                                        className="text-gray-400"
+                                    />
+                                )}
+                            </div>
+                            <h3 className="font-medium text-gray-800 mb-1">
+                                {language === "en"
+                                    ? `No ${activeTab} screenings`
+                                    : language === "id"
+                                    ? `Tidak ada pemeriksaan ${
+                                          activeTab === "pending"
+                                              ? "tertunda"
+                                              : "selesai"
+                                      }`
+                                    : `没有${
+                                          activeTab === "pending"
+                                              ? "待处理"
+                                              : "已完成"
+                                      }的筛查`}
+                            </h3>
+                            <p className="text-sm text-gray-500 mb-4">
+                                {language === "en"
+                                    ? "Schedule a health screening to see it here"
+                                    : language === "id"
+                                    ? "Jadwalkan pemeriksaan kesehatan untuk melihatnya di sini"
+                                    : "安排健康筛查以在此处查看"}
+                            </p>
+                            <button
+                                onClick={() => setCurrentScreen("form1")}
+                                className="text-green-500 text-sm font-medium"
+                            >
+                                {t.startHealthCheck} →
+                            </button>
                         </div>
-                        <h3 className="font-medium text-gray-800 mb-1">
-                            {language === "en"
-                                ? `No ${activeTab} screenings`
-                                : language === "id"
-                                ? `Tidak ada pemeriksaan ${
-                                      activeTab === "pending"
-                                          ? "tertunda"
-                                          : "selesai"
-                                  }`
-                                : `没有${
-                                      activeTab === "pending"
-                                          ? "待处理"
-                                          : "已完成"
-                                  }的筛查`}
-                        </h3>
-                        <p className="text-sm text-gray-500 mb-4">
-                            {language === "en"
-                                ? "Schedule a health screening to see it here"
-                                : language === "id"
-                                ? "Jadwalkan pemeriksaan kesehatan untuk melihatnya di sini"
-                                : "安排健康筛查以在此处查看"}
-                        </p>
-                        <button
-                            onClick={() => setCurrentScreen("form1")}
-                            className="text-green-500 text-sm font-medium"
-                        >
-                            {t.startHealthCheck} →
-                        </button>
-                    </div>
-                )}
+                    )}
+                </div>
+    
+                <button
+                    className="fixed right-6 bottom-20 w-14 h-14 rounded-full bg-green-500 flex items-center justify-center shadow-lg text-white"
+                    onClick={() => setCurrentScreen("form1")}
+                >
+                    <Plus size={24} />
+                </button>
+    
+                {renderBottomNav()}
             </div>
-
-            <button
-                className="fixed right-6 bottom-20 w-14 h-14 rounded-full bg-green-500 flex items-center justify-center shadow-lg text-white"
-                onClick={() => setCurrentScreen("form1")}
-            >
-                <Plus size={24} />
-            </button>
-
-            {renderBottomNav()}
-        </div>
-    );
+        );
+    };
     const ProfileScreen = () => {
         const [showPartnerForm, setShowPartnerForm] = useState(false);
 
@@ -1732,7 +1757,7 @@ const App = () => {
                             <ChevronRight size={20} className="text-white" />
                         </button>
 
-                        <button className="w-full flex justify-between items-center p-4 bg-white rounded-xl shadow-sm mb-4">
+                        <div className="w-full flex justify-between items-center p-4 bg-white rounded-xl shadow-sm mb-4">
                             <div className="flex items-center">
                                 <Globe
                                     size={20}
@@ -1741,19 +1766,17 @@ const App = () => {
                                 <span>{t.language}</span>
                             </div>
                             <div className="flex items-center">
-                                <span className="text-gray-500 mr-2">
-                                    {language === "en"
-                                        ? "English"
-                                        : language === "id"
-                                        ? "Bahasa"
-                                        : "中文"}
-                                </span>
-                                <ChevronRight
-                                    size={20}
-                                    className="text-gray-400"
-                                />
+                                <select 
+                                    value={language}
+                                    onChange={(e) => setLanguage(e.target.value)}
+                                    className="bg-gray-100 rounded-md py-2 text-gray-700 border-none appearance-none mr-2"
+                                >
+                                    <option value="en">EN</option>
+                                    <option value="id">ID</option>
+                                    <option value="zh">ZH</option>
+                                </select>
                             </div>
-                        </button>
+                        </div>
 
                         <button className="w-full flex justify-between items-center p-4 bg-white rounded-xl shadow-sm">
                             <div className="flex items-center">
@@ -2027,8 +2050,7 @@ const App = () => {
                                                 className="text-green-500 mx-auto mb-2"
                                             />
                                             <p className="text-sm text-gray-600">
-                                                Click to select your location on
-                                                map
+                                                {t.selectLocationMap}
                                             </p>
                                         </div>
                                     </div>
@@ -2442,17 +2464,17 @@ const App = () => {
                     <button onClick={() => setCurrentScreen("home")} className="mr-2">
                         <ArrowLeft size={24} className="text-gray-800" />
                     </button>
-                    <h1 className="text-xl font-bold">Ijen Health Guardian</h1>
+                    <h1 className="text-xl font-bold">{t.appName}</h1>
                 </div>
 
                 {/* City selection tabs */}
                 <div className="p-4">
-                    <h1 className="text-2xl font-bold text-gray-800 mb-2">Schedule Appointment</h1>
-                    <p className="text-gray-600 mb-6">Select a date, location, and time for your health screening.</p>
+                    <h1 className="text-2xl font-bold text-gray-800 mb-2">{t.scheduleAppointment}</h1>
+                    <p className="text-gray-600 mb-6">{t.selectDateTimeLocation}</p>
                     
-                    <div className="bg-white rounded-xl shadow-sm p-4 border mb-4 shadow-sm">
-                        <h2 className="text-xl font-bold text-gray-800 mb-1">1. Select Date</h2>
-                        <p className="text-gray-600 mb-4">Choose a date up to 14 days before your planned visit.</p>
+                    <div className="bg-white rounded-xl p-4 border mb-4 shadow-sm">
+                        <h2 className="text-xl font-bold text-gray-800 mb-1">{t.selectDateStep}</h2>
+                        <p className="text-gray-600 mb-4">{t.chooseDate}</p>
 
                         <div className="flex overflow-x-auto pb-2 mb-4 space-x-2">
                             {dates.map((date, index) => (
@@ -2601,7 +2623,7 @@ const App = () => {
                                     ) : (
                                         <div className="text-center py-6 bg-white rounded-xl shadow-sm">
                                             <p className="text-gray-500">
-                                                No locations found
+                                                {t.noLocationsFound}
                                             </p>
                                         </div>
                                     )}
@@ -2662,7 +2684,7 @@ const App = () => {
                                         {participantCount}
                                     </span>
                                     <p className="text-xs text-gray-500">
-                                        People
+                                        {t.peopleLabel}
                                     </p>
                                 </div>
                                 <button
@@ -3015,7 +3037,7 @@ const App = () => {
                                                     ? "border-red-500"
                                                     : "border-gray-300"
                                             } rounded-lg p-3`}
-                                            placeholder="YYYY"
+                                            placeholder={t.birthYearPlaceholder}
                                             min="1900"
                                             max={new Date().getFullYear()}
                                         />
@@ -3113,10 +3135,9 @@ const App = () => {
                                             </p>
                                         )}
                                         <p className="text-xs text-gray-500 mt-1">
-                                            {participant.nationality ===
-                                            "Indonesia"
-                                                ? "KTP must be 16 digits"
-                                                : "Passport must be 8-9 alphanumeric characters"}
+                                            {participant.nationality === "Indonesia"
+                                                ? t.ktpValidation
+                                                : t.passportValidation}
                                         </p>
                                     </div>
                                 </div>
@@ -3372,7 +3393,7 @@ const App = () => {
                                 </div>
                                 <div className="flex-1">
                                     <h3 className="font-medium">
-                                        Credit/Debit Card
+                                        {t.creditCard}
                                     </h3>
                                     <p className="text-xs text-gray-500">
                                         {t.instantVerification}
@@ -3399,7 +3420,7 @@ const App = () => {
                                     )}
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="font-medium">QRIS</h3>
+                                    <h3 className="font-medium">{t.qrisPayment}</h3>
                                     <p className="text-xs text-gray-500">
                                         {t.instantVerification}
                                     </p>
@@ -3424,7 +3445,7 @@ const App = () => {
                                     )}
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="font-medium">OVO</h3>
+                                    <h3 className="font-medium">{t.ovoPayment}</h3>
                                     <p className="text-xs text-gray-500">
                                         {t.instantVerification}
                                     </p>
@@ -3441,7 +3462,7 @@ const App = () => {
                             {/* Virtual Account Section Header */}
                             <div className="pt-2 pb-1">
                                 <h3 className="text-sm font-medium text-gray-600">
-                                    Virtual Account
+                                {t.virtualAccount}
                                 </h3>
                             </div>
 
@@ -3457,7 +3478,7 @@ const App = () => {
                                 </div>
                                 <div className="flex-1">
                                     <h3 className="font-medium">
-                                        BNI Virtual Account
+                                    {t.bniVirtualAccount}
                                     </h3>
                                     <p className="text-xs text-gray-500">
                                         {t.instantVerification}
@@ -3484,7 +3505,7 @@ const App = () => {
                                 </div>
                                 <div className="flex-1">
                                     <h3 className="font-medium">
-                                        BRI Virtual Account
+                                    {t.briVirtualAccount}
                                     </h3>
                                     <p className="text-xs text-gray-500">
                                         {t.instantVerification}
@@ -3513,7 +3534,7 @@ const App = () => {
                                 </div>
                                 <div className="flex-1">
                                     <h3 className="font-medium">
-                                        Mandiri Virtual Account
+                                    {t.mandiriVirtualAccount}
                                     </h3>
                                     <p className="text-xs text-gray-500">
                                         {t.instantVerification}
@@ -3549,6 +3570,15 @@ const App = () => {
 
                         {/* Terms and Conditions Agreement Checkbox */}
                         <div className="mb-4 mt-6">
+                            <div className="mb-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                                <div className="flex items-start">
+                                    <AlertCircle size={18} className="text-yellow-600 mr-2 mt-0.5 flex-shrink-0" />
+                                    <p className="text-sm text-yellow-800">
+                                        {t.dataExpiryWarning}
+                                    </p>
+                                </div>
+                            </div>
+
                             <div
                                 className="flex items-start cursor-pointer"
                                 onClick={() => setTermsAgreed(!termsAgreed)}
@@ -3801,12 +3831,7 @@ const App = () => {
     
         // Clean the selectedScreeningId of any quotes
         const cleanedScreeningId = selectedScreeningId ? selectedScreeningId.replace(/^["']|["']$/g, '') : null;
-        
-        // Debug output
-        console.log("Original selectedScreeningId:", selectedScreeningId);
-        console.log("Cleaned selectedScreeningId:", cleanedScreeningId);
-        console.log("All screening IDs:", screeningData.map(s => s.id));
-    
+            
         // Find screening using the cleaned ID
         const screening = screeningData.find(
             (item) => item.id === cleanedScreeningId
@@ -3976,7 +4001,7 @@ const App = () => {
                                         ? participant.allergies
                                             ? `Allergies: ${participant.allergies}`
                                             : "Has medical history"
-                                        : "No medical history"}
+                                        : t.noMedicalHistory}
                                 </p>
                             </div>
                         ))}
@@ -4386,12 +4411,14 @@ const App = () => {
         );
     };
 
-    const VideoPopup = () => (
+    const VideoPopup = ({ videoType = "map" }) => (
         <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-xl w-full max-w-4xl overflow-hidden">
                 <div className="p-4 flex justify-between items-center border-b border-gray-200">
                     <h3 className="font-bold text-lg">
-                        {t.ijenCraterExperience}
+                        {videoType === "map" 
+                            ? t.ijenCraterExperience 
+                            : t.registrationGuide}
                     </h3>
                     <button
                         onClick={() => setShowVideoPopup(false)}
@@ -4403,16 +4430,98 @@ const App = () => {
                 <div className="relative h-[50vh]">
                     <iframe
                         className="absolute top-0 left-0 w-full h-full"
-                        src="https://www.youtube.com/embed/eq1Lu4Lr19Y"
-                        title="YouTube video player"
+                        src={videoType === "map" 
+                            ? "https://www.youtube.com/embed/eq1Lu4Lr19Y" // Kawah Ijen video
+                            : "https://www.youtube.com/embed/t73EOoLtLFE" // Contoh video animasi panduan (bisa diganti)
+                        }
+                        title={videoType === "map" ? "Kawah Ijen Experience" : "Registration Guide"}
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
                     ></iframe>
                 </div>
+                {videoType === "guide" && (
+                    <div className="p-4 bg-gray-50 border-t border-gray-200">
+                        <h4 className="font-medium text-gray-800 mb-2">
+                            {language === "en" 
+                                ? "Registration Steps Overview" 
+                                : language === "id" 
+                                    ? "Ringkasan Langkah Pendaftaran" 
+                                    : "注册步骤概述"}
+                        </h4>
+                        <ol className="list-decimal pl-5 text-gray-700 space-y-1 text-sm">
+                            <li>{t.step1Title} - {t.step1Desc}</li>
+                            <li>{t.step2Title} - {t.step2Desc}</li>
+                            <li>{t.step3Title} - {t.step3Desc}</li>
+                            <li>{t.step4Title} - {t.step4Desc}</li>
+                        </ol>
+                        <div className="mt-4 text-center">
+                            <button
+                                onClick={() => {
+                                    setShowVideoPopup(false);
+                                    setCurrentScreen("form1");
+                                }}
+                                className="inline-flex items-center px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-lg transition-colors"
+                            >
+                                {language === "en" ? "Start Registration Now" : language === "id" ? "Mulai Pendaftaran Sekarang" : "立即开始注册"}
+                                <ChevronRight size={16} className="ml-1" />
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
+
+    const InfographicImagePopup = () => (
+        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] overflow-auto">
+                <div className="p-4 flex justify-between items-center border-b border-gray-200">
+                    <h3 className="font-bold text-lg">
+                        {language === "en" 
+                            ? "Registration Process Flow" 
+                            : language === "id" 
+                                ? "Alur Proses Pendaftaran" 
+                                : "注册流程"}
+                    </h3>
+                    <button
+                        onClick={() => setShowInfographicImagePopup(false)}
+                        className="p-2 rounded-full hover:bg-gray-100"
+                    >
+                        <X size={24} className="text-gray-600" />
+                    </button>
+                </div>
+                <div className="p-4">
+                    <img 
+                        src="/assets/img/infografik2.png" 
+                        alt="Registration Process Flow"
+                        className="w-full h-auto rounded-lg" 
+                    />
+                    <div className="mt-4 text-center">
+                        <p className="text-sm text-gray-600 mb-4">
+                            {language === "en" 
+                                ? "This infographic shows the complete registration process from application to entering Kawah Ijen gate. Follow these steps for a smooth experience." 
+                                : language === "id" 
+                                    ? "Infografik ini menunjukkan proses pendaftaran lengkap dari aplikasi hingga memasuki gerbang Kawah Ijen. Ikuti langkah-langkah ini untuk pengalaman yang lancar."
+                                    : "该信息图显示了从应用程序到进入伊真火山口大门的完整注册过程。按照这些步骤获得流畅的体验。"}
+                        </p>
+                        <button
+                            onClick={() => {
+                                setShowInfographicPopup(false);
+                                setCurrentScreen("form1");
+                            }}
+                            className="inline-flex items-center px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-medium rounded-lg transition-colors"
+                        >
+                            {language === "en" ? "Start Registration" : language === "id" ? "Mulai Pendaftaran" : "开始注册"}
+                            <ChevronRight size={20} className="ml-2" />
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
     useEffect(() => {
         // Show loading/onboarding for 1.5 seconds
         const timer = setTimeout(() => {
@@ -4461,7 +4570,9 @@ const App = () => {
     
             {/* Popups are shown regardless of loading state */}
             {showLoginPopup && <LoginPopup />}
-            {showVideoPopup && <VideoPopup />}
+            {showVideoPopup && <VideoPopup videoType={showingRegistrationVideo ? "guide" : "map"} />}
+            {showInfographicPopup && <InfographicPopup />}
+            {showInfographicImagePopup && <InfographicImagePopup />}
         </div>
     );
 };
