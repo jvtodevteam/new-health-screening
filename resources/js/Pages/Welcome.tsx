@@ -79,7 +79,7 @@ const App = () => {
     };
 
     const [currentScreen, setCurrentScreen] = useState(() => {
-        return loadFromLocalStorage("currentScreen", "onboarding");
+        return loadFromLocalStorage("currentScreen", "home");
     });
 
     useEffect(() => {
@@ -603,18 +603,9 @@ const App = () => {
     };
 
     const OnboardingScreen = () => {
-        // Effect untuk menangani loading animation dan redirect ke home
-        React.useEffect(() => {
-            const timer = setTimeout(() => {
-                setIsLoading(false);
-                setCurrentScreen("form1");
-            }, 1500); // 3 detik loading animation
-
-            return () => clearTimeout(timer);
-        }, []);
 
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-b from-green-500 to-indigo-600">
+            <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-b from-green-500 to-green-600">
                 <div className="mb-8 text-center">
                     <div className="bg-white rounded-full p-5 inline-block mb-4">
                         <Activity size={40} className="text-green-500" />
@@ -4422,36 +4413,55 @@ const App = () => {
             </div>
         </div>
     );
-
+    useEffect(() => {
+        // Show loading/onboarding for 1.5 seconds
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 1500);
+    
+        // Clean up timer if component unmounts
+        return () => clearTimeout(timer);
+    }, []); // Empty dependency array means this runs once on mount
+    
     return (
         <div className="font-sans">
             <Head title="Online Submission" />
-
-            {currentScreen === "onboarding" && <OnboardingScreen />}
-            {currentScreen === "home" && <HomeScreen />}
-            {currentScreen === "screening" && <ScreeningScreen />}
-            {currentScreen === "profile" && <ProfileScreen />}
-            {currentScreen === "form1" && <Form1Screen />}
-            {currentScreen === "form2" && (
-                <Form2Screen
-                    participants={participants}
-                    onParticipantChange={handleParticipantChange}
-                    onAddParticipant={addParticipant}
-                    onRemoveParticipant={removeParticipant}
-                    onNext={() => setCurrentScreen("form3")}
-                    onBack={() => setCurrentScreen("form1")}
-                />
+    
+            {isLoading ? (
+                // Show onboarding screen during loading period
+                <OnboardingScreen />
+            ) : (
+                // After loading completed, show the appropriate screen based on currentScreen
+                <>
+                    {currentScreen === "home" && <HomeScreen />}
+                    {currentScreen === "screening" && <ScreeningScreen />}
+                    {currentScreen === "profile" && <ProfileScreen />}
+                    {currentScreen === "form1" && <Form1Screen />}
+                    {currentScreen === "form2" && (
+                        <Form2Screen
+                            participants={participants}
+                            onParticipantChange={handleParticipantChange}
+                            onAddParticipant={addParticipant}
+                            onRemoveParticipant={removeParticipant}
+                            onNext={() => setCurrentScreen("form3")}
+                            onBack={() => setCurrentScreen("form1")}
+                        />
+                    )}
+                    {currentScreen === "form3" && <Form3Screen />}
+                    {currentScreen === "form5" && <Form5Screen />}
+                    {currentScreen === "form6" && <Form6Screen />}
+                    {currentScreen === "details" && <DetailScreen />}
+                    {currentScreen === "partner" && <PartnerScreen />}
+                    {currentScreen === "viewTicket" && <ViewTicketScreen />}
+                    {currentScreen === "info" && <InfoScreen />}
+                    {currentScreen === "success" && <SuccessScreen />}
+                    {currentScreen === "onboarding" && <OnboardingScreen />}
+                </>
             )}
-            {currentScreen === "form3" && <Form3Screen />}
-            {currentScreen === "form5" && <Form5Screen />}
-            {currentScreen === "form6" && <Form6Screen />}
-            {currentScreen === "details" && <DetailScreen />}
-            {currentScreen === "partner" && <PartnerScreen />}
-            {currentScreen === "viewTicket" && <ViewTicketScreen />}
-            {currentScreen === "info" && <InfoScreen />}
+    
+            {/* Popups are shown regardless of loading state */}
             {showLoginPopup && <LoginPopup />}
             {showVideoPopup && <VideoPopup />}
-            {currentScreen === "success" && <SuccessScreen/>}
         </div>
     );
 };
