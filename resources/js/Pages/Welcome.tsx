@@ -975,7 +975,7 @@ const App = () => {
                     <h4 className="text-lg text-gray-700">
                         {t.weatherAlongTrail}
                     </h4>
-                    <select className="text-sm text-gray-700 bg-gray-100 rounded-full px-3 py-1 border-none">
+                    <select className="text-xs text-gray-700 bg-gray-100 rounded-full pr-6 py-1 border-none">
                         <option>11:00 PM</option>
                         <option>12:00 AM</option>
                         <option>1:00 AM</option>
