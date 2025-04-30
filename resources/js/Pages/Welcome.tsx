@@ -603,7 +603,7 @@ const App = () => {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-black">
                 <div className="mb-8 text-center">
-                    <img src="/assets/img/logo-blue.png" className="mx-auto w-64" alt="" srcset="" />
+                    <img src="/assets/img/logo-blue.png" className="mx-auto w-64" alt="" srcSet="" />
                     <h1 className="text-3xl font-bold text-white">
                         {t.appName}
                     </h1>
@@ -894,20 +894,18 @@ const App = () => {
             <div className="p-5">
                 {/* Date selector */}
                 <div className="flex overflow-x-auto hide-scrollbar mb-6">
-                    {[
-                        "Sat",
-                        "Sun",
-                        "Mon",
-                        "Tue",
-                        "Wed",
-                        "Thu",
-                        "Fri",
-                    ].map((day, index) => {
+                    {Array(7).fill().map((_, index) => {
                         // Generate dates dynamically starting from today
                         const date = new Date();
                         date.setDate(date.getDate() + index);
                         const dayNum = date.getDate();
                         const isToday = index === 0;
+                        
+                        // Get day name based on the actual date
+                        const dayName = date.toLocaleDateString(
+                            language === "id" ? "id-ID" : language === "zh" ? "zh-CN" : "en-US", 
+                            { weekday: "short" }
+                        );
 
                         return (
                             <div
@@ -915,7 +913,7 @@ const App = () => {
                                 className="flex flex-col items-center mr-8"
                             >
                                 <span className="text-sm text-gray-500 mb-1">
-                                    {day}
+                                    {dayName}
                                 </span>
                                 <div
                                     className={`w-12 h-12 rounded-full flex items-center justify-center text-lg ${
