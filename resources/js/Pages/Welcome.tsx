@@ -348,7 +348,7 @@ const App = () => {
         // Set loading state to true at the beginning of the process
         setIsProcessingPayment(true);
 
-        const SCREENING_FEE = 1000; // 35.000 rupiah per pax
+        const SCREENING_FEE = 35000; // 35.000 rupiah per pax
         const SERVICE_FEE = 0; // 5.000 rupiah service fee
 
         // Calculate total based on participants and service fee
