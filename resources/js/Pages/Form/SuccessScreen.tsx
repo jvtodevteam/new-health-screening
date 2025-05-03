@@ -26,7 +26,7 @@ const SuccessScreen = ({ screening }) => {
             } else {
                 // If we've already redirected, go to details page after countdown
                 const redirectTimer = setTimeout(() => {
-                    window.location.href = route('screenings.show', screening.id);
+                    window.location.href = route('screenings.show', screening.reference_id);
                 }, 5000);
                 
                 return () => clearTimeout(redirectTimer);
@@ -77,7 +77,7 @@ const SuccessScreen = ({ screening }) => {
             
             <Link 
                 href={hasRedirected 
-                    ? route('screenings.show', screening.id) 
+                    ? route('screenings.show', screening.reference_id) 
                     : screening.payment_url
                 }
                 className="text-green-500 font-medium"

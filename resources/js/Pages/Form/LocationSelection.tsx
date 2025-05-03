@@ -19,39 +19,60 @@ const defaultIcon = new L.Icon({
 const FlyToMarker = ({ coords }) => {
     const map = useMap();
     useEffect(() => {
-        if (coords) {
+        if (coords && coords[0] && coords[1]) {
             map.flyTo([coords[0] - 0.008, coords[1]], 14);
         }
     }, [coords, map]);
     return null;
 };
 
-const SetMapCenter = ({ city }) => {
-    const map = useMap();
-    useEffect(() => {
-        if (city) {
-            const center = getCityCenter(city);
-            map.setView(center, 14);
-        }
-    }, [city, map]);
-    return null;
+// This component controls the map view based on the selected city
+const MapViewController = ({ city, cities }) => {
+  const map = useMap(); // Get the map instance
+  
+  useEffect(() => {
+    if (city && cities && cities[city]) {
+      const cityData = cities[city];
+      if (cityData.latitude && cityData.longitude) {
+        
+        // Force immediate view change
+        map.setView([cityData.latitude, cityData.longitude], 13, {
+          animate: true,
+          duration: 1 // 1 second animation
+        });
+        
+        // Add a delay and then invalidate size and set view again to ensure it takes effect
+        setTimeout(() => {
+          map.invalidateSize(true);
+          map.setView([cityData.latitude, cityData.longitude], 13);
+        }, 100);
+      }
+    }
+  }, [city, cities, map]); // Re-run when city changes
+  
+  return null; // This component doesn't render anything
 };
 
-// Get center coordinates for map based on selected city
-const getCityCenter = (city) => {
-    if (city === "Bondowoso") return [-7.91303, 113.820867];
-    if (city === "Banyuwangi") return [-8.215083, 114.367759];
-    return [-7.91303, 113.820867]; // Default to Bondowoso
-};
+// Default coordinates if none available
+const DEFAULT_CENTER = [-7.91303, 113.820867]; // Bondowoso default
 
-const LocationSelection = ({ data, setData, errors, locations, timeSlots, onNext }) => {
+const LocationSelection = ({ data, setData, errors, cities, onNext }) => {
     const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState("");
-    const [selectedCity, setSelectedCity] = useState("Bondowoso");
+    const [selectedCity, setSelectedCity] = useState("");
     const [showDetail, setShowDetail] = useState(false);
     const [localSelectedLocation, setLocalSelectedLocation] = useState(null);
     const [localSelectedTimeSlot, setLocalSelectedTimeSlot] = useState(null);
     const [participantCount, setParticipantCount] = useState(1);
+    const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
+    const [isLoadingTimeSlots, setIsLoadingTimeSlots] = useState(false);
+    
+    // Set initial city if cities data is available
+    useEffect(() => {
+        if (cities && Object.keys(cities).length > 0) {
+            setSelectedCity(Object.keys(cities)[0]);
+        }
+    }, [cities]);
     
     // Generate dates for the next 7 days
     const [dateOptions, setDateOptions] = useState([]);
@@ -81,8 +102,8 @@ const LocationSelection = ({ data, setData, errors, locations, timeSlots, onNext
     }, []);
     
     // Get active locations for the selected city
-    const activeLocations = selectedCity && locations[selectedCity] 
-        ? locations[selectedCity] 
+    const activeLocations = selectedCity && cities && cities[selectedCity] && cities[selectedCity].locations 
+        ? cities[selectedCity].locations 
         : [];
     
     // Filter locations based on search query
@@ -94,12 +115,37 @@ const LocationSelection = ({ data, setData, errors, locations, timeSlots, onNext
         setLocalSelectedLocation(location);
         setShowDetail(true);
         setSearchQuery(""); // Reset search after selecting location
-        setData('location_id', location.id);
+        
+        // Save both the ID and the name/description for display
+        setData({
+            ...data,
+            location_id: location.id,
+            location_name: location.name,
+            location_description: location.description
+        });
+        
+        // Load time slots from the location data
+        setAvailableTimeSlots(location.time_slots || []);
+        
+        // Reset selected time slot
+        setLocalSelectedTimeSlot(null);
+        setData('time_slot_id', '');
+        setData('time_slot_start', '');
+        setData('time_slot_end', '');
+        setData('time_slot_label', '');
     };
     
     const handleTimeSelection = (timeSlot) => {
         setLocalSelectedTimeSlot(timeSlot);
-        setData('time_slot_id', timeSlot.id);
+        
+        // Save both the ID and the start/end times for display
+        setData({
+            ...data,
+            time_slot_id: timeSlot.id,
+            time_slot_start: timeSlot.start,
+            time_slot_end: timeSlot.end,
+            time_slot_label: timeSlot.label
+        });
     };
     
     const handleDateSelection = (date) => {
@@ -107,6 +153,28 @@ const LocationSelection = ({ data, setData, errors, locations, timeSlots, onNext
         setData('date', date);
     };
     
+    const handleCityChange = (cityName) => {
+        setSelectedCity(cityName);
+        
+        // Reset location and time slot selections
+        setLocalSelectedLocation(null);
+        setLocalSelectedTimeSlot(null);
+        
+        // Clear all related data
+        setData({
+            ...data,
+            location_id: '',
+            location_name: '',
+            location_description: '',
+            time_slot_id: '',
+            time_slot_start: '',
+            time_slot_end: '',
+            time_slot_label: ''
+        });
+        
+        setShowDetail(false);
+    };
+
     // Handle participant count
     const decreaseParticipantCount = () => {
         if (participantCount > 1) {
@@ -131,7 +199,7 @@ const LocationSelection = ({ data, setData, errors, locations, timeSlots, onNext
                     title: "Mr",
                     name: "",
                     birth_year: "",
-                    nationality: "",
+                    nationality_id: "",
                     id_number: "",
                     has_medical_history: false,
                 });
@@ -143,6 +211,22 @@ const LocationSelection = ({ data, setData, errors, locations, timeSlots, onNext
     const canProceed = () => {
         return data.location_id && data.date && data.time_slot_id;
     };
+    
+    // Get current city center coordinates
+    const getCurrentCityCenter = () => {
+        if (selectedCity && cities && cities[selectedCity]) {
+            const city = cities[selectedCity];
+            if (city.latitude && city.longitude) {
+                return [city.latitude, city.longitude];
+            }
+        }
+        return DEFAULT_CENTER;
+    };
+    
+    // Scroll to top when component mounts
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
     
     return (
         <div className="min-h-screen bg-gray-50 relative">
@@ -187,26 +271,19 @@ const LocationSelection = ({ data, setData, errors, locations, timeSlots, onNext
                 {/* City & Location Selection */}
                 <div className="bg-white p-4 border shadow-sm rounded-xl">
                     <div className="flex space-x-2 shadow-sm">
-                        <button
-                            className={`flex-1 py-2 px-4 rounded-full text-sm font-medium ${
-                                selectedCity === "Bondowoso"
-                                    ? "bg-green-500 text-white"
-                                    : "bg-gray-100 text-gray-800"
-                            }`}
-                            onClick={() => setSelectedCity("Bondowoso")}
-                        >
-                            {t.bondowoso}
-                        </button>
-                        <button
-                            className={`flex-1 py-2 px-4 rounded-full text-sm font-medium ${
-                                selectedCity === "Banyuwangi"
-                                    ? "bg-green-500 text-white"
-                                    : "bg-gray-100 text-gray-800"
-                            }`}
-                            onClick={() => setSelectedCity("Banyuwangi")}
-                        >
-                            {t.banyuwangi}
-                        </button>
+                        {cities && Object.keys(cities).map((cityName) => (
+                            <button
+                                key={cityName}
+                                className={`flex-1 py-2 px-4 rounded-full text-sm font-medium ${
+                                    selectedCity === cityName
+                                        ? "bg-green-500 text-white"
+                                        : "bg-gray-100 text-gray-800"
+                                }`}
+                                onClick={() => handleCityChange(cityName)}
+                            >
+                                {cityName}
+                            </button>
+                        ))}
                     </div>
                     
                     {!selectedCity ? (
@@ -222,7 +299,8 @@ const LocationSelection = ({ data, setData, errors, locations, timeSlots, onNext
                             {/* Map Container */}
                             <div className="h-48 rounded-xl overflow-hidden shadow-md mb-4">
                                 <MapContainer
-                                    center={getCityCenter(selectedCity)}
+                                    key={selectedCity} // Add this key prop to force re-render when city changes
+                                    center={getCurrentCityCenter()}
                                     zoom={14}
                                     style={{ height: "100%", width: "100%" }}
                                     zoomControl={false}
@@ -233,7 +311,8 @@ const LocationSelection = ({ data, setData, errors, locations, timeSlots, onNext
                                         className="grayscale brightness-105 contrast-105"
                                     />
 
-                                    <SetMapCenter city={selectedCity} />
+                                    {/* Add this controller for map view updates */}
+                                    <MapViewController city={selectedCity} cities={cities} />
 
                                     {activeLocations.map((location) => (
                                         <Marker
@@ -248,7 +327,7 @@ const LocationSelection = ({ data, setData, errors, locations, timeSlots, onNext
                                         </Marker>
                                     ))}
 
-                                    {localSelectedLocation && (
+                                    {localSelectedLocation && localSelectedLocation.lat && localSelectedLocation.lng && (
                                         <FlyToMarker coords={[
                                             localSelectedLocation.lat, 
                                             localSelectedLocation.lng
@@ -361,8 +440,7 @@ const LocationSelection = ({ data, setData, errors, locations, timeSlots, onNext
                             <button
                                 onClick={increaseParticipantCount}
                                 className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-green-500 shadow-sm"
-                                disabled={participantCount >=
-                                 10}
+                                disabled={participantCount >= 10}
                             >
                                 <span className="text-xl font-bold">+</span>
                             </button>
@@ -370,30 +448,47 @@ const LocationSelection = ({ data, setData, errors, locations, timeSlots, onNext
                     </div>
 
                     {/* Time Slots */}
-                    <div className="grid grid-cols-2 gap-2 mb-4">
-                        {timeSlots.map((slot) => (
-                            <div
-                                key={slot.id}
-                                className={`p-3 rounded-lg ${
-                                    localSelectedTimeSlot &&
-                                    localSelectedTimeSlot.id === slot.id
-                                        ? "bg-green-500 text-white"
-                                        : "bg-gray-100 text-gray-800"
-                                } flex flex-col items-center cursor-pointer`}
-                                onClick={() => handleTimeSelection(slot)}
-                            >
-                                <span className="text-xs opacity-80">
-                                    {slot.label}
-                                </span>
-                                <span className="text-sm font-medium">
-                                    {slot.start} - {slot.end}
-                                </span>
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            {t.timeSlots || "Time Slots"}
+                        </label>
+                        
+                        {availableTimeSlots.length > 0 ? (
+                            <div className="grid grid-cols-2 gap-2">
+                                {availableTimeSlots.map((slot) => (
+                                    <div
+                                        key={slot.id}
+                                        className={`p-3 rounded-lg ${
+                                            localSelectedTimeSlot &&
+                                            localSelectedTimeSlot.id === slot.id
+                                                ? "bg-green-500 text-white"
+                                                : "bg-gray-100 text-gray-800"
+                                        } flex flex-col items-center cursor-pointer`}
+                                        onClick={() => handleTimeSelection(slot)}
+                                    >
+                                        <span className="text-xs opacity-80">
+                                            {slot.label}
+                                        </span>
+                                        <span className="text-sm font-medium">
+                                            {slot.start} - {slot.end}
+                                        </span>
+                                    </div>
+                                ))}
                             </div>
-                        ))}
+                        ) : (
+                            <div className="text-center py-4 bg-gray-50 rounded-lg">
+                                <p className="text-gray-500">
+                                    {t.noTimeSlotsAvailable || "No time slots available"}
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     <button
-                        onClick={onNext}
+                        onClick={() => {
+                            window.scrollTo(0, 0);
+                            onNext();
+                        }}
                         className={`w-full py-3 rounded-xl font-medium ${
                             canProceed()
                                 ? "bg-green-500 text-white"

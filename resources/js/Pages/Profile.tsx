@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import { Head, Link } from "@inertiajs/react";
 import { 
     Globe, FileText, LogOut, MapPin, 
-    ChevronRight, User
+    ChevronRight, User, CheckCircle
 } from "lucide-react";
 import Layout from "./Layout";
 import PartnerApplicationForm from "../components/Profile/PartnerApplicationForm";
 import { useTranslation } from "../hooks/useTranslation";
 
 const Profile = ({ auth, appName }) => {
-    const { t } = useTranslation();
+    const { t, locale, setLanguage } = useTranslation();
     const [showPartnerForm, setShowPartnerForm] = useState(false);
     
     // Get the appropriate user data based on login status
@@ -85,13 +85,9 @@ const Profile = ({ auth, appName }) => {
                             <span>{t.language}</span>
                         </div>
                         <select 
+                            value={locale} 
+                            onChange={(e) => setLanguage(e.target.value)}
                             className="bg-gray-100 rounded-md py-2 text-gray-700 border-none"
-                            onChange={(e) => {
-                                // Handle language change
-                                window.location.href = route('settings.update-language', {
-                                    language: e.target.value
-                                });
-                            }}
                         >
                             <option value="en">EN</option>
                             <option value="id">ID</option>

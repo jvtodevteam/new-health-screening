@@ -170,7 +170,7 @@
     "scheduleAppointment": "Jadwalkan Pemeriksaan",
     "selectDateTimeLocation": "Pilih tanggal, lokasi, dan waktu untuk pemeriksaan kesehatan Anda.",
     "selectDateStep": "1. Pilih Tanggal",
-    "chooseDate": "Pilih tanggal hingga 14 hari sebelum kunjungan yang direncanakan.",
+    "chooseDate": "Pilih tanggal hingga 7 hari sebelum kunjungan yang direncanakan.",
     "noLocationsFound": "Lokasi tidak ditemukan",
     "selectLocationMap": "Klik untuk memilih lokasi Anda di peta",
     "peopleLabel": "Orang",
@@ -245,7 +245,11 @@
     "viewRegistrationProcess": "Lihat Proses Pendaftaran",
     "registrationProcessFlow": "Alur Proses Pendaftaran",
     "infographicDescription": "Infografik ini menunjukkan proses pendaftaran lengkap dari aplikasi hingga memasuki gerbang Kawah Ijen. Ikuti langkah-langkah ini untuk pengalaman yang lancar.",
-    "startRegistration": "Mulai Pendaftaran"
-
-
+    "startRegistration": "Mulai Pendaftaran",
+    "birthYear": "Tahun Lahir",
+    "submissionSuccessful": "Submit Berhasil!",
+    "screeningScheduledSuccessfully": "Pemeriksaan Anda telah berhasil dijadwalkan.",
+    "redirectingToDetails": "Mengalihkan ke halaman detail dalam",
+    "redirectingToPayment": "Mengalihkan ke halaman pembayaran dalam",
+    "seconds": "detik"
 }

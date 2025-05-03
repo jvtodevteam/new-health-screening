@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Head, useForm } from "@inertiajs/react";
-import Layout from "../../Layout";
+import Layout from "../Layout";
 import LocationSelection from "./LocationSelection";
 import ParticipantInfo from "./ParticipantInfo";
 import PaymentSummary from "./PaymentSummary";
 import SuccessScreen from "./SuccessScreen";
-import LoginModal from "../../components/Modals/LoginModal";
 import { useTranslation } from "../../hooks/useTranslation";
 
-const ScreeningForm = ({ locations, timeSlots, auth }) => {
+// Updated to match new database structure and handle the updated form flow
+const ScreeningForm = ({ cities, nationalities, initialTimeSlots, auth }) => {
     const { t } = useTranslation();
     const [formStep, setFormStep] = useState(1);
-    const [showLoginPopup, setShowLoginPopup] = useState(false);
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
     
     // Use Inertia form helper for form handling
@@ -24,7 +23,7 @@ const ScreeningForm = ({ locations, timeSlots, auth }) => {
                 title: "Mr",
                 name: "",
                 birth_year: "",
-                nationality: "",
+                nationality_id: "",
                 id_number: "",
                 has_medical_history: false,
                 allergies: "",
@@ -37,17 +36,47 @@ const ScreeningForm = ({ locations, timeSlots, auth }) => {
         terms_agreed: false,
     });
     
-    // Function to handle form submission
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    // Check for Google login redirect and authentication status on component mount
+    useEffect(() => {
+        // Check if this is a redirect from Google login with successful auth
+        const urlParams = new URLSearchParams(window.location.search);
+        const authSuccess = urlParams.get('auth_success');
         
-        if (!auth.user && data.terms_agreed) {
-            setShowLoginPopup(true);
-            return;
+        if (authSuccess === 'true' && formStep === 3) {
+            // User was redirected back after successful authentication
+            // We'll clean up the URL
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
+            
+            // Now handle form submission if we're on the payment step
+            handleSubmitAfterAuth();
         }
-        
+    }, []);
+    
+    // Function to handle form submission
+// Function to handle form submission
+const handleSubmit = () => {
+    console.log('Form submission handler called');
+    setIsProcessingPayment(true);
+    
+    // Submit the form data
+    post('/screenings', {
+        onSuccess: () => {
+            console.log('Form submission successful');
+            setFormStep(4); // Go to success screen
+            setIsProcessingPayment(false);
+        },
+        onError: (errors) => {
+            console.log('Form submission error:', errors);
+            setIsProcessingPayment(false);
+        }
+    });
+};
+    
+    // Special handler for when form is submitted after authentication redirect
+    const handleSubmitAfterAuth = () => {
         setIsProcessingPayment(true);
-        post(route('screenings.store'), {
+        post('/screenings', {
             onSuccess: () => {
                 setFormStep(4); // Go to success screen
                 setIsProcessingPayment(false);
@@ -60,6 +89,11 @@ const ScreeningForm = ({ locations, timeSlots, auth }) => {
     
     // Render different form steps based on current step
     const renderFormStep = () => {
+        // Scroll to top whenever step changes
+        React.useEffect(() => {
+            window.scrollTo(0, 0);
+        }, [formStep]);
+        
         switch (formStep) {
             case 1:
                 return (
@@ -67,9 +101,12 @@ const ScreeningForm = ({ locations, timeSlots, auth }) => {
                         data={data}
                         setData={setData}
                         errors={errors} 
-                        locations={locations}
-                        timeSlots={timeSlots}
-                        onNext={() => setFormStep(2)}
+                        cities={cities}
+                        initialTimeSlots={initialTimeSlots}
+                        onNext={() => {
+                            window.scrollTo(0, 0);
+                            setFormStep(2);
+                        }}
                     />
                 );
                 
@@ -78,9 +115,16 @@ const ScreeningForm = ({ locations, timeSlots, auth }) => {
                     <ParticipantInfo 
                         data={data}
                         setData={setData}
+                        nationalities={nationalities}
                         errors={errors}
-                        onNext={() => setFormStep(3)}
-                        onBack={() => setFormStep(1)}
+                        onNext={() => {
+                            window.scrollTo(0, 0);
+                            setFormStep(3);
+                        }}
+                        onBack={() => {
+                            window.scrollTo(0, 0);
+                            setFormStep(1);
+                        }}
                     />
                 );
                 
@@ -92,7 +136,11 @@ const ScreeningForm = ({ locations, timeSlots, auth }) => {
                         errors={errors}
                         isProcessing={isProcessingPayment}
                         onSubmit={handleSubmit}
-                        onBack={() => setFormStep(2)}
+                        onBack={() => {
+                            window.scrollTo(0, 0);
+                            setFormStep(2);
+                        }}
+                        auth={auth} // Pass auth object to PaymentSummary
                     />
                 );
                 
@@ -100,23 +148,24 @@ const ScreeningForm = ({ locations, timeSlots, auth }) => {
                 return <SuccessScreen />;
                 
             default:
-                return <LocationSelection />;
+                return <LocationSelection 
+                    data={data}
+                    setData={setData}
+                    errors={errors} 
+                    cities={cities}
+                    initialTimeSlots={initialTimeSlots}
+                    onNext={() => {
+                        window.scrollTo(0, 0);
+                        setFormStep(2);
+                    }}
+                />;
         }
-    };
-    
+    };    
     return (
         <Layout>
             <Head title={`${t.healthScreening} - ${t[`step${formStep}Title`]}`} />
             
             {renderFormStep()}
-            
-            {showLoginPopup && (
-                <LoginModal 
-                    onClose={() => setShowLoginPopup(false)}
-                    onLogin={() => handleSubmit()}
-                    isProcessing={isProcessingPayment}
-                />
-            )}
         </Layout>
     );
 };

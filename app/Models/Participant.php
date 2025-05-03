@@ -14,7 +14,7 @@ class Participant extends Model
         'title',
         'name',
         'age',
-        'nationality',
+        'nationality_id',
         'id_number',
         'has_medical_history',
         'allergies',
@@ -30,5 +30,10 @@ class Participant extends Model
     public function screening()
     {
         return $this->belongsTo(Screening::class);
+    }
+    
+    public function nationality()
+    {
+        return $this->belongsTo(Nationality::class);
     }
 }

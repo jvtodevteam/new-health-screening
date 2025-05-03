@@ -10,12 +10,22 @@ class Location extends Model
     use HasFactory;
 
     protected $fillable = [
+        'city_id',
         'name',
-        'city',
         'description',
         'latitude',
         'longitude',
     ];
+
+    public function city()
+    {
+        return $this->belongsTo(City::class);
+    }
+
+    public function timeSlots()
+    {
+        return $this->hasMany(TimeSlot::class);
+    }
 
     public function screenings()
     {

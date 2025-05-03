@@ -1,7 +1,7 @@
 import React from "react";
 import { Head, Link } from "@inertiajs/react";
 import { ArrowLeft, Download, Activity, MapPin, Calendar, Clock, CheckCircle, User, LogOut } from "lucide-react";
-import { useTranslation } from "../hooks/useTranslation";
+import { useTranslation } from "../../hooks/useTranslation";
 
 const ETicket = ({ screening }) => {
     const { t } = useTranslation();
@@ -16,7 +16,7 @@ const ETicket = ({ screening }) => {
             
             <div className="bg-white p-4 flex items-center shadow-sm">
                 <Link
-                    href={route('screenings.show', screening.id)}
+                    href={route('screenings.show', screening.reference_id)}
                     className="mr-2"
                 >
                     <ArrowLeft size={24} className="text-gray-800" />

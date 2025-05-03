@@ -19,6 +19,7 @@ class HomeController extends Controller
                 ->map(function ($screening) {
                     return [
                         'id' => $screening->id,
+                        'reference_id' => $screening->reference_id,
                         'location' => $screening->location->name,
                         'date' => $screening->date->format('Y-m-d'),
                         'time' => $screening->timeSlot->start . ' - ' . $screening->timeSlot->end,

@@ -8,7 +8,6 @@ const BottomNav = () => {
     const { url } = usePage();
     
     const isActive = (path) => url.startsWith(path);
-    console.log(url);
     
     return (
         <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg flex justify-around py-3 border-t">

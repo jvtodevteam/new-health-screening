@@ -1,24 +1,25 @@
 import React, { useState } from "react";
 import { ArrowLeft, X, Plus } from "lucide-react";
 import { useTranslation } from "../../hooks/useTranslation";
+import SearchableSelect from "../../Components/UI/SearchableSelect";
 
-const ParticipantInfo = ({ data, setData, errors, onNext, onBack }) => {
+const ParticipantInfo = ({ data, setData,nationalities, errors, onNext, onBack }) => {
     const { t } = useTranslation();
     const [validationErrors, setValidationErrors] = useState({});
     
     // Validate ID numbers
-    const validateIdNumber = (nationality, idNumber, index) => {
+    const validateIdNumber = (nationalityId, idNumber, index) => {
         const errors = { ...validationErrors };
 
         if (!idNumber) {
             errors[`idNumber_${index}`] = "ID number is required";
         } else if (
-            nationality === "Indonesia" &&
+            nationalityId === 101 &&
             !/^\d{16}$/.test(idNumber)
         ) {
             errors[`idNumber_${index}`] = "KTP must be 16 digits";
         } else if (
-            nationality !== "Indonesia" &&
+            nationalityId !== 101 &&
             !/^[A-Z0-9]{8,9}$/.test(idNumber)
         ) {
             errors[`idNumber_${index}`] = "Passport must be 8-9 characters";
@@ -79,13 +80,13 @@ const ParticipantInfo = ({ data, setData, errors, onNext, onBack }) => {
         // Validate based on field type
         if (field === "id_number") {
             validateIdNumber(
-                updatedParticipants[index].nationality,
+                updatedParticipants[index].nationality_id,
                 value,
                 index
             );
         }
 
-        if (field === "nationality") {
+        if (field === "nationality_id") {
             validateIdNumber(
                 value,
                 updatedParticipants[index].id_number,
@@ -110,7 +111,7 @@ const ParticipantInfo = ({ data, setData, errors, onNext, onBack }) => {
                 title: "Mr",
                 name: "",
                 birth_year: "",
-                nationality: "",
+                nationality_id: "",
                 id_number: "",
                 has_medical_history: false,
                 allergies: "",
@@ -143,7 +144,7 @@ const ParticipantInfo = ({ data, setData, errors, onNext, onBack }) => {
 const canProceed = () => {
     // Check if all required fields are filled
     return data.participants.every(
-        (p) => p.name && p.birth_year && p.nationality && p.id_number
+        (p) => p.name && p.birth_year && p.nationality_id && p.id_number
     ) && Object.keys(validationErrors).length === 0;
 };
 
@@ -262,41 +263,22 @@ return (
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     {t.nationality}
                                 </label>
-                                <select
-                                    className={`w-full border ${
-                                        errors[`participants.${index}.nationality`]
-                                            ? "border-red-500"
-                                            : "border-gray-300"
-                                    } rounded-lg p-3`}
-                                    value={participant.nationality || ""}
-                                    onChange={(e) =>
-                                        handleInputChange(
-                                            index,
-                                            "nationality",
-                                            e.target.value
-                                        )
-                                    }
-                                >
-                                    <option value="">Select...</option>
-                                    <option value="Indonesia">Indonesia</option>
-                                    <option value="Malaysia">Malaysia</option>
-                                    <option value="Singapore">Singapore</option>
-                                    <option value="Australia">Australia</option>
-                                    <option value="United States">United States</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                                {errors[`participants.${index}.nationality`] && (
-                                    <p className="text-red-500 text-xs mt-1">
-                                        {errors[`participants.${index}.nationality`]}
-                                    </p>
-                                )}
+                                <SearchableSelect
+                                    options={nationalities}
+                                    selectedOption={nationalities.find(n => n.id.toString() === participant.nationality_id.toString())}
+                                    onSelect={(option) => handleInputChange(index, "nationality_id", option.id.toString())}
+                                    placeholder="Select nationality..."
+                                    hasError={!!errors[`participants.${index}.nationality_id`]}
+                                    errorMessage={errors[`participants.${index}.nationality_id`]}
+                                />
+
                             </div>
                         </div>
 
                         <div className="space-y-2">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    {participant.nationality === "Indonesia"
+                                    {participant.nationality_id === 101
                                         ? "KTP Number"
                                         : "Passport Number"}
                                 </label>
@@ -316,7 +298,7 @@ return (
                                             : "border-gray-300"
                                     } rounded-lg p-3`}
                                     placeholder={
-                                        participant.nationality === "Indonesia"
+                                        participant.nationality_id === 101
                                             ? "16 digits"
                                             : "8-9 characters"
                                     }
@@ -327,7 +309,7 @@ return (
                                     </p>
                                 )}
                                 <p className="text-xs text-gray-500 mt-1">
-                                    {participant.nationality === "Indonesia"
+                                    {participant.nationality_id === 101
                                         ? t.ktpValidation
                                         : t.passportValidation}
                                 </p>

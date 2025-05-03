@@ -1,19 +1,49 @@
-import React from "react";
+import React, { useState } from "react";
 import { ArrowLeft, CheckCircle, AlertCircle, DollarSign, CreditCard, Smartphone } from "lucide-react";
 import { useTranslation } from "../../hooks/useTranslation";
+import LoginModal from "../../components/Modals/LoginModal";
 
-const PaymentSummary = ({ data, setData, errors, isProcessing, onSubmit, onBack }) => {
+const PaymentSummary = ({ data, setData, errors, isProcessing, onSubmit, onBack, auth }) => {
     const { t } = useTranslation();
+    const [showLoginPopup, setShowLoginPopup] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     
     // Constants for fee calculation
     const SCREENING_FEE = 35000; // 35,000 IDR per participant
-    const SERVICE_FEE = 5000;    // 5,000 IDR service fee
+    const SERVICE_FEE = 0;    // 5,000 IDR service fee
     
     // Calculate total
     const calculateTotal = () => {
         return (SCREENING_FEE * data.participants.length) + SERVICE_FEE;
     };
 
+    // Handle form submission with auth check
+    const handleSubmit = () => {
+        // If user is not logged in, show login popup
+        if (!auth?.user && data.terms_agreed) {
+            setShowLoginPopup(true);
+            return;
+        }
+        
+        // If user is logged in, proceed with submission
+        setIsSubmitting(true);
+        onSubmit();
+    };
+    
+    // Handle successful login
+    const handleLoginSuccess = () => {
+        console.log('Login success - submitting form directly');
+        
+        // Hide popup and set state
+        setShowLoginPopup(false);
+        setIsSubmitting(true);
+        
+        // DIRECT SUBMIT with minimal delay
+        setTimeout(() => {
+            console.log('Calling onSubmit function');
+            onSubmit();
+        }, 50);
+    };
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
             <div className="bg-white p-4 flex items-center shadow-sm">
@@ -46,10 +76,11 @@ const PaymentSummary = ({ data, setData, errors, isProcessing, onSubmit, onBack 
                     <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg mb-3">
                         <span className="text-gray-700">{t.time}</span>
                         <span className="font-medium">
-                            {data.time_slot_start} - {data.time_slot_end}
+                            {data.time_slot_start && data.time_slot_end 
+                                ? `${data.time_slot_start} - ${data.time_slot_end}` 
+                                : "Selected Time"}
                         </span>
                     </div>
-
                     <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg mb-3">
                         <span className="text-gray-700">
                             {t.participants}
@@ -246,12 +277,6 @@ const PaymentSummary = ({ data, setData, errors, isProcessing, onSubmit, onBack 
                                 {data.participants.length}
                             </span>
                         </div>
-                        <div className="flex justify-between mb-2">
-                            <span className="text-gray-700">
-                                {t.serviceFee}
-                            </span>
-                            <span>Rp {SERVICE_FEE.toLocaleString()}</span>
-                        </div>
                         <div className="flex justify-between font-bold text-lg mt-4">
                             <span>{t.total}</span>
                             <span>
@@ -304,15 +329,15 @@ const PaymentSummary = ({ data, setData, errors, isProcessing, onSubmit, onBack 
                     </div>
                     
                     <button
-                        onClick={onSubmit}
+                        onClick={handleSubmit}
                         className={`w-full ${
                             data.terms_agreed && data.payment_method
                                 ? "bg-green-500 text-white"
                                 : "bg-gray-300 text-gray-500"
                         } py-3 rounded-xl font-medium`}
-                        disabled={!data.terms_agreed || !data.payment_method || isProcessing}
+                        disabled={!data.terms_agreed || !data.payment_method || isSubmitting || isProcessing}
                     >
-                        {isProcessing ? (
+                        {isSubmitting || isProcessing ? (
                             <span className="flex items-center justify-center">
                                 <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
                                 {t.processing}
@@ -323,6 +348,15 @@ const PaymentSummary = ({ data, setData, errors, isProcessing, onSubmit, onBack 
                     </button>
                 </div>
             </div>
+            
+            {/* Login Modal for unauthenticated users */}
+            {showLoginPopup && (
+                <LoginModal
+                    onClose={() => setShowLoginPopup(false)}
+                    onLogin={handleLoginSuccess}
+                    isProcessing={isSubmitting}
+                />
+            )}
         </div>
     );
 };

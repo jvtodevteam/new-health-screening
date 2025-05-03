@@ -160,7 +160,7 @@
     "scheduleAppointment": "预约健康检查",
     "selectDateTimeLocation": "为您的健康检查选择日期、地点和时间。",
     "selectDateStep": "1. 选择日期",
-    "chooseDate": "在计划访问前选择最多14天的日期。",
+    "chooseDate": "在计划访问前选择最多7天的日期。",
     "noLocationsFound": "未找到位置",
     "selectLocationMap": "点击在地图上选择您的位置",
     "peopleLabel": "人",
@@ -235,5 +235,11 @@
     "viewRegistrationProcess": "查看注册流程",
     "registrationProcessFlow": "注册流程",
     "infographicDescription": "该信息图显示了从应用程序到进入伊真火山口大门的完整注册过程。按照这些步骤获得流畅的体验。",
-    "startRegistration": "开始注册"
+    "startRegistration": "开始注册",
+    "birthYear": "出生年份",
+    "submissionSuccessful": "提交成功！",
+    "screeningScheduledSuccessfully": "您的筛查已成功预约。",
+    "redirectingToDetails": "正在跳转到详情页面，剩余",
+    "redirectingToPayment": "正在跳转到付款页面，剩余",
+    "seconds": "秒"
 }

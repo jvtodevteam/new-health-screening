@@ -12,7 +12,7 @@ import InfographicModal from "../components/Modals/InfographicModal";
 import { useTranslation } from "../hooks/useTranslation";
 
 const Home = ({ screenings, weatherData }) => {
-    const { t } = useTranslation();
+    const { t, locale, setLanguage } = useTranslation();
     const [showVideoPopup, setShowVideoPopup] = useState(false);
     const [showInfographicImagePopup, setShowInfographicImagePopup] = useState(false);
     const [showingRegistrationVideo, setShowingRegistrationVideo] = useState(false);
@@ -36,7 +36,9 @@ const Home = ({ screenings, weatherData }) => {
                     <div className="flex items-center gap-3">
                         {/* Language selector */}
                         <select 
-                            className="bg-gray-100 rounded-md py-1 text-sm text-gray-700 border-none"
+                            value={locale} 
+                            onChange={(e) => setLanguage(e.target.value)}
+                            className="bg-gray-100 rounded-md py-2 text-gray-700 border-none"
                         >
                             <option value="en">EN</option>
                             <option value="id">ID</option>
@@ -141,7 +143,7 @@ const Home = ({ screenings, weatherData }) => {
                                         </div>
                                     </div>
                                     <Link
-                                        href={route('screenings.show', screening.id)}
+                                        href={route('screenings.show', screening.reference_id)}
                                         className="w-full flex justify-center items-center py-2 text-green-500 text-sm font-medium mt-2 hover:bg-green-50 rounded-lg transition-colors"
                                     >
                                         {t.viewDetails}

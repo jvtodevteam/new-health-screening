@@ -1,15 +1,17 @@
 import React from "react";
 import { Head, Link } from "@inertiajs/react";
-import { ArrowLeft, MapPin, Calendar, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Layout from "../Layout";
-import { useTranslation } from "../hooks/useTranslation";
+import { useTranslation } from "../../hooks/useTranslation";
 
 const ScreeningDetail = ({ screening }) => {
     const { t } = useTranslation();
+    console.log(screening);
+    
     
     // Constants for fee calculation
     const SCREENING_FEE = 35000; // 35,000 IDR per participant
-    const SERVICE_FEE = 5000;    // 5,000 IDR service fee
+    const SERVICE_FEE = 0;    // 5,000 IDR service fee
     
     return (
         <Layout>
@@ -29,7 +31,7 @@ const ScreeningDetail = ({ screening }) => {
                     <div className="flex justify-between items-center mb-4">
                         <div className="flex items-center">
                             <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-500 mr-3">
-                                <MapPin size={20} />
+                                <span className="fa fa-map-marker-alt"></span>
                             </div>
                             <div>
                                 <h3 className="font-medium text-gray-800">
@@ -144,12 +146,6 @@ const ScreeningDetail = ({ screening }) => {
                                 {screening.participants.length}
                             </span>
                         </div>
-                        <div className="flex justify-between mb-2">
-                            <span className="text-gray-700">
-                                {t.serviceFee}
-                            </span>
-                            <span>Rp {SERVICE_FEE.toLocaleString()}</span>
-                        </div>
                         <div className="flex justify-between font-bold text-lg mt-4">
                             <span>{t.total}</span>
                             <span>
@@ -160,7 +156,6 @@ const ScreeningDetail = ({ screening }) => {
                     
                     {screening.status === 'pending' ? (
                         <a
-                        
                             href={screening.payment_url}
                             className="w-full block text-center bg-green-500 text-white py-3 rounded-xl font-medium"
                             target="_blank"

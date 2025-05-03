@@ -170,7 +170,7 @@
     "scheduleAppointment": "Schedule Appointment",
     "selectDateTimeLocation": "Select a date, location, and time for your health screening.",
     "selectDateStep": "1. Select Date",
-    "chooseDate": "Choose a date up to 14 days before your planned visit.",
+    "chooseDate": "Choose a date up to 7 days before your planned visit.",
     "noLocationsFound": "No locations found",
     "selectLocationMap": "Click to select your location on map",
     "peopleLabel": "People",
@@ -245,6 +245,11 @@
     "viewRegistrationProcess": "View Registration Process",
     "registrationProcessFlow": "Registration Process Flow",
     "infographicDescription": "This infographic shows the complete registration process from application to entering Kawah Ijen gate. Follow these steps for a smooth experience.",
-    "startRegistration": "Start Registration"
-
+    "startRegistration": "Start Registration",
+    "birthYear": "Birth Year",
+    "submissionSuccessful": "Submission Successful!",
+    "screeningScheduledSuccessfully": "Your screening has been scheduled successfully.",
+    "redirectingToDetails": "Redirecting to details page in",
+    "redirectingToPayment": "Redirecting to payment page in",
+    "seconds": "seconds"
 }

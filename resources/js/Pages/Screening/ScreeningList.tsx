@@ -73,7 +73,7 @@ const ScreeningList = ({ screenings }) => {
                                         </h3>
                                         <p className="text-xs text-gray-500">
                                             {screening.date} • {screening.participants.length}{" "}
-                                            {screening.participants.length > 1 ? t.participants : t.participant}
+                                            {t.participants}
                                         </p>
                                     </div>
                                 </div>
@@ -112,7 +112,7 @@ const ScreeningList = ({ screenings }) => {
                                 </div>
                             </div>
                             <Link
-                                href={route('screenings.show', screening.id)}
+                                href={route('screenings.show', screening.reference_id)}
                                 className="w-full flex justify-center items-center py-2 mt-2 text-green-500 text-sm font-medium hover:bg-green-50 rounded-lg transition-colors"
                             >
                                 {t.viewDetails}
@@ -129,10 +129,10 @@ const ScreeningList = ({ screenings }) => {
                             )}
                         </div>
                         <h3 className="font-medium text-gray-800 mb-1">
-                            {t.noScreeningsInTab}
+                            {t.noScreeningsYet}
                         </h3>
                         <p className="text-sm text-gray-500 mb-4">
-                            {t.scheduleHealthScreening}
+                            {t.completeHealthScreening}
                         </p>
                         <Link
                             href={route('screenings.create')}
