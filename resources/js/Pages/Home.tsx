@@ -5,6 +5,7 @@ import {
     Plus, CheckCircle, Thermometer, Wind, Droplets, 
     Footprints, Flashlight, Umbrella, Sunrise, Sunset,Play,FileImage,Maximize2,Home as HomeIcon
 } from "lucide-react";
+import LanguageSelector  from "../components/LanguageSelector";
 
 import Layout from "./Layout";
 import VideoModal from "../components/Modals/VideoModal";
@@ -35,15 +36,10 @@ const Home = ({ screenings, weatherData }) => {
                     </div>
                     <div className="flex items-center gap-3">
                         {/* Language selector */}
-                        <select 
+                        <LanguageSelector 
                             value={locale} 
-                            onChange={(e) => setLanguage(e.target.value)}
-                            className="bg-gray-100 rounded-md py-2 text-gray-700 border-none"
-                        >
-                            <option value="en">EN</option>
-                            <option value="id">ID</option>
-                            <option value="zh">ZH</option>
-                        </select>
+                            onChange={setLanguage} 
+                        />
                         <div className="bg-gray-100 rounded-full p-2">
                             <User size={20} className="text-gray-500" />
                         </div>
