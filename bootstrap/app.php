@@ -17,7 +17,11 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
             \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::except([
                 '/payment-webhook'
-            ])            
+            ]),
+            
+        ]);
+        $middleware->alias([
+            'auth.medical' => \App\Http\Middleware\MedicalAuth::class,
         ]);
 
         //

@@ -83,3 +83,4 @@ Route::get('/language/{lang}', function($lang) {
 
 
 require __DIR__.'/auth.php';
+require __DIR__.'/medical.php';
