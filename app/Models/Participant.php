@@ -30,6 +30,7 @@ class Participant extends Model
         'respiratory_rate',
         'oxygen_saturation',
         'examined_at',
+        'unique_code'
     ];
 
     protected $casts = [

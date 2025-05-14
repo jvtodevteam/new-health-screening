@@ -1,89 +1,115 @@
 import React from 'react';
 import { Head } from '@inertiajs/react';
 import MedicalLayout from '@/Layouts/MedicalLayout';
+import { Calendar, Users, CheckSquare, Clock, Activity, CheckCircle, FileText } from 'lucide-react';
 
 export default function Dashboard({ medicalStaff, location, screeningsCount, participantsCount, examinedCount, progressPercentage }) {
+    // Format date in Indonesian
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('id-ID', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    });
+    
+    // Format time for last update
+    const hours = String(today.getHours()).padStart(2, '0');
+    const minutes = String(today.getMinutes()).padStart(2, '0');
+    const formattedTime = `${hours}.${minutes}`;
+
     return (
         <MedicalLayout>
             <Head title="Dashboard Petugas Medis" />
             
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-                
-                <div className="mt-2 bg-white shadow overflow-hidden sm:rounded-lg">
-                    <div className="px-4 py-5 sm:px-6">
-                        <h3 className="text-lg leading-6 font-medium text-gray-900">
-                            Informasi Petugas
-                        </h3>
+            {/* Date Display */}
+            <div className="flex items-center mb-4 text-sm text-blue-600">
+                <Calendar className="h-4 w-4 mr-1.5" />
+                <span>{formattedDate}</span>
+            </div>
+            
+            {/* Stats Cards Row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                {/* Peserta Diperiksa Card */}
+                <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
+                    <div className="p-4 md:p-5">
+                        <div className="flex items-center">
+                            <div className="mr-4 flex-shrink-0 bg-green-100 p-3 rounded-lg">
+                                <CheckSquare className="h-6 w-6 text-green-600" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-medium text-gray-900">Peserta Diperiksa</h3>
+                                <p className="text-3xl font-bold">{examinedCount}</p>
+                            </div>
+                        </div>
                     </div>
-                    <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
-                        <dl className="sm:divide-y sm:divide-gray-200">
-                            <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                <dt className="text-sm font-medium text-gray-500">Username</dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{medicalStaff.username}</dd>
-                            </div>
-                            <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                <dt className="text-sm font-medium text-gray-500">Lokasi</dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{location.name}</dd>
-                            </div>
-                            <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                <dt className="text-sm font-medium text-gray-500">Kontak</dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{medicalStaff.phone}</dd>
-                            </div>
-                        </dl>
+                    <div className="bg-green-50 px-4 py-2 border-t border-green-100">
+                        <p className="text-sm text-green-700">Selesai pemeriksaan</p>
+                    </div>
+                </div>
+            </div>
+            
+            {/* Progress Section */}
+            <div className="bg-white rounded-lg shadow-sm p-4 md:p-5 mb-6 border border-gray-100">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
+                    <h2 className="text-lg font-medium text-gray-900 mb-2 md:mb-0">Progress Pemeriksaan</h2>
+                    <div className="flex items-center text-sm text-gray-500">
+                        <Clock className="h-4 w-4 mr-1.5" />
+                        <span>Update terakhir: {formattedTime}</span>
                     </div>
                 </div>
                 
-                <div className="mt-8 bg-white shadow sm:rounded-lg">
-                    <div className="px-4 py-5 sm:p-6">
-                        <h3 className="text-lg leading-6 font-medium text-gray-900">
-                            Ringkasan Hari Ini
-                        </h3>
-                        <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
-                            <div className="bg-white overflow-hidden shadow rounded-lg">
-                                <div className="px-4 py-5 sm:p-6">
-                                    <dl>
-                                        <dt className="text-sm font-medium text-gray-500 truncate">Total Pemeriksaan</dt>
-                                        <dd className="mt-1 text-3xl font-semibold text-gray-900">{screeningsCount}</dd>
-                                    </dl>
-                                </div>
-                            </div>
-                            <div className="bg-white overflow-hidden shadow rounded-lg">
-                                <div className="px-4 py-5 sm:p-6">
-                                    <dl>
-                                        <dt className="text-sm font-medium text-gray-500 truncate">Total Peserta</dt>
-                                        <dd className="mt-1 text-3xl font-semibold text-gray-900">{participantsCount}</dd>
-                                    </dl>
-                                </div>
-                            </div>
-                            <div className="bg-white overflow-hidden shadow rounded-lg">
-                                <div className="px-4 py-5 sm:p-6">
-                                    <dl>
-                                        <dt className="text-sm font-medium text-gray-500 truncate">Peserta Diperiksa</dt>
-                                        <dd className="mt-1 text-3xl font-semibold text-gray-900">{examinedCount}</dd>
-                                    </dl>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div className="mt-6">
-                            <h4 className="text-sm font-medium text-gray-500">Progress Pemeriksaan Hari Ini</h4>
-                            <div className="mt-2">
-                                <div className="relative pt-1">
-                                    <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
-                                        <div 
-                                            style={{ width: `${progressPercentage}%` }} 
-                                            className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-500"
-                                        ></div>
-                                    </div>
-                                    <div className="text-right">
-                                        <span className="text-sm font-semibold inline-block text-indigo-500">
-                                            {progressPercentage}%
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                {/* Progress Bar */}
+                <div className="mb-4">
+                    <div className="flex justify-between items-center mb-1">
+                        <span className="text-sm text-gray-500">Persentase peserta diperiksa</span>
+                        <span className="text-sm font-medium text-blue-600">{progressPercentage}%</span>
+                    </div>
+                    <div className="overflow-hidden h-2.5 rounded-full bg-gray-200">
+                        <div 
+                            style={{ width: `${progressPercentage}%` }} 
+                            className={`h-full rounded-full ${
+                                progressPercentage < 30 ? 'bg-red-500' : 
+                                progressPercentage < 70 ? 'bg-yellow-500' : 
+                                'bg-green-500'
+                            } transition-all duration-500 ease-in-out`}
+                        ></div>
+                    </div>
+                </div>
+                
+                {/* Stats Pills */}
+                <div className="flex flex-wrap gap-2">
+                    <div className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-800">
+                        <CheckCircle className="h-4 w-4 mr-1 text-green-500" />
+                        <span>Diperiksa: {examinedCount}</span>
+                    </div>
+                    <div className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-800">
+                        <Clock className="h-4 w-4 mr-1 text-yellow-500" />
+                        <span>Menunggu: {participantsCount - examinedCount}</span>
+                    </div>
+                </div>
+            </div>
+            
+            {/* Staff Info Section */}
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-700 px-4 py-3">
+                    <h3 className="text-white font-medium flex items-center">
+                        <FileText className="h-5 w-5 mr-2" />
+                        Informasi Petugas
+                    </h3>
+                </div>
+                <div className="divide-y divide-gray-100">
+                    <div className="px-4 py-3 flex items-center">
+                        <div className="text-gray-500 w-24 flex-shrink-0">Username</div>
+                        <div className="font-medium ml-2">{medicalStaff.username}</div>
+                    </div>
+                    <div className="px-4 py-3 flex items-center">
+                        <div className="text-gray-500 w-24 flex-shrink-0">Lokasi</div>
+                        <div className="font-medium ml-2">{location.name}</div>
+                    </div>
+                    <div className="px-4 py-3 flex items-center">
+                        <div className="text-gray-500 w-24 flex-shrink-0">Kontak</div>
+                        <div className="font-medium ml-2">{medicalStaff.phone || '-'}</div>
                     </div>
                 </div>
             </div>

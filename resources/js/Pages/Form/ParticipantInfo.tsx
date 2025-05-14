@@ -14,12 +14,12 @@ const ParticipantInfo = ({ data, setData,nationalities, errors, onNext, onBack }
         if (!idNumber) {
             errors[`idNumber_${index}`] = "ID number is required";
         } else if (
-            nationalityId === 101 &&
+            nationalityId == 101 &&
             !/^\d{16}$/.test(idNumber)
         ) {
             errors[`idNumber_${index}`] = "KTP must be 16 digits";
         } else if (
-            nationalityId !== 101 &&
+            nationalityId != 101 &&
             !/^[A-Z0-9]{8,9}$/.test(idNumber)
         ) {
             errors[`idNumber_${index}`] = "Passport must be 8-9 characters";
@@ -78,7 +78,7 @@ const ParticipantInfo = ({ data, setData,nationalities, errors, onNext, onBack }
         setData('participants', updatedParticipants);
 
         // Validate based on field type
-        if (field === "id_number") {
+        if (field == "id_number") {
             validateIdNumber(
                 updatedParticipants[index].nationality_id,
                 value,
@@ -86,7 +86,7 @@ const ParticipantInfo = ({ data, setData,nationalities, errors, onNext, onBack }
             );
         }
 
-        if (field === "nationality_id") {
+        if (field == "nationality_id") {
             validateIdNumber(
                 value,
                 updatedParticipants[index].id_number,
@@ -94,11 +94,11 @@ const ParticipantInfo = ({ data, setData,nationalities, errors, onNext, onBack }
             );
         }
 
-        if (field === "name") {
+        if (field == "name") {
             validateName(value, index);
         }
 
-        if (field === "birth_year") {
+        if (field == "birth_year") {
             validateBirthYear(value, index);
         }
     };
@@ -145,7 +145,7 @@ const canProceed = () => {
     // Check if all required fields are filled
     return data.participants.every(
         (p) => p.name && p.birth_year && p.nationality_id && p.id_number
-    ) && Object.keys(validationErrors).length === 0;
+    ) && Object.keys(validationErrors).length == 0;
 };
 
 return (
@@ -261,11 +261,11 @@ return (
                             </div>
                             <div className="flex-1">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    {t.nationality}
+                                    {t.nationality} 
                                 </label>
                                 <SearchableSelect
                                     options={nationalities}
-                                    selectedOption={nationalities.find(n => n.id.toString() === participant.nationality_id.toString())}
+                                    selectedOption={nationalities.find(n => n.id.toString() == participant.nationality_id.toString())}
                                     onSelect={(option) => handleInputChange(index, "nationality_id", option.id.toString())}
                                     placeholder="Select nationality..."
                                     hasError={!!errors[`participants.${index}.nationality_id`]}
@@ -278,7 +278,7 @@ return (
                         <div className="space-y-2">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    {participant.nationality_id === 101
+                                    {participant.nationality_id == 101
                                         ? "KTP Number"
                                         : "Passport Number"}
                                 </label>
@@ -298,7 +298,7 @@ return (
                                             : "border-gray-300"
                                     } rounded-lg p-3`}
                                     placeholder={
-                                        participant.nationality_id === 101
+                                        participant.nationality_id == 101
                                             ? "16 digits"
                                             : "8-9 characters"
                                     }
@@ -309,7 +309,7 @@ return (
                                     </p>
                                 )}
                                 <p className="text-xs text-gray-500 mt-1">
-                                    {participant.nationality_id === 101
+                                    {participant.nationality_id == 101
                                         ? t.ktpValidation
                                         : t.passportValidation}
                                 </p>

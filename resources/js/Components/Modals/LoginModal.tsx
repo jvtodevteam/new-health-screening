@@ -123,7 +123,7 @@ const handleGoogleLogin = () => {
               ) : (
                 <>
                   <img
-                    src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"
+                    src="/assets/img/google.png"
                     alt="Google logo"
                     className="w-5 h-5"
                   />
@@ -139,12 +139,12 @@ const handleGoogleLogin = () => {
               </svg>
               <span>{t.loginWithApple}</span>
             </button>
-            <button
+            {/* <button
               className="w-full border border-gray-300 bg-white py-3 px-6 rounded-xl flex items-center justify-center space-x-2 text-gray-700 font-medium"
             >
                 <Mail size={18} className="text-gray-500" />
                 <span>{t.loginWithEmail}</span>
-            </button>
+            </button> */}
 
           </div>
 
