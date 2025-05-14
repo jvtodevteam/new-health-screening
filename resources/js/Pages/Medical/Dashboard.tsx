@@ -1,7 +1,7 @@
 import React from 'react';
 import { Head } from '@inertiajs/react';
 import MedicalLayout from '@/Layouts/MedicalLayout';
-import { Calendar, Users, CheckSquare, Clock, Activity, CheckCircle, FileText } from 'lucide-react';
+import { Info,Calendar, Users, CheckSquare, Clock, Activity, CheckCircle, FileText } from 'lucide-react';
 
 export default function Dashboard({ medicalStaff, location, screeningsCount, participantsCount, examinedCount, progressPercentage }) {
     // Format date in Indonesian
@@ -30,7 +30,25 @@ export default function Dashboard({ medicalStaff, location, screeningsCount, par
             
             {/* Stats Cards Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                {/* Peserta Menunggu Card */}
+                <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
+                    <div className="p-4 md:p-5">
+                        <div className="flex items-center">
+                            <div className="mr-4 flex-shrink-0 bg-blue-100 p-3 rounded-lg">
+                                <Info className="h-6 w-6 text-blue-600" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-medium text-gray-900">Peserta Menunggu</h3>
+                                <p className="text-3xl font-bold">{participantsCount - examinedCount}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-blue-50 px-4 py-2 border-t border-blue-100">
+                        <p className="text-sm text-blue-700">Menunggu pemeriksaan</p>
+                    </div>
+                </div>
                 {/* Peserta Diperiksa Card */}
+
                 <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
                     <div className="p-4 md:p-5">
                         <div className="flex items-center">

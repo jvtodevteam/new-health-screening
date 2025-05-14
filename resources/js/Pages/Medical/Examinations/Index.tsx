@@ -132,6 +132,12 @@ export default function ExaminationIndex({ examinations, currentDate }) {
                         <span className="text-sm text-gray-500">Total: {filteredExaminations.length} hasil pemeriksaan</span>
                     </div>
                 </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-100">
+                        <div className="text-sm text-gray-500">Total Pemeriksaan</div>
+                        <div className="mt-1 text-2xl font-bold text-gray-900">{filteredExaminations.length}</div>
+                    </div>
+                </div>
                 
                 {/* Search & Filters */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">

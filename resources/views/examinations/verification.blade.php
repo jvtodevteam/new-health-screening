@@ -1,4 +1,16 @@
 <!-- resources/views/examinations/verification.blade.php -->
+@php
+    // Clear session on page load if refresh detected via URL parameter
+    if (request()->has('clear_session')) {
+        session()->forget('id_verified');
+    }
+    
+    $isVerified = false;
+    if (session('id_verified')) {
+        $isVerified = session('id_verified') === $participant->id;
+    }
+@endphp
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -71,6 +83,24 @@
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-50 min-h-screen">
+    <!-- Refresh Detection Script -->
+    <script>
+        // On page load, check if this is a refresh
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if this is a page refresh (not initial load)
+            if (performance.navigation.type === 1) {
+                // Get current URL
+                let url = new URL(window.location.href);
+                
+                // Add the clear_session parameter
+                url.searchParams.set('clear_session', '1');
+                
+                // Redirect to the same page with parameter
+                window.location.href = url.toString();
+            }
+        });
+    </script>
+
     <div class="max-w-3xl mx-auto px-4 py-8">
         <!-- Print Header (only visible when printing) -->
         <div class="print-only mb-4 text-center">
@@ -99,13 +129,6 @@
                     </div>
                 </div>
             </div>
-            
-            @php
-                $isVerified = false;
-                if (session('id_verified')) {
-                    $isVerified = session('id_verified') === $participant->id;
-                }
-            @endphp
             
             <!-- Verification Form -->
             @if (!$isVerified)
@@ -290,19 +313,69 @@
                 </div>
             </div>
             
-            <!-- Action Buttons -->
-            <div class="p-5 flex flex-wrap gap-3 justify-end no-print">
-                <button onclick="window.print()" class="inline-flex items-center px-4 py-2 bg-gray-100 rounded-lg text-gray-800 hover:bg-gray-200 transition-colors duration-200">
-                    <i class="ri-printer-line mr-2"></i>
-                    Print Results
-                </button>
+            <!-- Medical History Information - NEW SECTION -->
+            <div class="p-5 sm:p-8 border-b border-gray-100">
+                <h2 class="text-lg font-bold text-gray-800 mb-5 flex items-center">
+                    <i class="ri-file-list-3-line mr-2 text-indigo-600"></i>
+                    Medical History
+                </h2>
                 
-                <button onclick="savePDF()" class="inline-flex items-center px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors duration-200">
-                    <i class="ri-download-2-line mr-2"></i>
-                    Save as PDF
-                </button>
+                <div class="grid grid-cols-1 gap-4">
+                    <!-- Allergies -->
+                    <div class="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-lg shadow-sm scale-hover transition-all">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-sm text-gray-700 font-medium flex items-center">
+                                <i class="ri-alert-line mr-2 text-orange-500"></i>
+                                Allergies
+                            </p>
+                            <span class="bg-white text-xs text-orange-600 font-medium px-2 py-1 rounded-full">Important</span>
+                        </div>
+                        <div class="bg-white bg-opacity-50 p-3 rounded-md">
+                            <p class="text-gray-800">{{ $participant->allergies ?? 'No known allergies' }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Past Medical History -->
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg shadow-sm scale-hover transition-all">
+                        <div class="flex items-center mb-2">
+                            <p class="text-sm text-gray-700 font-medium flex items-center">
+                                <i class="ri-history-line mr-2 text-purple-500"></i>
+                                Past Medical History
+                            </p>
+                        </div>
+                        <div class="bg-white bg-opacity-50 p-3 rounded-md">
+                            <p class="text-gray-800">{{ $participant->past_medical_history ?? 'No significant past medical history' }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Current Medications -->
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg shadow-sm scale-hover transition-all">
+                        <div class="flex items-center mb-2">
+                            <p class="text-sm text-gray-700 font-medium flex items-center">
+                                <i class="ri-medicine-bottle-line mr-2 text-blue-500"></i>
+                                Current Medications
+                            </p>
+                        </div>
+                        <div class="bg-white bg-opacity-50 p-3 rounded-md">
+                            <p class="text-gray-800">{{ $participant->current_medications ?? 'No current medications' }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Family Medical History -->
+                    <div class="bg-gradient-to-br from-teal-50 to-teal-100 p-4 rounded-lg shadow-sm scale-hover transition-all">
+                        <div class="flex items-center mb-2">
+                            <p class="text-sm text-gray-700 font-medium flex items-center">
+                                <i class="ri-parent-line mr-2 text-teal-500"></i>
+                                Family Medical History
+                            </p>
+                        </div>
+                        <div class="bg-white bg-opacity-50 p-3 rounded-md">
+                            <p class="text-gray-800">{{ $participant->family_medical_history ?? 'No significant family medical history' }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            
+                        
             <!-- Verification Info -->
             <div class="p-5 sm:p-6 bg-gradient-to-br from-gray-50 to-blue-50 border-t border-gray-100">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -358,6 +431,25 @@
             // In a real app, use a PDF library instead
             alert('In a real application, this would download a PDF of your examination results.');
             window.print(); // For demo, just trigger print dialog
+        }
+        
+        // Animation function for vital signs
+        function animateValue(obj, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const value = Math.floor(progress * (end - start) + start);
+                
+                // Keep the unit part (e.g., "mmHg", "bpm") if present
+                const unitPart = obj.innerHTML.includes(' ') ? ' ' + obj.innerHTML.split(' ').slice(1).join(' ') : '';
+                obj.innerHTML = value + unitPart;
+                
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
         }
     </script>
 </body>
