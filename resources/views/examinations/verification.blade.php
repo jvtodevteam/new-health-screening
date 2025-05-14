@@ -420,8 +420,22 @@
                 const vitalElements = document.querySelectorAll('.text-2xl.font-bold');
                 
                 vitalElements.forEach(el => {
-                    const finalValue = el.innerText.split(' ')[0]; // Get value without unit
-                    animateValue(el, 0, parseInt(finalValue), 1500);
+                    // Handle special case for blood pressure which contains "/"
+                    if (el.innerText.includes('/')) {
+                        // For blood pressure we don't animate
+                        return;
+                    }
+                    
+                    // Extract numeric part and remove any non-numeric characters
+                    const rawValue = el.innerText.split(' ')[0];
+                    const numericValue = parseFloat(rawValue);
+                    
+                    // Only animate if we have a valid number
+                    if (!isNaN(numericValue)) {
+                        const originalHTML = el.innerHTML;
+                        const unitPart = originalHTML.substring(rawValue.length);
+                        animateValue(el, 0, numericValue, 1500, unitPart);
+                    }
                 });
             }
         });
@@ -434,15 +448,25 @@
         }
         
         // Animation function for vital signs
-        function animateValue(obj, start, end, duration) {
+        function animateValue(obj, start, end, duration, unitPart) {
             let startTimestamp = null;
             const step = (timestamp) => {
                 if (!startTimestamp) startTimestamp = timestamp;
                 const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                const value = Math.floor(progress * (end - start) + start);
                 
-                // Keep the unit part (e.g., "mmHg", "bpm") if present
-                const unitPart = obj.innerHTML.includes(' ') ? ' ' + obj.innerHTML.split(' ').slice(1).join(' ') : '';
+                // Handle decimal values properly
+                const isDecimal = end % 1 !== 0;
+                let value;
+                
+                if (isDecimal) {
+                    // For decimal values like temperature (e.g., 36.5)
+                    value = (progress * (end - start) + start).toFixed(1);
+                } else {
+                    // For integer values
+                    value = Math.floor(progress * (end - start) + start);
+                }
+                
+                // Set the value with the unit part
                 obj.innerHTML = value + unitPart;
                 
                 if (progress < 1) {
