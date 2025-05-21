@@ -48,15 +48,13 @@
     "viewDetails": "View Details",
     "exploreRoutes": "Explore Ijen Crater Routes",
     "interactiveMap": "Interactive Map",
-    "routeDescription":
-        "Find the best route for your journey with our detailed maps",
+    "routeDescription": "Find the best route for your journey with our detailed maps",
     "viewFullMap": "View Full Map",
     "becomePartnerTitle": "Become A Partner",
     "reviewInfo": "Review Your Information",
     "screeningDetails": "Screening Details",
     "screeningSubmitted": "Screening Submitted",
-    "completePayment":
-        "Please complete the payment to finalize your screening",
+    "completePayment": "Please complete the payment to finalize your screening",
     "paymentDetails": "Payment Details",
     "bankTransferInstructions": "Bank Transfer Instructions",
     "transferAmount": "Transfer the exact amount shown below",
@@ -85,10 +83,8 @@
     "healthConfirmation": "Health Screening Confirmation",
     "referenceId": "Reference ID",
     "participants": "Participants",
-    "arriveEarly":
-        "Please arrive 15 minutes before your scheduled time for check-in",
-    "showTicket":
-        "Health screening confirmed. Please show this e-ticket upon arrival.",
+    "arriveEarly": "Please arrive 15 minutes before your scheduled time for check-in",
+    "showTicket": "Health screening confirmed. Please show this e-ticket upon arrival.",
     "issuedBy": "Issued by",
     "status": "Status",
     "confirmed": "CONFIRMED",
@@ -115,8 +111,7 @@
     "bondowoso": "Bondowoso",
     "banyuwangi": "Banyuwangi",
     "selectCity": "Select a City",
-    "selectCityPrompt":
-        "Please choose a city from the tabs above to view available locations",
+    "selectCityPrompt": "Please choose a city from the tabs above to view available locations",
     "searchLocations": "Search locations...",
     "elevation": "Elevation",
     "difficulty": "Difficulty",
@@ -124,34 +119,26 @@
     "selectThisLocation": "Select This Location",
     "confirmationTitle": "Confirmation",
     "language": "Language",
-    "partnerDescription":
-        "Our partner program connects verified health screening providers with travelers to Ijen. Join our network to offer essential pre-trek health checks.",
+    "partnerDescription": "Our partner program connects verified health screening providers with travelers to Ijen. Join our network to offer essential pre-trek health checks.",
     "uploadDocuments": "Upload Required Documents",
     "uploadInstructions": "Click to upload or drag and drop",
     "fileTypes": "PDF, PNG, JPG up to 5MB",
     "requiredField": "*",
-    "reviewApplication":
-        "Please review your information before submitting. After submission, our team will review your application within 3-5 business days.",
+    "reviewApplication": "Please review your information before submitting. After submission, our team will review your application within 3-5 business days.",
     "participantInfo": "Participant Information",
     "title": "Title",
     "warmClothing": "Warm Clothing",
-    "warmClothingDesc":
-        "Temperature can drop to 2°C at night. Bring layers including a jacket and thermal wear.",
+    "warmClothingDesc": "Temperature can drop to 2°C at night. Bring layers including a jacket and thermal wear.",
     "gasMask": "Gas Mask",
-    "gasMaskDesc":
-        "Protect yourself from sulfur gas. Rentals are available, but bringing your own is recommended.",
+    "gasMaskDesc": "Protect yourself from sulfur gas. Rentals are available, but bringing your own is recommended.",
     "waterSnacks": "Water & Snacks",
-    "waterSnacksDesc":
-        "Stay hydrated and energized. Bring at least 1.5 liters of water per person.",
+    "waterSnacksDesc": "Stay hydrated and energized. Bring at least 1.5 liters of water per person.",
     "properFootwear": "Proper Footwear",
-    "footwearDesc":
-        "Sturdy hiking boots with good ankle support. The terrain is rocky and can be slippery.",
+    "footwearDesc": "Sturdy hiking boots with good ankle support. The terrain is rocky and can be slippery.",
     "headlamp": "Headlamp",
-    "headlampDesc":
-        "Essential for night hikes to see the blue fire. Hands-free lighting is important for safety.",
+    "headlampDesc": "Essential for night hikes to see the blue fire. Hands-free lighting is important for safety.",
     "rainGear": "Rain Gear",
-    "rainGearDesc":
-        "Weather can change quickly. Bring a lightweight waterproof jacket or poncho.",
+    "rainGearDesc": "Weather can change quickly. Bring a lightweight waterproof jacket or poncho.",
     "essentialItems": "Essential Items",
     "bankTransfer": "Bank Transfer",
     "manualVerification": "Manual verification (1-2 hours)",
@@ -162,8 +149,7 @@
     "serviceFee": "Service Fee",
     "pinLocation": "Pin Your Location",
     "selectMapLocation": "Click to select your location on map",
-    "partnerInterest":
-        "Tell us about your interest in partnering with Ijen Health",
+    "partnerInterest": "Tell us about your interest in partnering with Ijen Health",
     "businessDetails": "Business Details",
     "locationDocuments": "Location & Documents",
     "progress": "Progress",
@@ -253,5 +239,21 @@
     "redirectingToPayment": "Redirecting to payment page in",
     "seconds": "seconds",
     "payOnSpot": "Pay on the Spot",
-    "payAtLocation": "Pay cash at the screening location"
+    "payAtLocation": "Pay cash at the screening location",
+    "enterEmail": "Enter your email address",
+    "sendOtp": "Send OTP",
+    "sending": "Sending...",
+    "otpToEmail": "We will send a one-time password to your email",
+    "verifyOtp": "Verify OTP",
+    "otpSentTo": "We've sent a verification code to",
+    "verify": "Verify",
+    "verifying": "Verifying...",
+    "didntReceiveCode": "Didn't receive the code?",
+    "resendIn": "Resend in",
+    "resendOtp": "Resend OTP",
+    "emailRequired": "Email is required",
+    "invalidEmail": "Please enter a valid email",
+    "otpSendFailed": "Failed to send OTP",
+    "completeOtp": "Please enter the complete OTP",
+    "invalidOtp": "Invalid OTP"
 }

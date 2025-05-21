@@ -239,5 +239,21 @@
     "redirectingToPayment": "正在跳转到付款页面，剩余",
     "seconds": "秒",
     "payOnSpot": "现场支付",
-    "payAtLocation": "在检查地点支付现金"
+    "payAtLocation": "在检查地点支付现金",
+    "enterEmail": "输入您的邮箱地址",
+    "sendOtp": "发送验证码",
+    "sending": "发送中...",
+    "otpToEmail": "我们将向您的邮箱发送一次性密码",
+    "verifyOtp": "验证 OTP",
+    "otpSentTo": "我们已向以下邮箱发送验证码",
+    "verify": "验证",
+    "verifying": "验证中...",
+    "didntReceiveCode": "没有收到验证码？",
+    "resendIn": "重新发送倒计时",
+    "resendOtp": "重新发送验证码",
+    "emailRequired": "请输入邮箱",
+    "invalidEmail": "请输入有效的邮箱地址",
+    "otpSendFailed": "发送验证码失败",
+    "completeOtp": "请输入完整的验证码",
+    "invalidOtp": "验证码无效"
 }

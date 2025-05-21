@@ -5,34 +5,48 @@ import { useTranslation } from "../../hooks/useTranslation";
 
 const SuccessScreen = ({ screening }) => {
     const { t } = useTranslation();
+    
     const [countdown, setCountdown] = useState(5);
     
-    // Handle redirect to payment page
+    // Check if payment method is "pay on the spot"
+    const isPayOnSpot = screening?.payment_method === "spot";
+    
+    // Handle redirect to payment page or details page
     useEffect(() => {
-        // Only redirect if we have a payment URL and we haven't redirected before
-        if (screening && screening.payment_url) {
-            const hasRedirected = sessionStorage.getItem("hasRedirectedToPayment") === "true";
-            
-            if (!hasRedirected) {
-                const redirectTimer = setTimeout(() => {
-                    // Mark that we've redirected
-                    sessionStorage.setItem("hasRedirectedToPayment", "true");
-                    
-                    // Redirect to payment page
-                    window.location.href = screening.payment_url;
-                }, 5000);
-                
-                return () => clearTimeout(redirectTimer);
-            } else {
-                // If we've already redirected, go to details page after countdown
+        // If pay on spot, go directly to details
+        if (screening) {
+            if (isPayOnSpot) {
                 const redirectTimer = setTimeout(() => {
                     window.location.href = route('screenings.show', screening.reference_id);
                 }, 5000);
                 
                 return () => clearTimeout(redirectTimer);
+            } 
+            // If online payment and we have a payment URL
+            else if (screening.payment_url) {
+                const hasRedirected = sessionStorage.getItem("hasRedirectedToPayment") === "true";
+                
+                if (!hasRedirected) {
+                    const redirectTimer = setTimeout(() => {
+                        // Mark that we've redirected
+                        sessionStorage.setItem("hasRedirectedToPayment", "true");
+                        
+                        // Redirect to payment page
+                        window.location.href = screening.payment_url;
+                    }, 5000);
+                    
+                    return () => clearTimeout(redirectTimer);
+                } else {
+                    // If we've already redirected, go to details page after countdown
+                    const redirectTimer = setTimeout(() => {
+                        window.location.href = route('screenings.show', screening.reference_id);
+                    }, 5000);
+                    
+                    return () => clearTimeout(redirectTimer);
+                }
             }
         }
-    }, [screening]);
+    }, [screening, isPayOnSpot]);
     
     // Countdown effect
     useEffect(() => {
@@ -63,9 +77,12 @@ const SuccessScreen = ({ screening }) => {
             
             <div className="w-full max-w-sm bg-green-50 rounded-lg p-4 mb-6 text-center">
                 <p className="text-green-700">
-                    {hasRedirected
-                        ? `${t.redirectingToDetails} ${countdown} ${t.seconds}...`
-                        : `${t.redirectingToPayment} ${countdown} ${t.seconds}...`}
+                    {isPayOnSpot
+                        ? `${t.redirectingToDetails || "Redirecting to screening details in"} ${countdown} ${t.seconds}...`
+                        : (hasRedirected
+                            ? `${t.redirectingToDetails} ${countdown} ${t.seconds}...`
+                            : `${t.redirectingToPayment} ${countdown} ${t.seconds}...`)
+                    }
                 </p>
                 <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
                     <div 
@@ -76,13 +93,18 @@ const SuccessScreen = ({ screening }) => {
             </div>
             
             <Link 
-                href={hasRedirected 
-                    ? route('screenings.show', screening.reference_id) 
-                    : screening.payment_url
+                href={isPayOnSpot 
+                    ? route('screenings.show', screening.reference_id)
+                    : (hasRedirected 
+                        ? route('screenings.show', screening.reference_id) 
+                        : screening.payment_url || "#")
                 }
                 className="text-green-500 font-medium"
             >
-                {hasRedirected ? t.proceedNow : t.proceedToPaymentNow}
+                {isPayOnSpot 
+                    ? (t.viewDetails || "View Details Now")
+                    : (hasRedirected ? t.proceedNow : t.proceedToPaymentNow)
+                }
             </Link>
         </div>
     );

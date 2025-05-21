@@ -102,7 +102,7 @@ const ScreeningDetail = ({ screening }) => {
                                     {t.payment}
                                 </span>
                                 <span className="font-medium">
-                                    {screening.payment_method.toUpperCase()}
+                                    {screening.payment_method == 'spot' ? t.payOnSpot.toUpperCase() : screening.payment_method.toUpperCase()}
                                 </span>
                             </div>
                         )}
@@ -154,7 +154,7 @@ const ScreeningDetail = ({ screening }) => {
                         </div>
                     </div>
                     
-                    {screening.status === 'pending' ? (
+                    {screening.status === 'pending' && screening.payment_method != 'spot' ? (
                         <a
                             href={screening.payment_url}
                             className="w-full block text-center bg-green-500 text-white py-3 rounded-xl font-medium"

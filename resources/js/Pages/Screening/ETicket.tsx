@@ -148,7 +148,7 @@ const ETicket = ({ screening }) => {
                             </div>
                         </div>
 
-                        <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-100">
+                        {/* <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-100">
                             <div className="flex">
                                 <CheckCircle
                                     size={20}
@@ -158,27 +158,30 @@ const ETicket = ({ screening }) => {
                                     {t.showTicket}
                                 </p>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
 
-                    <div className="bg-gray-50 p-4 border-t border-gray-200">
-                        <div className="flex justify-between">
+                    <div className="bg-gray-50 px-4 py-2 border-t border-gray-200">
+                        <div className="flex justify-between items-center">
                             <div>
                                 <p className="text-xs text-gray-500">
                                     {t.issuedBy}
                                 </p>
-                                <p className="text-sm font-medium text-gray-800">
+                                <p className="text-sm font-medium text-green-600">
                                     {t.issuingOrg}
                                 </p>
                             </div>
                             <div className="text-right">
+                                <img src="/assets/img/logo-blue.png" className="w-12" alt="" srcset="" />
+                            </div>
+                            {/* <div className="text-right">
                                 <p className="text-xs text-gray-500">
                                     {t.status}
                                 </p>
                                 <p className="text-sm font-medium text-green-600">
                                     {t.confirmed}
                                 </p>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>

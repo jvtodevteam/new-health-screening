@@ -193,7 +193,7 @@ class ScreeningController extends Controller
         }
 
         // Fallback ke halaman sukses jika tidak ada URL pembayaran
-        return redirect()->route('screenings.success', $screening);
+        return redirect()->route('screenings.index');
     }
 
     protected function generatePayment($paymentData)
