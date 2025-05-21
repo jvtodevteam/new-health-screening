@@ -20,34 +20,34 @@ class ScreeningController extends Controller
     {
         // Get all screenings for the logged in user
         $screenings = auth()->check() ? auth()->user()
-        ->screenings()->with(['participants', 'location', 'timeSlot'])
-                ->orderBy('created_at', 'desc')
-                ->get()
-                ->map(function ($screening) {
-                    return [
-                        'id' => $screening->id,
-                        'reference_id' => $screening->reference_id,
-                        'location' => $screening->location->name,
-                        'date' => $screening->date->format('Y-m-d'),
-                        'time' => $screening->timeSlot->start . ' - ' . $screening->timeSlot->end,
-                        'status' => $screening->status,
-                        'payment_method' => $screening->payment_method,
-                        'payment_url' => $screening->payment_url,
-                        'total' => $screening->total,
-                        'participants' => $screening->participants->map(function ($participant) {
-                            return [
-                                'name' => $participant->name,
-                                'title' => $participant->title,
-                                'age' => $participant->age,
-                                'nationality' => $participant->nationality,
-                                'id_number' => $participant->id_number,
-                                'has_medical_history' => $participant->has_medical_history,
-                            ];
-                        }),
-                        'created_at' => $screening->created_at,
-                    ];
-                }) : [];
-            
+            ->screenings()->with(['participants', 'location', 'timeSlot'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($screening) {
+                return [
+                    'id' => $screening->id,
+                    'reference_id' => $screening->reference_id,
+                    'location' => $screening->location->name,
+                    'date' => $screening->date->format('Y-m-d'),
+                    'time' => $screening->timeSlot->start . ' - ' . $screening->timeSlot->end,
+                    'status' => $screening->status,
+                    'payment_method' => $screening->payment_method,
+                    'payment_url' => $screening->payment_url,
+                    'total' => $screening->total,
+                    'participants' => $screening->participants->map(function ($participant) {
+                        return [
+                            'name' => $participant->name,
+                            'title' => $participant->title,
+                            'age' => $participant->age,
+                            'nationality' => $participant->nationality,
+                            'id_number' => $participant->id_number,
+                            'has_medical_history' => $participant->has_medical_history,
+                        ];
+                    }),
+                    'created_at' => $screening->created_at,
+                ];
+            }) : [];
+
         return Inertia::render('Screening/ScreeningList', [
             'screenings' => $screenings
         ]);
@@ -56,44 +56,44 @@ class ScreeningController extends Controller
     public function create()
     {
         // Get cities with their locations
-        $cities = City::with(['locations' => function($query) {
+        $cities = City::with(['locations' => function ($query) {
             $query->select('id', 'city_id', 'name', 'description', 'latitude', 'longitude');
         }])
-        ->get()
-        ->map(function ($city) {
-            return [
-                'id' => $city->id,
-                'name' => $city->name,
-                'latitude' => $city->latitude,
-                'longitude' => $city->longitude,
-                'locations' => $city->locations->map(function ($location) {
-                    // Load time slots for each location
-                    $timeSlots = TimeSlot::where('location_id', $location->id)
-                        ->where('available', true)
-                        ->select('id', 'location_id', 'start', 'end', 'label')
-                        ->get();
-                    
-                    return [
-                        'id' => $location->id,
-                        'name' => $location->name,
-                        'description' => $location->description,
-                        'lat' => $location->latitude,
-                        'lng' => $location->longitude,
-                        'city_id' => $location->city_id,
-                        'time_slots' => $timeSlots
-                    ];
-                })
-            ];
-        })
-        ->keyBy('name');
-        
+            ->get()
+            ->map(function ($city) {
+                return [
+                    'id' => $city->id,
+                    'name' => $city->name,
+                    'latitude' => $city->latitude,
+                    'longitude' => $city->longitude,
+                    'locations' => $city->locations->map(function ($location) {
+                        // Load time slots for each location
+                        $timeSlots = TimeSlot::where('location_id', $location->id)
+                            ->where('available', true)
+                            ->select('id', 'location_id', 'start', 'end', 'label')
+                            ->get();
+
+                        return [
+                            'id' => $location->id,
+                            'name' => $location->name,
+                            'description' => $location->description,
+                            'lat' => $location->latitude,
+                            'lng' => $location->longitude,
+                            'city_id' => $location->city_id,
+                            'time_slots' => $timeSlots
+                        ];
+                    })
+                ];
+            })
+            ->keyBy('name');
+
         // Get nationalities for the form
         $nationalities = Nationality::select('id', 'long_name as name', 'short_name as code')->get();
         if (session()->has('pending_screening_id')) {
             // Hapus dari session
             $pendingScreeningId = session('pending_screening_id');
             session()->forget('pending_screening_id');
-            
+
             // Redirect ke halaman list screening
             return redirect()->route('screenings.index');
         }
@@ -124,33 +124,34 @@ class ScreeningController extends Controller
             'payment_method' => 'required|string',
             'terms_agreed' => 'required|accepted',
         ]);
-        
+
         // Calculate age from birth year
         foreach ($validated['participants'] as $key => $participant) {
             $validated['participants'][$key]['age'] = date('Y') - $participant['birth_year'];
         }
-        
+
         // Calculate total
         $totalParticipants = count($validated['participants']);
         $screeningFee = 35000; // 35,000 IDR per participant
         $serviceFee = 0;    // 5,000 IDR service fee
         $total = ($screeningFee * $totalParticipants) + $serviceFee;
-        
+
         // Create reference ID
         $referenceId = 'IJN' . date('Ymd') . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
-        
+
         // Create payment (this would interface with your payment gateway)
-        $paymentData = [
-            'payment_method' => $validated['payment_method'],
-            'external_id' => $referenceId,
-            'description' => 'Health Screening Payment for ' . $totalParticipants . ' participant(s)',
-            'amount' => $total,
-            'customer' => $validated['participants'][0]['name'],
-            'quantity' => $totalParticipants,
-            'price' => $screeningFee,
-        ];
-        
-        $paymentResult = $this->generatePayment($paymentData);
+        if ($validated['payment_method'] != 'spot') {
+            $paymentData = [
+                'payment_method' => $validated['payment_method'],
+                'external_id' => $referenceId,
+                'description' => 'Health Screening Payment for ' . $totalParticipants . ' participant(s)',
+                'amount' => $total,
+                'customer' => $validated['participants'][0]['name'],
+                'quantity' => $totalParticipants,
+                'price' => $screeningFee,
+            ];
+            $paymentResult = $this->generatePayment($paymentData);
+        }
 
         // Create screening record
         $screening = Screening::create([
@@ -161,16 +162,16 @@ class ScreeningController extends Controller
             'time_slot_id' => $validated['time_slot_id'],
             'status' => 'pending',
             'payment_method' => $validated['payment_method'],
-            'payment_id' => $paymentResult['id'] ?? null,
-            'payment_url' => $paymentResult['invoice_url'] ?? null,
+            'payment_id' => $validated['payment_method'] != 'spot' ? ($paymentResult['id'] ?? null) : null,
+            'payment_url' => $validated['payment_method'] != 'spot' ? ($paymentResult['invoice_url'] ?? null) : null,
             'total' => $total,
         ]);
-        
+
         // Create participant records
         foreach ($validated['participants'] as $participantData) {
             // Get nationality name for backward compatibility
             $nationalityName = Nationality::find($participantData['nationality_id'])->name ?? 'Unknown';
-            
+
             $screening->participants()->create([
                 'title' => $participantData['title'],
                 'name' => $participantData['name'],
@@ -199,29 +200,23 @@ class ScreeningController extends Controller
     {
         Configuration::setXenditKey(env('XENDIT_KEY'));
         $paymentMethod = [];
-    
-        if($paymentData['payment_method'] == 'card'){
+
+        if ($paymentData['payment_method'] == 'card') {
             $paymentMethod = ["CREDIT_CARD"];
-        }
-        else if($paymentData['payment_method'] == 'qris'){
+        } else if ($paymentData['payment_method'] == 'qris') {
             $paymentMethod = ["QRIS"];
-        }
-        else if($paymentData['payment_method'] == 'ovo'){
+        } else if ($paymentData['payment_method'] == 'ovo') {
             $paymentMethod = ["OVO"];
-        }
-        else if($paymentData['payment_method'] == 'bni'){
+        } else if ($paymentData['payment_method'] == 'bni') {
             $paymentMethod = ["BNI"];
-        }
-        else if($paymentData['payment_method'] == 'bri'){
+        } else if ($paymentData['payment_method'] == 'bri') {
             $paymentMethod = ["BRI"];
-        }
-        else if($paymentData['payment_method'] == 'bsi'){
+        } else if ($paymentData['payment_method'] == 'bsi') {
             $paymentMethod = ["BSI"];
-        }
-        else if($paymentData['payment_method'] == 'mandiri'){
+        } else if ($paymentData['payment_method'] == 'mandiri') {
             $paymentMethod = ["MANDIRI"];
         }
-        
+
         $apiInstance = new InvoiceApi();
         $create_invoice_request = new CreateInvoiceRequest([
             'external_id' => $paymentData['external_id'],
@@ -246,15 +241,15 @@ class ScreeningController extends Controller
                 ]
             ],
             "payment_methods" => $paymentMethod,
-            "success_redirect_url" => route('screenings.show', $paymentData['external_id']),   
+            "success_redirect_url" => route('screenings.show', $paymentData['external_id']),
         ]);
-    
+
         $result = $apiInstance->createInvoice($create_invoice_request);
         return $result;
     }
 
     public function show($referenceId)
-    {        
+    {
         $screening = Screening::where('reference_id', $referenceId)->firstOrFail();
         $screening->load('participants', 'location', 'timeSlot');
         return Inertia::render('Screening/ScreeningDetail', [
@@ -262,7 +257,7 @@ class ScreeningController extends Controller
                 'id' => $screening->id,
                 'reference_id' => $screening->reference_id,
                 'location' => $screening->location->name,
-                'date' => date('Y-m-d',strtotime($screening->date)),
+                'date' => date('Y-m-d', strtotime($screening->date)),
                 'time' => $screening->timeSlot->start . ' - ' . $screening->timeSlot->end,
                 'status' => $screening->status,
                 'payment_method' => $screening->payment_method,
@@ -288,15 +283,15 @@ class ScreeningController extends Controller
 
     public function ticket(Screening $screening)
     {
-        
+
         $screening->load('participants', 'location', 'timeSlot');
-        
+
         return Inertia::render('Screening/ETicket', [
             'screening' => [
                 'id' => $screening->id,
                 'reference_id' => $screening->reference_id,
                 'location' => $screening->location->name,
-                'date' => date('Y-m-d',strtotime($screening->date)),
+                'date' => date('Y-m-d', strtotime($screening->date)),
                 'time' => $screening->timeSlot->start . ' - ' . $screening->timeSlot->end,
                 'participants' => $screening->participants->map(function ($participant) {
                     return [
@@ -336,18 +331,18 @@ class ScreeningController extends Controller
     {
         // Validate the webhook signature
         // Process payment status update
-        
+
         $referenceId = $request->input('reference_id');
         $status = $request->input('status');
-        
+
         if ($status === 'paid') {
             $screening = Screening::where('reference_id', $referenceId)->first();
-            
+
             if ($screening) {
                 $screening->update(['status' => 'complete']);
             }
         }
-        
+
         return response()->json(['success' => true]);
     }
 
@@ -376,8 +371,8 @@ class ScreeningController extends Controller
     //     else if($request->payment_method == 'mandiri'){
     //         $paymentMethod = ["MANDIRI"];
     //     }
-        
-        
+
+
     //     $apiInstance = new InvoiceApi();
     //     $create_invoice_request = new CreateInvoiceRequest([
     //       'external_id' => $request->external_id,
@@ -414,10 +409,10 @@ class ScreeningController extends Controller
     {
         // Clean any quotes from the ID
         $cleanId = trim($id, '"\'');
-        
+
         // Here you can add any server-side logic if needed
         // For example, update payment status in your database
-        
+
         // Return a view with the cleaned ID
         return view('payment-success', [
             'screeningId' => $cleanId

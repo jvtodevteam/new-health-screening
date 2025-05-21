@@ -251,5 +251,7 @@
     "screeningScheduledSuccessfully": "Your screening has been scheduled successfully.",
     "redirectingToDetails": "Redirecting to details page in",
     "redirectingToPayment": "Redirecting to payment page in",
-    "seconds": "seconds"
+    "seconds": "seconds",
+    "payOnSpot": "Pay on the Spot",
+    "payAtLocation": "Pay cash at the screening location"
 }

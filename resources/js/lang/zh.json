@@ -119,19 +119,16 @@
     "selectThisLocation": "选择此位置",
     "confirmationTitle": "确认",
     "language": "语言",
-    "partnerDescription":
-        "我们的合作伙伴计划将经过验证的健康检查提供商与前往伊真的旅行者连接起来。加入我们的网络，提供必要的徒步前健康检查。",
+    "partnerDescription": "我们的合作伙伴计划将经过验证的健康检查提供商与前往伊真的旅行者连接起来。加入我们的网络，提供必要的徒步前健康检查。",
     "uploadDocuments": "上传所需文件",
     "uploadInstructions": "点击上传或拖放",
     "fileTypes": "PDF、PNG、JPG，最大5MB",
     "requiredField": "*",
-    "reviewApplication":
-        "请在提交前审核您的信息。提交后，我们的团队将在3-5个工作日内审核您的申请。",
+    "reviewApplication": "请在提交前审核您的信息。提交后，我们的团队将在3-5个工作日内审核您的申请。",
     "participantInfo": "参与者信息",
     "title": "称呼",
     "warmClothing": "保暖衣物",
-    "warmClothingDesc":
-        "夜间温度可能降至2°C。携带包括夹克和保暖内衣在内的层叠衣物。",
+    "warmClothingDesc": "夜间温度可能降至2°C。携带包括夹克和保暖内衣在内的层叠衣物。",
     "gasMask": "防毒面具",
     "gasMaskDesc": "防护硫磺气体。有租赁服务，但建议自带。",
     "waterSnacks": "水和小吃",
@@ -139,8 +136,7 @@
     "properFootwear": "适当的鞋类",
     "footwearDesc": "结实的徒步鞋，提供脚踝支撑。地形多岩石且可能湿滑。",
     "headlamp": "头灯",
-    "headlampDesc":
-        "夜间徒步观看蓝色火焰必备。解放双手的照明对安全至关重要。",
+    "headlampDesc": "夜间徒步观看蓝色火焰必备。解放双手的照明对安全至关重要。",
     "rainGear": "雨具",
     "rainGearDesc": "天气可能迅速变化。携带轻便防水夹克或雨披。",
     "essentialItems": "必备物品",
@@ -241,5 +237,7 @@
     "screeningScheduledSuccessfully": "您的筛查已成功预约。",
     "redirectingToDetails": "正在跳转到详情页面，剩余",
     "redirectingToPayment": "正在跳转到付款页面，剩余",
-    "seconds": "秒"
+    "seconds": "秒",
+    "payOnSpot": "现场支付",
+    "payAtLocation": "在检查地点支付现金"
 }

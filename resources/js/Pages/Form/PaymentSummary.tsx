@@ -95,6 +95,29 @@ const PaymentSummary = ({ data, setData, errors, isProcessing, onSubmit, onBack,
                     </h2>
 
                     <div className="space-y-3 mb-4">
+                        {/* Pay on the Spot Option */}
+                        <div
+                            className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer"
+                            onClick={() => setData('payment_method', 'spot')}
+                        >
+                            <div className="w-6 h-6 rounded-full border-2 border-green-500 flex items-center justify-center mr-3">
+                                {data.payment_method === "spot" && (
+                                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                )}
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="font-medium">
+                                    {t.payOnSpot || "Pay on the Spot"}
+                                </h3>
+                                <p className="text-xs text-gray-500">
+                                    {t.payAtLocation || "Pay cash at the screening location"}
+                                </p>
+                            </div>
+                            <div>
+                                <DollarSign size={20} className="text-green-500" />
+                            </div>
+                        </div>
+
                         {/* Credit/Debit Card Option */}
                         <div
                             className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer"

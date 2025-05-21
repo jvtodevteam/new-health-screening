@@ -48,15 +48,13 @@
     "viewDetails": "Lihat Detail",
     "exploreRoutes": "Jelajahi Rute Kawah Ijen",
     "interactiveMap": "Peta Interaktif",
-    "routeDescription":
-        "Temukan rute terbaik untuk perjalanan Anda dengan peta detail kami",
+    "routeDescription": "Temukan rute terbaik untuk perjalanan Anda dengan peta detail kami",
     "viewFullMap": "Lihat Peta Lengkap",
     "becomePartnerTitle": "Menjadi Mitra",
     "reviewInfo": "Tinjau Informasi Anda",
     "screeningDetails": "Detail Pemeriksaan",
     "screeningSubmitted": "Pemeriksaan Terkirim",
-    "completePayment":
-        "Silakan selesaikan pembayaran untuk menyelesaikan pemeriksaan Anda",
+    "completePayment": "Silakan selesaikan pembayaran untuk menyelesaikan pemeriksaan Anda",
     "paymentDetails": "Detail Pembayaran",
     "bankTransferInstructions": "Petunjuk Transfer Bank",
     "transferAmount": "Transfer jumlah yang ditampilkan di bawah ini",
@@ -85,10 +83,8 @@
     "healthConfirmation": "Konfirmasi Pemeriksaan Kesehatan",
     "referenceId": "ID Referensi",
     "participants": "Peserta",
-    "arriveEarly":
-        "Harap tiba 15 menit sebelum waktu yang dijadwalkan untuk check-in",
-    "showTicket":
-        "Pemeriksaan kesehatan dikonfirmasi. Harap tunjukkan e-tiket ini saat kedatangan.",
+    "arriveEarly": "Harap tiba 15 menit sebelum waktu yang dijadwalkan untuk check-in",
+    "showTicket": "Pemeriksaan kesehatan dikonfirmasi. Harap tunjukkan e-tiket ini saat kedatangan.",
     "issuedBy": "Diterbitkan oleh",
     "status": "Status",
     "confirmed": "DIKONFIRMASI",
@@ -115,8 +111,7 @@
     "bondowoso": "Bondowoso",
     "banyuwangi": "Banyuwangi",
     "selectCity": "Pilih Kota",
-    "selectCityPrompt":
-        "Silakan pilih kota dari tab di atas untuk melihat lokasi yang tersedia",
+    "selectCityPrompt": "Silakan pilih kota dari tab di atas untuk melihat lokasi yang tersedia",
     "searchLocations": "Cari lokasi...",
     "elevation": "Ketinggian",
     "difficulty": "Tingkat Kesulitan",
@@ -124,34 +119,26 @@
     "selectThisLocation": "Pilih Lokasi Ini",
     "confirmationTitle": "Konfirmasi",
     "language": "Bahasa",
-    "partnerDescription":
-        "Program mitra kami menghubungkan penyedia pemeriksaan kesehatan terverifikasi dengan pelancong ke Ijen. Bergabunglah dengan jaringan kami untuk menawarkan pemeriksaan kesehatan pra-pendakian yang penting.",
+    "partnerDescription": "Program mitra kami menghubungkan penyedia pemeriksaan kesehatan terverifikasi dengan pelancong ke Ijen. Bergabunglah dengan jaringan kami untuk menawarkan pemeriksaan kesehatan pra-pendakian yang penting.",
     "uploadDocuments": "Unggah Dokumen yang Diperlukan",
     "uploadInstructions": "Klik untuk mengunggah atau seret dan lepas",
     "fileTypes": "PDF, PNG, JPG hingga 5MB",
     "requiredField": "*",
-    "reviewApplication":
-        "Harap tinjau informasi Anda sebelum mengirim. Setelah pengiriman, tim kami akan meninjau aplikasi Anda dalam 3-5 hari kerja.",
+    "reviewApplication": "Harap tinjau informasi Anda sebelum mengirim. Setelah pengiriman, tim kami akan meninjau aplikasi Anda dalam 3-5 hari kerja.",
     "participantInfo": "Informasi Peserta",
     "title": "Gelar",
     "warmClothing": "Pakaian Hangat",
-    "warmClothingDesc":
-        "Suhu dapat turun hingga 2°C di malam hari. Bawa lapisan termasuk jaket dan pakaian termal.",
+    "warmClothingDesc": "Suhu dapat turun hingga 2°C di malam hari. Bawa lapisan termasuk jaket dan pakaian termal.",
     "gasMask": "Masker Gas",
-    "gasMaskDesc":
-        "Lindungi diri dari gas belerang. Persewaan tersedia, tetapi membawa sendiri direkomendasikan.",
+    "gasMaskDesc": "Lindungi diri dari gas belerang. Persewaan tersedia, tetapi membawa sendiri direkomendasikan.",
     "waterSnacks": "Air & Makanan Ringan",
-    "waterSnacksDesc":
-        "Tetap terhidrasi dan berenergi. Bawa setidaknya 1,5 liter air per orang.",
+    "waterSnacksDesc": "Tetap terhidrasi dan berenergi. Bawa setidaknya 1,5 liter air per orang.",
     "properFootwear": "Alas Kaki yang Tepat",
-    "footwearDesc":
-        "Sepatu hiking yang kokoh dengan dukungan pergelangan kaki. Medan berbatu dan bisa licin.",
+    "footwearDesc": "Sepatu hiking yang kokoh dengan dukungan pergelangan kaki. Medan berbatu dan bisa licin.",
     "headlamp": "Lampu Kepala",
-    "headlampDesc":
-        "Penting untuk pendakian malam untuk melihat api biru. Pencahayaan hands-free penting untuk keselamatan.",
+    "headlampDesc": "Penting untuk pendakian malam untuk melihat api biru. Pencahayaan hands-free penting untuk keselamatan.",
     "rainGear": "Perlengkapan Hujan",
-    "rainGearDesc":
-        "Cuaca dapat berubah dengan cepat. Bawa jaket tahan air ringan atau jas hujan.",
+    "rainGearDesc": "Cuaca dapat berubah dengan cepat. Bawa jaket tahan air ringan atau jas hujan.",
     "essentialItems": "Perlengkapan Penting",
     "bankTransfer": "Transfer Bank",
     "manualVerification": "Verifikasi manual (1-2 jam)",
@@ -162,8 +149,7 @@
     "serviceFee": "Biaya Layanan",
     "pinLocation": "Pin Lokasi Anda",
     "selectMapLocation": "Klik untuk memilih lokasi Anda di peta",
-    "partnerInterest":
-        "Ceritakan tentang minat Anda dalam bermitra dengan Ijen Health",
+    "partnerInterest": "Ceritakan tentang minat Anda dalam bermitra dengan Ijen Health",
     "businessDetails": "Detail Bisnis",
     "locationDocuments": "Lokasi & Dokumen",
     "progress": "Kemajuan",
@@ -251,5 +237,7 @@
     "screeningScheduledSuccessfully": "Pemeriksaan Anda telah berhasil dijadwalkan.",
     "redirectingToDetails": "Mengalihkan ke halaman detail dalam",
     "redirectingToPayment": "Mengalihkan ke halaman pembayaran dalam",
-    "seconds": "detik"
+    "seconds": "detik",
+    "payOnSpot": "Bayar di Tempat",
+    "payAtLocation": "Bayar tunai di lokasi pemeriksaan"
 }

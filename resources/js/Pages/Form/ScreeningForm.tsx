@@ -32,7 +32,7 @@ const ScreeningForm = ({ cities, nationalities, initialTimeSlots, auth }) => {
                 family_medical_history: "",
             },
         ],
-        payment_method: "",
+        payment_method: "spot",
         terms_agreed: false,
     });
     
