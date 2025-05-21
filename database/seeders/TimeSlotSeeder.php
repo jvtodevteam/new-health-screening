@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Location;
 use App\Models\TimeSlot;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 
 class TimeSlotSeeder extends Seeder
 {
@@ -17,31 +18,22 @@ class TimeSlotSeeder extends Seeder
     {
         // Get all locations
         $locations = Location::all();
+        Schema::disableForeignKeyConstraints();
+        TimeSlot::truncate();
+        Schema::enableForeignKeyConstraints();
 
         // Standard time slots for all locations
         $standardTimeSlots = [
             [
-                'start' => '04:30',
-                'end' => '05:30',
-                'label' => 'Morning',
-                'available' => true,
-            ],
-            [
-                'start' => '05:30',
-                'end' => '06:30',
-                'label' => 'Sunrise',
-                'available' => true,
-            ],
-            [
                 'start' => '15:00',
-                'end' => '16:00',
+                'end' => '18:00',
                 'label' => 'Afternoon',
                 'available' => true,
             ],
             [
-                'start' => '20:00',
-                'end' => '21:00',
-                'label' => 'Night (Blue Fire)',
+                'start' => '18:00',
+                'end' => '20:00',
+                'label' => 'Night',
                 'available' => true,
             ],
         ];
