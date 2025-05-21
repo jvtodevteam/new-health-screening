@@ -8,6 +8,8 @@ use App\Models\Nationality;
 use App\Models\Screening;
 use App\Models\TimeSlot;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Xendit\Configuration;
 use Xendit\Invoice\CreateInvoiceRequest;
@@ -140,6 +142,7 @@ class ScreeningController extends Controller
         $referenceId = 'IJN' . date('Ymd') . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
 
         // Create payment (this would interface with your payment gateway)
+        $paymentResult = null;
         if ($validated['payment_method'] != 'spot') {
             $paymentData = [
                 'payment_method' => $validated['payment_method'],
@@ -168,11 +171,14 @@ class ScreeningController extends Controller
         ]);
 
         // Create participant records
+        $participantRecords = [];
         foreach ($validated['participants'] as $participantData) {
             // Get nationality name for backward compatibility
-            $nationalityName = Nationality::find($participantData['nationality_id'])->name ?? 'Unknown';
+            $nationality = Nationality::find($participantData['nationality_id']);
+            $nationalityName = $nationality->name ?? 'Unknown';
+            $nationalityCode = $nationality->code ?? null;
 
-            $screening->participants()->create([
+            $participant = $screening->participants()->create([
                 'title' => $participantData['title'],
                 'name' => $participantData['name'],
                 'age' => $participantData['age'],
@@ -185,6 +191,69 @@ class ScreeningController extends Controller
                 'current_medications' => $participantData['current_medications'] ?? null,
                 'family_medical_history' => $participantData['family_medical_history'] ?? null,
             ]);
+
+            // Add to array for API submission
+            $participantRecords[] = [
+                'id' => $participant->id,
+                'title' => $participantData['title'],
+                'name' => $participantData['name'],
+                'age' => $participantData['age'],
+                'birth_year' => $participantData['birth_year'],
+                'nationality_id' => $participantData['nationality_id'],
+                'nationality' => $nationalityName,
+                'nationality_code' => $nationalityCode,
+                'id_number' => $participantData['id_number'],
+                'has_medical_history' => $participantData['has_medical_history'] ?? false,
+                'allergies' => $participantData['allergies'] ?? null,
+                'past_medical_history' => $participantData['past_medical_history'] ?? null,
+                'current_medications' => $participantData['current_medications'] ?? null,
+                'family_medical_history' => $participantData['family_medical_history'] ?? null,
+            ];
+        }
+
+        // Get location and time slot info for API submission
+        $location = Location::find($validated['location_id']);
+        $timeSlot = TimeSlot::find($validated['time_slot_id']);
+
+        // Get user info
+        $user = auth()->user();
+
+        // Prepare data for external API
+        $apiData = [
+            'screening' => [
+                'id' => $screening->id,
+                'reference_id' => $referenceId,
+                'user_id' => auth()->id(),
+                'user_email' => $user ? $user->email : null,
+                'user_name' => $user ? $user->name : null,
+                'user_phone' => $user ? $user->phone : null,
+                'location_id' => $validated['location_id'],
+                'location_name' => $location ? $location->name : null,
+                'location_address' => $location ? $location->address : null,
+                'date' => $validated['date'],
+                'time_slot_id' => $validated['time_slot_id'],
+                'time_slot_start' => $timeSlot ? $timeSlot->start_time : null,
+                'time_slot_end' => $timeSlot ? $timeSlot->end_time : null,
+                'status' => 'pending',
+                'payment_method' => $validated['payment_method'],
+                'payment_id' => $validated['payment_method'] != 'spot' ? ($paymentResult['id'] ?? null) : null,
+                'payment_status' => $validated['payment_method'] == 'spot' ? 'pending' : 'unpaid',
+                'payment_url' => $validated['payment_method'] != 'spot' ? ($paymentResult['invoice_url'] ?? null) : null,
+                'total' => $total,
+                'created_at' => $screening->created_at->toIso8601String(),
+            ],
+            'participants' => $participantRecords
+        ];
+
+        // Post to external API
+        try {
+            $response = Http::post('https://screening.mountijen.com/admin/post-api', $apiData);
+        } catch (\Exception $e) {
+            // Log the error but continue with the process
+            Log::error('Failed to sync screening ' . $referenceId . ' with external API', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
         }
 
         session(['pending_screening_id' => $screening->id]);
@@ -195,7 +264,7 @@ class ScreeningController extends Controller
         // Fallback ke halaman sukses jika tidak ada URL pembayaran
         return redirect()->route('screenings.index');
     }
-
+    
     protected function generatePayment($paymentData)
     {
         Configuration::setXenditKey(env('XENDIT_KEY'));

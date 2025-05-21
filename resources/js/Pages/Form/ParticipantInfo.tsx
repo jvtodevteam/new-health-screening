@@ -105,7 +105,6 @@ const ParticipantInfo = ({ data, setData,nationalities, errors, onNext, onBack }
     
     // Add participant
     const handleAddParticipant = () => {
-        if (data.participants.length < 10) {
             const updatedParticipants = [...data.participants];
             updatedParticipants.push({
                 title: "Mr",
@@ -120,7 +119,6 @@ const ParticipantInfo = ({ data, setData,nationalities, errors, onNext, onBack }
                 family_medical_history: "",
             });
             setData('participants', updatedParticipants);
-        }
     };
     
     // Remove participant
@@ -427,15 +425,13 @@ return (
                 </div>
             ))}
 
-            {data.participants.length < 10 && (
                 <button
                     onClick={handleAddParticipant}
                     className="w-full mb-4 border-2 border-dashed border-green-300 text-green-500 py-3 rounded-xl font-medium flex items-center justify-center"
                 >
                     <Plus size={20} className="mr-2" />
-                    {t.addParticipant} ({data.participants.length}/10)
+                    {t.addParticipant}
                 </button>
-            )}
 
             <button
                 onClick={onNext}
