@@ -156,8 +156,7 @@ class ScreeningController extends Controller
             $paymentResult = $this->generatePayment($paymentData);
         }
 
-        // Create screening record
-        $screening = Screening::create([
+        $storeData = [
             'reference_id' => $referenceId,
             'user_id' => auth()->id(),
             'location_id' => $validated['location_id'],
@@ -168,7 +167,16 @@ class ScreeningController extends Controller
             'payment_id' => $validated['payment_method'] != 'spot' ? ($paymentResult['id'] ?? null) : null,
             'payment_url' => $validated['payment_method'] != 'spot' ? ($paymentResult['invoice_url'] ?? null) : null,
             'total' => $total,
-        ]);
+        ];
+
+        if ($validated['payment_method'] == 'spot') {
+            $storeData['status'] = 'complete';
+        }
+
+
+
+        // Create screening record
+        $screening = Screening::create($storeData);
 
         // Create participant records
         $participantRecords = [];
