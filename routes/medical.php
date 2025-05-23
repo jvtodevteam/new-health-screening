@@ -3,10 +3,12 @@
 use App\Http\Controllers\Medical\Auth\LoginController;
 use App\Http\Controllers\Medical\DashboardController;
 use App\Http\Controllers\Medical\ExaminationController;
+use App\Http\Controllers\Medical\ParticipantController;
 use App\Http\Controllers\Medical\RegistrationController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
-
+Route::post('/medical/examination/update-results', [ParticipantController::class, 'storeApi'])
+    ->name('api.update-examination-results');
 Route::prefix('medical')->name('medical.')->group(function () {
     // Guest routes (redirect to dashboard if already logged in)
     Route::middleware('guest:medical')->group(function () {

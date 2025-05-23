@@ -16,7 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\SetLocale::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
             \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::except([
-                '/payment-webhook'
+                '/payment-webhook',
+                '/medical/examination/update-results'
             ]),
             
         ]);
