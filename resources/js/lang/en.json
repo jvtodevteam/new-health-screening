@@ -255,5 +255,10 @@
     "invalidEmail": "Please enter a valid email",
     "otpSendFailed": "Failed to send OTP",
     "completeOtp": "Please enter the complete OTP",
-    "invalidOtp": "Invalid OTP"
+    "invalidOtp": "Invalid OTP",
+    "recommended": "Recommended",
+    "noCharge": "NO CHARGE", 
+    "noOnlineFees": "No online processing fees",
+    "free": "FREE",
+    "orPayOnline": "Or pay online"    
 }

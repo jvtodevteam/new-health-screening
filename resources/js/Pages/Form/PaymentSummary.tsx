@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ArrowLeft, CheckCircle, AlertCircle, DollarSign, CreditCard, Smartphone } from "lucide-react";
+import { ArrowLeft, CheckCircle, AlertCircle, DollarSign, CreditCard, Smartphone, Star } from "lucide-react";
 import { useTranslation } from "../../hooks/useTranslation";
 import LoginModal from "../../components/Modals/LoginModal";
 
@@ -95,32 +95,62 @@ const PaymentSummary = ({ data, setData, errors, isProcessing, onSubmit, onBack,
                     </h2>
 
                     <div className="space-y-3 mb-4">
-                        {/* Pay on the Spot Option */}
-                        <div
-                            className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer"
-                            onClick={() => setData('payment_method', 'spot')}
-                        >
-                            <div className="w-6 h-6 rounded-full border-2 border-green-500 flex items-center justify-center mr-3">
-                                {data.payment_method === "spot" && (
-                                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                                )}
+                        {/* Pay on the Spot Option - Enhanced with highlights */}
+                        <div className="relative mb-6">
+                            {/* Recommended Badge */}
+                            <div className="absolute -top-2 -right-2 z-10">
+                                <div className="bg-gradient-to-r from-green-400 to-green-600 text-white text-xs px-2 py-1 rounded-full flex items-center shadow-lg">
+                                    <Star size={12} className="mr-1 fill-white" />
+                                    {t.noCharge}
+                                </div>
                             </div>
-                            <div className="flex-1">
-                                <h3 className="font-medium">
-                                    {t.payOnSpot || "Pay on the Spot"}
-                                </h3>
-                                <p className="text-xs text-gray-500">
-                                    {t.payAtLocation || "Pay cash at the screening location"}
-                                </p>
+                            
+                            <div
+                                className={`flex items-center p-4 rounded-lg cursor-pointer transition-all duration-200 border-2 ${
+                                    data.payment_method === "spot" 
+                                        ? "bg-gradient-to-r from-green-50 to-green-100 border-green-500 shadow-lg scale-105" 
+                                        : "bg-white border-green-300 hover:border-green-400 hover:shadow-md"
+                                }`}
+                                onClick={() => setData('payment_method', 'spot')}
+                            >
+                                <div className="w-6 h-6 rounded-full border-2 border-green-500 flex items-center justify-center mr-3">
+                                    {data.payment_method === "spot" && (
+                                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                    )}
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex items-center mb-1">
+                                        <h3 className="font-bold text-lg text-gray-800">
+                                            {t.payOnSpot || "Pay on the Spot"}
+                                        </h3>
+                                    </div>
+                                    <p className="text-xs text-gray-600 mb-2">
+                                        {t.payAtLocation || "Pay cash at the screening location"}
+                                    </p>
+                                    <div className="flex items-center text-green-600">
+                                        <span className="text-xs font-medium">
+                                            {t.noOnlineFees || "No online processing fees"}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col items-center">
+                                    <DollarSign size={24} className="text-green-500 mb-1" />
+                                </div>
                             </div>
-                            <div>
-                                <DollarSign size={20} className="text-green-500" />
-                            </div>
+                        </div>
+
+                        {/* Divider with text */}
+                        <div className="flex items-center mb-7">
+                            <div className="flex-1 border-t border-gray-300"></div>
+                            <span className="px-3 text-sm text-gray-500 bg-white">
+                                {t.orPayOnline || "Or pay online"}
+                            </span>
+                            <div className="flex-1 border-t border-gray-300"></div>
                         </div>
 
                         {/* Credit/Debit Card Option */}
                         <div
-                            className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer"
+                            className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer opacity-75"
                             onClick={() => setData('payment_method', 'card')}
                         >
                             <div className="w-6 h-6 rounded-full border-2 border-green-500 flex items-center justify-center mr-3">
@@ -147,7 +177,7 @@ const PaymentSummary = ({ data, setData, errors, isProcessing, onSubmit, onBack,
 
                         {/* QRIS Option */}
                         <div
-                            className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer"
+                            className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer opacity-75"
                             onClick={() => setData('payment_method', 'qris')}
                         >
                             <div className="w-6 h-6 rounded-full border-2 border-green-500 flex items-center justify-center mr-3">
@@ -172,7 +202,7 @@ const PaymentSummary = ({ data, setData, errors, isProcessing, onSubmit, onBack,
 
                         {/* OVO Option */}
                         <div
-                            className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer"
+                            className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer opacity-75"
                             onClick={() => setData('payment_method', 'ovo')}
                         >
                             <div className="w-6 h-6 rounded-full border-2 border-green-500 flex items-center justify-center mr-3">
@@ -204,7 +234,7 @@ const PaymentSummary = ({ data, setData, errors, isProcessing, onSubmit, onBack,
 
                         {/* BNI Virtual Account */}
                         <div
-                            className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer"
+                            className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer opacity-75"
                             onClick={() => setData('payment_method', 'bni')}
                         >
                             <div className="w-6 h-6 rounded-full border-2 border-green-500 flex items-center justify-center mr-3">
@@ -231,7 +261,7 @@ const PaymentSummary = ({ data, setData, errors, isProcessing, onSubmit, onBack,
 
                         {/* BRI Virtual Account */}
                         <div
-                            className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer"
+                            className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer opacity-75"
                             onClick={() => setData('payment_method', 'bri')}
                         >
                             <div className="w-6 h-6 rounded-full border-2 border-green-500 flex items-center justify-center mr-3">
@@ -258,7 +288,7 @@ const PaymentSummary = ({ data, setData, errors, isProcessing, onSubmit, onBack,
 
                         {/* Mandiri Virtual Account */}
                         <div
-                            className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer"
+                            className="flex items-center p-3 bg-gray-50 rounded-lg cursor-pointer opacity-75"
                             onClick={() => setData('payment_method', 'mandiri')}
                         >
                             <div className="w-6 h-6 rounded-full border-2 border-green-500 flex items-center justify-center mr-3">

@@ -255,5 +255,10 @@
     "invalidEmail": "请输入有效的邮箱地址",
     "otpSendFailed": "发送验证码失败",
     "completeOtp": "请输入完整的验证码",
-    "invalidOtp": "验证码无效"
+    "invalidOtp": "验证码无效",
+    "recommended": "推荐",
+    "noCharge": "免费", 
+    "noOnlineFees": "无在线处理费",
+    "free": "免费",
+    "orPayOnline": "或在线支付"    
 }

@@ -255,5 +255,10 @@
     "invalidEmail": "Silakan masukkan email yang valid",
     "otpSendFailed": "Gagal mengirim OTP",
     "completeOtp": "Silakan masukkan OTP lengkap",
-    "invalidOtp": "OTP tidak valid"
+    "invalidOtp": "OTP tidak valid",
+    "recommended": "Direkomendasikan",
+    "noCharge": "TANPA BIAYA", 
+    "noOnlineFees": "Tanpa biaya pemrosesan online",
+    "free": "GRATIS",
+    "orPayOnline": "Atau bayar online"    
 }
