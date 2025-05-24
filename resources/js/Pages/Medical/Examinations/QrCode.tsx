@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { 
   ArrowLeft, 
@@ -20,6 +20,7 @@ export default function ExaminationQrCode({ examination }) {
     const qrCodeValue = `${window.location.origin}/verify-examination/${examination.unique_code}`;
     const [copied, setCopied] = useState(false);
     const [qrSize, setQrSize] = useState(200);
+    const qrRef = useRef(null);
     
     // Function to copy URL to clipboard
     const copyToClipboard = () => {
@@ -31,12 +32,111 @@ export default function ExaminationQrCode({ examination }) {
     
     // Function to download QR Code as image
     const downloadQRCode = () => {
-        const canvas = document.getElementById('qr-canvas');
-        const url = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.download = `qrcode-${examination.unique_code}.png`;
-        link.href = url;
-        link.click();
+        try {
+            // Get the QR code SVG element
+            const svgElement = qrRef.current?.querySelector('svg');
+            if (!svgElement) {
+                alert('QR Code tidak ditemukan');
+                return;
+            }
+
+            // Create canvas
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size
+            canvas.width = qrSize + 40; // Add padding
+            canvas.height = qrSize + 40;
+            
+            // Fill white background
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Convert SVG to image
+            const svgData = new XMLSerializer().serializeToString(svgElement);
+            const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+            const svgUrl = URL.createObjectURL(svgBlob);
+            
+            const qrImg = new Image();
+            qrImg.onload = function() {
+                // Draw QR code
+                ctx.drawImage(qrImg, 20, 20, qrSize, qrSize);
+                
+                // Load and draw logo
+                const logoImg = new Image();
+                logoImg.onload = function() {
+                    // Calculate logo position and size
+                    const logoSize = qrSize * 0.18;
+                    const logoX = 20 + (qrSize - logoSize) / 2;
+                    const logoY = 20 + (qrSize - logoSize) / 2;
+                    
+                    // Draw white background for logo
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(logoX - 2, logoY - 2, logoSize + 4, logoSize + 4);
+                    
+                    // Draw border around logo
+                    ctx.strokeStyle = '#e5e7eb';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(logoX - 2, logoY - 2, logoSize + 4, logoSize + 4);
+                    
+                    // Draw logo
+                    ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+                    
+                    // Create download link
+                    const link = document.createElement('a');
+                    link.download = `qrcode-${examination.unique_code}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    
+                    // Clean up
+                    URL.revokeObjectURL(svgUrl);
+                };
+                
+                logoImg.onerror = function() {
+                    // If logo fails to load, draw fallback
+                    const logoSize = qrSize * 0.18;
+                    const logoX = 20 + (qrSize - logoSize) / 2;
+                    const logoY = 20 + (qrSize - logoSize) / 2;
+                    
+                    // Draw white background
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(logoX - 2, logoY - 2, logoSize + 4, logoSize + 4);
+                    
+                    // Draw border
+                    ctx.strokeStyle = '#e5e7eb';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(logoX - 2, logoY - 2, logoSize + 4, logoSize + 4);
+                    
+                    // Draw blue background for fallback
+                    ctx.fillStyle = '#3B82F6';
+                    ctx.fillRect(logoX, logoY, logoSize, logoSize);
+                    
+                    // Draw letter "M"
+                    ctx.fillStyle = 'white';
+                    ctx.font = `bold ${logoSize * 0.4}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('M', logoX + logoSize/2, logoY + logoSize/2);
+                    
+                    // Create download link
+                    const link = document.createElement('a');
+                    link.download = `qrcode-${examination.unique_code}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    
+                    // Clean up
+                    URL.revokeObjectURL(svgUrl);
+                };
+                
+                // Set logo source
+                logoImg.src = '/assets/img/logo-blue.png';
+            };
+            qrImg.src = svgUrl;
+            
+        } catch (error) {
+            console.error('Error downloading QR code:', error);
+            alert('Gagal mendownload QR Code');
+        }
     };
     
     return (
@@ -69,16 +169,45 @@ export default function ExaminationQrCode({ examination }) {
                     
                     <div className="p-5">
                         <div className="flex flex-col items-center justify-center">
-                            {/* QR Code display */}
-                            <div className="mb-6 bg-white p-4 rounded-lg border border-gray-200">
+                            {/* QR Code display with logo */}
+                            <div className="mb-6 bg-white p-4 rounded-lg border border-gray-200 relative" ref={qrRef}>
                                 <QRCodeSVG 
-                                    id="qr-canvas"
                                     value={qrCodeValue}
                                     size={qrSize}
                                     level="H"
                                     includeMargin={true}
                                     className="rounded-lg"
                                 />
+                                
+                                {/* Logo overlay di tengah QR Code */}
+                                <div 
+                                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-md border-2 border-gray-100 p-1"
+                                    style={{
+                                        width: qrSize * 0.18,
+                                        height: qrSize * 0.18,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}
+                                >
+                                    <img 
+                                        src="/assets/img/logo-blue.png" 
+                                        alt="Logo"
+                                        className="w-full h-full object-contain rounded"
+                                        onError={(e) => {
+                                            // Fallback jika gambar tidak bisa dimuat
+                                            e.target.style.display = 'none';
+                                            e.target.nextElementSibling.style.display = 'flex';
+                                        }}
+                                    />
+                                    {/* Fallback logo */}
+                                    <div 
+                                        className="w-full h-full bg-blue-600 rounded flex items-center justify-center"
+                                        style={{ display: 'none' }}
+                                    >
+                                        <span className="text-white font-bold" style={{ fontSize: qrSize * 0.08 }}>M</span>
+                                    </div>
+                                </div>
                             </div>
                             
                             {/* QR Size Controls */}
@@ -94,7 +223,7 @@ export default function ExaminationQrCode({ examination }) {
                                     step="10"
                                     value={qrSize}
                                     onChange={(e) => setQrSize(Number(e.target.value))}
-                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                                 />
                                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                                     <span>Kecil</span>
@@ -113,7 +242,7 @@ export default function ExaminationQrCode({ examination }) {
                                             type="text"
                                             name="qr-url"
                                             id="qr-url"
-                                            className="block w-full rounded-none rounded-l-lg border-gray-300 text-sm"
+                                            className="block w-full rounded-none rounded-l-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500"
                                             value={qrCodeValue}
                                             readOnly
                                         />
@@ -121,7 +250,7 @@ export default function ExaminationQrCode({ examination }) {
                                     <button
                                         type="button"
                                         onClick={copyToClipboard}
-                                        className="relative -ml-px inline-flex items-center space-x-2 rounded-r-lg border border-gray-300 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                                        className="relative -ml-px inline-flex items-center space-x-2 rounded-r-lg border border-gray-300 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                     >
                                         {copied ? (
                                             <>
@@ -190,7 +319,7 @@ export default function ExaminationQrCode({ examination }) {
                             <button
                                 type="button"
                                 onClick={downloadQRCode}
-                                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+                                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                             >
                                 <Download className="mr-2 h-4 w-4" />
                                 Download QR
@@ -199,7 +328,7 @@ export default function ExaminationQrCode({ examination }) {
                             <button
                                 type="button"
                                 onClick={() => window.print()}
-                                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
+                                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                             >
                                 <Printer className="mr-2 h-4 w-4" />
                                 Cetak QR Code
@@ -223,6 +352,43 @@ export default function ExaminationQrCode({ examination }) {
                     </div>
                 </div>
             </div>
+
+            <style jsx>{`
+                .slider::-webkit-slider-thumb {
+                    appearance: none;
+                    height: 20px;
+                    width: 20px;
+                    border-radius: 50%;
+                    background: #3B82F6;
+                    cursor: pointer;
+                    border: 2px solid #ffffff;
+                    box-shadow: 0 0 0 1px #3B82F6;
+                }
+
+                .slider::-moz-range-thumb {
+                    height: 20px;
+                    width: 20px;
+                    border-radius: 50%;
+                    background: #3B82F6;
+                    cursor: pointer;
+                    border: 2px solid #ffffff;
+                    box-shadow: 0 0 0 1px #3B82F6;
+                }
+
+                @media print {
+                    body * {
+                        visibility: hidden;
+                    }
+                    .print-area, .print-area * {
+                        visibility: visible;
+                    }
+                    .print-area {
+                        position: absolute;
+                        left: 0;
+                        top: 0;
+                    }
+                }
+            `}</style>
         </MedicalLayout>
     );
 }
