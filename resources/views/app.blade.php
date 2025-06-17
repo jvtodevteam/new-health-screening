@@ -11,7 +11,7 @@
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="627" />
         <link rel="icon" type="image/png" href="https://health.mountijen.com/assets/img/logo-blue.png" id="favicon"/>
-
+        <link rel="manifest" href="/manifest.json" />
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
         <!-- Fonts -->
@@ -33,5 +33,19 @@
         </style>
 
         @inertia
+        <script>
+            if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker
+                .register('/sw.js')
+                .then(function (registration) {
+                    console.log('SW registered: ', registration);
+                })
+                .catch(function (registrationError) {
+                    console.log('SW registration failed: ', registrationError);
+                });
+            });
+            }            
+        </script>
     </body>
 </html>
